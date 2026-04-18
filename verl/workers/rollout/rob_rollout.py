@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import contextlib
+import math
 import os
 import torch
 import torch.distributed
@@ -494,8 +495,12 @@ class RobHFRollout(BaseRollout):
             micro_batch_size = self.config.val_micro_batch_size if self.config.val_micro_batch_size is not None else 1
         else:
             micro_batch_size = self.config.get('micro_batch_size', batch_size)
-            
-        num_chunks = max(batch_size // micro_batch_size, 1)
+
+        micro_batch_size = int(micro_batch_size)
+        if micro_batch_size < 1:
+            raise ValueError(f"micro_batch_size must be >= 1, got {micro_batch_size}")
+
+        num_chunks = max(math.ceil(batch_size / micro_batch_size), 1)
         batch_prompts = prompts.chunk(chunks=num_chunks)
         output = [self._generate_minibatch(p) for p in batch_prompts]
         output = DataProto.concat(output)

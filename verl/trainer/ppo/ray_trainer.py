@@ -496,6 +496,7 @@ class RayTrainer(object):
                 return
 
         for epoch in range(self.config.trainer.total_epochs):
+            print("epoch: ", epoch)
             self.train_dataloader.start_new_epoch()
             while True:
                 valid_batch = []
