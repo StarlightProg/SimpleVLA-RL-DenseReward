@@ -63,7 +63,6 @@ from codetiming import Timer
 
 # For Libero multiprocessing
 import multiprocessing
-from multiprocessing import Process, Queue
 
 __all__ = ['RobHFRollout']
 
@@ -329,6 +328,11 @@ class RobotwinEnvWrapper:
                     self.env.close_env(clear_cache=True)
                 except Exception as e:
                     print(f"******IN env.close ERROR {e} ******", flush=True)
+                finally:
+                    # Explicitly drop references so Python can reclaim memory promptly.
+                    self.env = None
+                    self.args = None
+                    self.instruction = None
 
 # ================ Libero-specific functions ================
 
@@ -462,6 +466,10 @@ class RobHFRollout(BaseRollout):
         if "robotwin" in self.config.task_suite_name:
             self.env_thread_pool = ThreadPoolExecutor(max_workers=16)
             self.robotwin_version = self._detect_robotwin_version()
+        else:
+            # Use spawn to avoid forking a process that already owns large model memory.
+            # This prevents long-run host RAM growth from copy-on-write side effects.
+            self.mp_ctx = multiprocessing.get_context("spawn")
         
     def _detect_robotwin_version(self):
         """Detect which version of robotwin to use based on config"""
@@ -805,104 +813,129 @@ class RobHFRollout(BaseRollout):
         input_queues = []
         output_queues = []
         
-        for idx in range(batch_size):
-            task_name = task_suite_name[idx]
-            t_id = task_id[idx][0].item()
-            tr_id = trial_id[idx][0].item()
-            input_q = Queue()
-            output_q = Queue()
-            p = Process(
-                target=env_worker,
-                args=(task_name, t_id, tr_id, self.config, input_q, output_q, is_valid, global_steps, max_steps)
-            )
-            p.start()
-            processes.append(p)
-            input_queues.append(input_q)
-            output_queues.append(output_q)
-        
-        inputs = []
-        task_descriptions = []
-        task_records = []
-        valid_video = defaultdict(list)
-        
-        for idx in range(batch_size):
-            init_data = output_queues[idx].get(timeout=120)
-            assert init_data['type'] == 'init'
-            task_descriptions.append(init_data["task_description"])
-            inputs.append(self._obs_to_input(init_data['obs'], is_robotwin=False))
-            task_records.append({
-                "active": init_data['active'],
-                "complete": init_data['complete'],
-                "finish_step": init_data['finish_step'],
-                "task_file_name": init_data['task_file_name']
-            })
-            if is_valid:
-                valid_video[init_data['task_file_name']].extend(init_data['valid_images'])
-        
-        step = 0
-        vla_history = []
-        
-        while step < max_steps:
-            active_indices = [i for i, r in enumerate(task_records) if r['active']]
-            
-            current_inputs = inputs
-            current_task_descriptions = task_descriptions
-            
-            vla_input = self.process_input(current_inputs, current_task_descriptions)
-            vla_input.update(meta_info)
-            vla_output = self._generate_one_step(vla_input)
-            actions = vla_output["action"]
-            
-            step_data = {
-                "responses": vla_output["responses"],
-                "input_ids": vla_output["input_ids"],
-                "attention_mask": vla_output["attention_mask"],
-                "pixel_values": vla_output["pixel_values"],
-                "action": actions,
-                "step": step
-            }
-            vla_history.append(step_data)
-            
-            for idx in active_indices:
-                input_queues[idx].put(actions[idx])
-            
-            new_inputs = inputs.copy()
-            for idx in active_indices:
-                result = output_queues[idx].get(timeout=30)
-                assert result['type'] == 'step'
-                new_inputs[idx] = self._obs_to_input(result['obs'], is_robotwin=False)
-                task_records[idx]['active'] = result['active']
-                task_records[idx]['complete'] = result['complete']
-                task_records[idx]['finish_step'] = result['finish_step']
-                if is_valid:
-                    valid_video[task_records[idx]['task_file_name']].extend(result['valid_images'])
-            
-            inputs = new_inputs
-            step += self.config.action_chunks_len
-        
-        for q in input_queues:
-            q.put(None)
-        for p in processes:
-            p.join(timeout=20)
-            if p.is_alive():
-                p.terminate()
-        
-        torch.cuda.empty_cache()
-        
-        if is_valid:
-            for task_file, images in valid_video.items():
-                complete = any(r['complete'] for r in task_records if r['task_file_name'] == task_file)
-                save_rollout_video(
-                    images,
-                    self.config.experiment_name,
-                    task_file,
-                    global_steps,
-                    complete
+        try:
+            for idx in range(batch_size):
+                task_name = task_suite_name[idx]
+                t_id = task_id[idx][0].item()
+                tr_id = trial_id[idx][0].item()
+                input_q = self.mp_ctx.Queue()
+                output_q = self.mp_ctx.Queue()
+                p = self.mp_ctx.Process(
+                    target=env_worker,
+                    args=(task_name, t_id, tr_id, self.config, input_q, output_q, is_valid, global_steps, max_steps),
                 )
-        
-        self.module.train()
-        
-        return self._prepare_output_batch(vla_history, task_records, batch_size)
+                p.start()
+                processes.append(p)
+                input_queues.append(input_q)
+                output_queues.append(output_q)
+
+            inputs = []
+            task_descriptions = []
+            task_records = []
+            valid_video = defaultdict(list)
+
+            for idx in range(batch_size):
+                init_data = output_queues[idx].get(timeout=120)
+                assert init_data['type'] == 'init'
+                task_descriptions.append(init_data["task_description"])
+                inputs.append(self._obs_to_input(init_data['obs'], is_robotwin=False))
+                task_records.append({
+                    "active": init_data['active'],
+                    "complete": init_data['complete'],
+                    "finish_step": init_data['finish_step'],
+                    "task_file_name": init_data['task_file_name']
+                })
+                if is_valid:
+                    valid_video[init_data['task_file_name']].extend(init_data['valid_images'])
+
+            step = 0
+            vla_history = []
+
+            while step < max_steps:
+                active_indices = [i for i, r in enumerate(task_records) if r['active']]
+
+                current_inputs = inputs
+                current_task_descriptions = task_descriptions
+
+                vla_input = self.process_input(current_inputs, current_task_descriptions)
+                vla_input.update(meta_info)
+                vla_output = self._generate_one_step(vla_input)
+                actions = vla_output["action"]
+
+                step_data = {
+                    "responses": vla_output["responses"],
+                    "input_ids": vla_output["input_ids"],
+                    "attention_mask": vla_output["attention_mask"],
+                    "pixel_values": vla_output["pixel_values"],
+                    "action": actions,
+                    "step": step
+                }
+                vla_history.append(step_data)
+
+                for idx in active_indices:
+                    input_queues[idx].put(actions[idx])
+
+                new_inputs = inputs.copy()
+                for idx in active_indices:
+                    result = output_queues[idx].get(timeout=30)
+                    assert result['type'] == 'step'
+                    new_inputs[idx] = self._obs_to_input(result['obs'], is_robotwin=False)
+                    task_records[idx]['active'] = result['active']
+                    task_records[idx]['complete'] = result['complete']
+                    task_records[idx]['finish_step'] = result['finish_step']
+                    if is_valid:
+                        valid_video[task_records[idx]['task_file_name']].extend(result['valid_images'])
+
+                inputs = new_inputs
+                step += self.config.action_chunks_len
+
+            torch.cuda.empty_cache()
+
+            if is_valid:
+                for task_file, images in valid_video.items():
+                    complete = any(r['complete'] for r in task_records if r['task_file_name'] == task_file)
+                    save_rollout_video(
+                        images,
+                        self.config.experiment_name,
+                        task_file,
+                        global_steps,
+                        complete
+                    )
+
+            self.module.train()
+            return self._prepare_output_batch(vla_history, task_records, batch_size)
+        finally:
+            for q in input_queues:
+                try:
+                    q.put(None)
+                except Exception:
+                    pass
+
+            for p in processes:
+                try:
+                    p.join(timeout=20)
+                    if p.is_alive():
+                        p.terminate()
+                        p.join(timeout=5)
+                except Exception:
+                    pass
+                finally:
+                    try:
+                        p.close()
+                    except Exception:
+                        pass
+
+            for q in input_queues + output_queues:
+                try:
+                    q.close()
+                except Exception:
+                    pass
+                try:
+                    q.join_thread()
+                except Exception:
+                    pass
+
+            gc.collect()
     
     def _prepare_output_batch(self, vla_history, task_records, batch_size):
         """Prepare the output batch from VLA history"""

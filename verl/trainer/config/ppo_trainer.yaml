@@ -247,10 +247,14 @@ trainer:
   logger: ['console', 'wandb']
   wandb_mode: online
   nnodes: 1
-  n_gpus_per_node: 8
+  n_gpus_per_node: 2
   save_freq: -1
   test_freq: -1
   critic_warmup: 0
+  logging:
+    window_updates: 8
+    ci_z: 1.96
+    log_driver_memory: True
   default_hdfs_dir: ~/experiments/gsm8k/ppo/${trainer.experiment_name}
   default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   runtime_env: none

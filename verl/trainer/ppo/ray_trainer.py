@@ -25,6 +25,8 @@ from functools import partial
 from pprint import pprint
 from typing import Callable, Type, Tuple, Union
 import uuid
+import math
+import resource
 from omegaconf import OmegaConf, open_dict
 import numpy as np
 from codetiming import Timer
@@ -37,6 +39,74 @@ from verl.trainer.ppo import core_algos
 from verl.utils.dataset.rob_dataset import BufferedDataLoader
 
 WorkerType = Type[Worker]
+
+
+class SlidingMoments:
+    """Fixed-size sliding window of aggregated moments.
+
+    Stores only (count, sum, sumsq) per update to keep RAM bounded and tiny.
+    """
+
+    def __init__(self, max_updates: int):
+        self.max_updates = max(1, int(max_updates))
+        self._entries = []
+        self._total_n = 0
+        self._total_sum = 0.0
+        self._total_sumsq = 0.0
+
+    def update(self, values):
+        if values is None:
+            return
+        flat = values.detach().float().reshape(-1)
+        if flat.numel() == 0:
+            return
+        n = int(flat.numel())
+        s = float(flat.sum().item())
+        ss = float((flat * flat).sum().item())
+        self._entries.append((n, s, ss))
+        self._total_n += n
+        self._total_sum += s
+        self._total_sumsq += ss
+
+        if len(self._entries) > self.max_updates:
+            old_n, old_s, old_ss = self._entries.pop(0)
+            self._total_n -= old_n
+            self._total_sum -= old_s
+            self._total_sumsq -= old_ss
+
+    @property
+    def count(self) -> int:
+        return self._total_n
+
+    @property
+    def updates(self) -> int:
+        return len(self._entries)
+
+    def mean(self) -> float:
+        if self._total_n == 0:
+            return 0.0
+        return self._total_sum / self._total_n
+
+    def std(self) -> float:
+        if self._total_n <= 1:
+            return 0.0
+        mean = self.mean()
+        var = max(self._total_sumsq / self._total_n - (mean * mean), 0.0)
+        return math.sqrt(var)
+
+    def ci95_halfwidth(self) -> float:
+        if self._total_n <= 1:
+            return 0.0
+        return 1.96 * self.std() / math.sqrt(self._total_n)
+
+
+def get_driver_memory_metrics() -> dict:
+    """Return lightweight host-RAM telemetry for the trainer process."""
+    # Linux returns KB. (macOS uses bytes, but this project target is Linux cluster)
+    rss_kb = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    return {
+        'system/driver_maxrss_gb': rss_kb / (1024.0 * 1024.0),
+    }
 
 
 class Role(Enum):
@@ -287,7 +357,53 @@ class RayTrainer(object):
         else:
             self.kl_ctrl = core_algos.FixedKLController(kl_coef=0.)
 
+        self._init_logging_state()
         self._create_dataloader()
+
+    def _init_logging_state(self):
+        logging_cfg = self.config.trainer.get('logging', {})
+        self.log_window_updates = int(logging_cfg.get('window_updates', 64))
+        self.log_ci_z = float(logging_cfg.get('ci_z', 1.96))
+        self.log_driver_memory = bool(logging_cfg.get('log_driver_memory', True))
+
+        self.success_window = SlidingMoments(self.log_window_updates)
+        self.reward_window = SlidingMoments(self.log_window_updates)
+        self.score_window = SlidingMoments(self.log_window_updates)
+        self.rollouts_window = []
+
+    def _update_window_metrics(self, batch: DataProto):
+        rollouts_this_update = len(batch)
+        self.rollouts_window.append(rollouts_this_update)
+        if len(self.rollouts_window) > self.log_window_updates:
+            self.rollouts_window.pop(0)
+
+        success_tensor = batch.batch['complete'].detach().to(dtype=torch.float32)
+        reward_tensor = batch.batch['token_level_rewards'].detach().sum(dim=-1).to(dtype=torch.float32)
+        score_tensor = batch.batch['token_level_scores'].detach().sum(dim=-1).to(dtype=torch.float32)
+
+        self.success_window.update(success_tensor)
+        self.reward_window.update(reward_tensor)
+        self.score_window.update(score_tensor)
+
+    def _build_window_metrics(self):
+        # Scale CI by configurable z-value (default 1.96 for 95% CI).
+        z_scale = self.log_ci_z / 1.96 if 1.96 > 0 else 1.0
+        metrics = {
+            'stats/rollouts_this_update': float(self.rollouts_window[-1]) if len(self.rollouts_window) > 0 else 0.0,
+            'stats/effective_rollouts_window': float(sum(self.rollouts_window)),
+            'stats/window_updates': float(len(self.rollouts_window)),
+            'stats/window_avg_rollouts_per_update': float(np.mean(self.rollouts_window)) if len(self.rollouts_window) > 0 else 0.0,
+            'stats/train_success_window_mean': self.success_window.mean(),
+            'stats/train_success_window_std': self.success_window.std(),
+            'stats/train_success_window_ci_halfwidth': self.success_window.ci95_halfwidth() * z_scale,
+            'stats/train_reward_window_mean': self.reward_window.mean(),
+            'stats/train_reward_window_std': self.reward_window.std(),
+            'stats/train_reward_window_ci_halfwidth': self.reward_window.ci95_halfwidth() * z_scale,
+            'stats/train_score_window_mean': self.score_window.mean(),
+            'stats/train_score_window_std': self.score_window.std(),
+            'stats/train_score_window_ci_halfwidth': self.score_window.ci95_halfwidth() * z_scale,
+        }
+        return metrics
 
     def _create_dataloader(self):   # next fix
         from torch.utils.data import DataLoader
@@ -576,6 +692,8 @@ class RayTrainer(object):
                             print(f"before filtering: {len(roll_batch)}")
                             filtered_roll_batch = self.filter(roll_batch.batch['acc'].unsqueeze(1), roll_batch, n_samples)
                             print(f"after filtering: {len(filtered_roll_batch)}")
+                        else:
+                            filtered_roll_batch = roll_batch
                     metrics['timing/acc&trunc_filter'] += timer.last
 
                     
@@ -655,6 +773,10 @@ class RayTrainer(object):
                                               config = self.config)
                 metrics['timing/adv'] = timer.last
 
+                # Update bounded-window stats so low-rollout training remains analyzable.
+                # This uses O(1) memory per update and is safe for multi-day runs.
+                self._update_window_metrics(batch)
+
                 # critic is disabled
 
                 # implement critic warmup
@@ -675,7 +797,7 @@ class RayTrainer(object):
                         entropy_output_metrics = reduce_metrics(entropy_output.meta_info['metrics'])
                         metrics.update(entropy_output_metrics)
                 # validate
-                if self.val_reward_fn is not None and (global_steps + 1) % self.config.trainer.test_freq == 0:
+                if self.val_reward_fn is not None and self.config.trainer.test_freq > 0 and (global_steps + 1) % self.config.trainer.test_freq == 0:
                     with Timer(name='testing', text="{name}: {seconds:.1f} seconds") as timer:
                         val_metrics: dict = self._validate(global_steps=global_steps+1)
                         val_metrics = {f'val/{key}': val for key, val in val_metrics.items()}
@@ -688,6 +810,9 @@ class RayTrainer(object):
                     data_metrics = compute_data_metrics(batch=batch, config = self.config)
                 with Timer(name='logging2', text="{name}: {seconds:.1f} seconds") as timer:
                     metrics.update(data_metrics)
+                    metrics.update(self._build_window_metrics())
+                    if self.log_driver_memory:
+                        metrics.update(get_driver_memory_metrics())
                 with Timer(name='logging3', text="{name}: {seconds:.1f} seconds") as timer:
                     # TODO: make a canonical logger that supports various backend
                     logger.log(data=metrics, step=global_steps)
