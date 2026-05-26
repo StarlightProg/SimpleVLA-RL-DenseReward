@@ -336,7 +336,7 @@ class RobotwinEnvWrapper:
 
 # ================ Libero-specific functions ================
 
-def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, is_valid, global_steps, max_steps):
+def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, collect_video, frame_stride, global_steps, max_steps):
     """Worker process for Libero environments"""
     from libero.libero import benchmark
     
@@ -371,7 +371,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         obs, _, _, _ = env.step(get_libero_dummy_action(config.model_family))
         t += 1
         
-    if is_valid:
+    if collect_video:
         img = obs["agentview_image"][::-1, ::-1]
         valid_images.append(img)
     
@@ -404,7 +404,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
             inverted_action = invert_gripper_action(normalized_action)
             obs, reward, done, info = env.step(inverted_action.tolist())
             
-            if is_valid:
+            if collect_video and (i % frame_stride == 0):
                 img = obs["agentview_image"][::-1, ::-1]
                 step_images.append(img)
             
@@ -420,7 +420,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
             'active': active,
             'complete': complete,
             'finish_step': finish_step,
-            'valid_images': step_images.copy() if is_valid else []
+            'valid_images': step_images.copy() if collect_video else []
         }
         output_queue.put(output_data)
 
@@ -645,7 +645,24 @@ class RobHFRollout(BaseRollout):
         max_steps = self._get_max_steps(self.config.task_suite_name)
         batch_size = task_id.size(0)
         is_valid = meta_info.get('n_samples') is None
+        collect_video = is_valid and bool(meta_info.get('save_validation_video', False))
+        video_max_episodes = max(0, int(meta_info.get('validation_video_max_episodes', 2)))
+        video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
+        video_mask_raw = meta_info.get('validation_video_mask', None)
+        minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
+
+        selected_video_indices = set()
+        if collect_video:
+            if video_mask_raw is not None:
+                video_mask = np.asarray(video_mask_raw, dtype=np.bool_).reshape(-1)
+                if video_mask.size * n_samples == batch_size:
+                    video_mask = np.repeat(video_mask, n_samples)
+                elif video_mask.size != batch_size:
+                    video_mask = np.zeros(batch_size, dtype=np.bool_)
+                selected_video_indices = {i for i, flag in enumerate(video_mask.tolist()) if flag}
+            else:
+                selected_video_indices = set(range(min(video_max_episodes, batch_size)))
         
         # Create environment wrappers
         env_wrappers = []
@@ -695,7 +712,7 @@ class RobHFRollout(BaseRollout):
                     "task_file_name": task_file_name
                 })
                 
-                if is_valid:
+                if collect_video and idx in selected_video_indices:
                     img = obs['observation']['head_camera']['rgb']
                     valid_video[task_file_name].append(img)
                     
@@ -706,6 +723,7 @@ class RobHFRollout(BaseRollout):
         
         # Main rollout loop
         step = 0
+        rollout_step_idx = 0
         vla_history = []
         
         while step < max_steps:
@@ -723,18 +741,18 @@ class RobHFRollout(BaseRollout):
             vla_output = self._generate_one_step(vla_input)
             actions = vla_output["action"]
             
-            step_data = {
-                "responses": vla_output["responses"],
-                "input_ids": vla_output["input_ids"],
-                "attention_mask": vla_output["attention_mask"],
-                "pixel_values": vla_output["pixel_values"],
-                "action": actions,
-                "step": step
-            }
-            if vla_output.get("proprio") is not None:
-                step_data["proprio"] = vla_output["proprio"]
-                
-            vla_history.append(step_data)
+            if not minimal_validation_output:
+                step_data = {
+                    "responses": vla_output["responses"],
+                    "input_ids": vla_output["input_ids"],
+                    "attention_mask": vla_output["attention_mask"],
+                    "pixel_values": vla_output["pixel_values"],
+                    "action": actions,
+                    "step": step
+                }
+                if vla_output.get("proprio") is not None:
+                    step_data["proprio"] = vla_output["proprio"]
+                vla_history.append(step_data)
             
             # Execute actions in parallel
             step_futures = []
@@ -758,7 +776,7 @@ class RobHFRollout(BaseRollout):
                     task_records[idx]['complete'] = env_wrappers[idx].complete
                     task_records[idx]['finish_step'] = env_wrappers[idx].finish_step
                     
-                    if is_valid and obs is not None:
+                    if collect_video and idx in selected_video_indices and obs is not None and (rollout_step_idx % video_frame_stride == 0):
                         img = obs['observation']['head_camera']['rgb']
                         valid_video[task_records[idx]['task_file_name']].append(img)
                         
@@ -770,6 +788,7 @@ class RobHFRollout(BaseRollout):
             
             inputs = new_inputs
             step += self.config.action_chunks_len
+            rollout_step_idx += 1
         
         # Clean up environments
         cleanup_futures = []
@@ -787,7 +806,7 @@ class RobHFRollout(BaseRollout):
         gc.collect()
         
         # Save validation videos
-        if is_valid:
+        if collect_video:
             for task_file, images in valid_video.items():
                 complete = any(r['complete'] for r in task_records if r['task_file_name'] == task_file)
                 save_rollout_video(
@@ -801,6 +820,8 @@ class RobHFRollout(BaseRollout):
         self.module.train()
         
         # Prepare output batch
+        if minimal_validation_output:
+            return self._prepare_validation_output_batch(task_records, batch_size, device=task_id.device)
         return self._prepare_output_batch(vla_history, task_records, batch_size)
     
     def _generate_minibatch_libero(self, prompts):
@@ -814,7 +835,24 @@ class RobHFRollout(BaseRollout):
         max_steps = self._get_max_steps(self.config.task_suite_name)
         batch_size = task_id.size(0)
         is_valid = meta_info.get('n_samples') is None
+        collect_video = is_valid and bool(meta_info.get('save_validation_video', False))
+        video_max_episodes = max(0, int(meta_info.get('validation_video_max_episodes', 2)))
+        video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
+        video_mask_raw = meta_info.get('validation_video_mask', None)
+        minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
+
+        selected_video_indices = set()
+        if collect_video:
+            if video_mask_raw is not None:
+                video_mask = np.asarray(video_mask_raw, dtype=np.bool_).reshape(-1)
+                if video_mask.size * n_samples == batch_size:
+                    video_mask = np.repeat(video_mask, n_samples)
+                elif video_mask.size != batch_size:
+                    video_mask = np.zeros(batch_size, dtype=np.bool_)
+                selected_video_indices = {i for i, flag in enumerate(video_mask.tolist()) if flag}
+            else:
+                selected_video_indices = set(range(min(video_max_episodes, batch_size)))
         
         processes = []
         input_queues = []
@@ -827,9 +865,10 @@ class RobHFRollout(BaseRollout):
                 tr_id = trial_id[idx][0].item()
                 input_q = self.mp_ctx.Queue()
                 output_q = self.mp_ctx.Queue()
+                process_collect_video = collect_video and idx in selected_video_indices
                 p = self.mp_ctx.Process(
                     target=env_worker,
-                    args=(task_name, t_id, tr_id, self.config, input_q, output_q, is_valid, global_steps, max_steps),
+                    args=(task_name, t_id, tr_id, self.config, input_q, output_q, process_collect_video, video_frame_stride, global_steps, max_steps),
                 )
                 p.start()
                 processes.append(p)
@@ -852,7 +891,7 @@ class RobHFRollout(BaseRollout):
                     "finish_step": init_data['finish_step'],
                     "task_file_name": init_data['task_file_name']
                 })
-                if is_valid:
+                if collect_video and idx in selected_video_indices:
                     valid_video[init_data['task_file_name']].extend(init_data['valid_images'])
 
             step = 0
@@ -860,6 +899,8 @@ class RobHFRollout(BaseRollout):
 
             while step < max_steps:
                 active_indices = [i for i, r in enumerate(task_records) if r['active']]
+                if len(active_indices) == 0:
+                    break
              
                 current_inputs = inputs
                 current_task_descriptions = task_descriptions
@@ -869,15 +910,16 @@ class RobHFRollout(BaseRollout):
                 vla_output = self._generate_one_step(vla_input)
                 actions = vla_output["action"]
 
-                step_data = {
-                    "responses": vla_output["responses"],
-                    "input_ids": vla_output["input_ids"],
-                    "attention_mask": vla_output["attention_mask"],
-                    "pixel_values": vla_output["pixel_values"],
-                    "action": actions,
-                    "step": step
-                }
-                vla_history.append(step_data)
+                if not minimal_validation_output:
+                    step_data = {
+                        "responses": vla_output["responses"],
+                        "input_ids": vla_output["input_ids"],
+                        "attention_mask": vla_output["attention_mask"],
+                        "pixel_values": vla_output["pixel_values"],
+                        "action": actions,
+                        "step": step
+                    }
+                    vla_history.append(step_data)
 
                 for idx in active_indices:
                     input_queues[idx].put(actions[idx])
@@ -890,7 +932,7 @@ class RobHFRollout(BaseRollout):
                     task_records[idx]['active'] = result['active']
                     task_records[idx]['complete'] = result['complete']
                     task_records[idx]['finish_step'] = result['finish_step']
-                    if is_valid:
+                    if collect_video and idx in selected_video_indices:
                         valid_video[task_records[idx]['task_file_name']].extend(result['valid_images'])
 
                 inputs = new_inputs
@@ -898,7 +940,7 @@ class RobHFRollout(BaseRollout):
 
             torch.cuda.empty_cache()
 
-            if is_valid:
+            if collect_video:
                 for task_file, images in valid_video.items():
                     complete = any(r['complete'] for r in task_records if r['task_file_name'] == task_file)
                     save_rollout_video(
@@ -910,6 +952,8 @@ class RobHFRollout(BaseRollout):
                     )
 
             self.module.train()
+            if minimal_validation_output:
+                return self._prepare_validation_output_batch(task_records, batch_size, device=task_id.device)
             return self._prepare_output_batch(vla_history, task_records, batch_size)
         finally:
             for q in input_queues:
@@ -968,6 +1012,23 @@ class RobHFRollout(BaseRollout):
         batch["complete"] = torch.tensor([bool(k["complete"]) for k in task_records], dtype=torch.bool, device=batch['responses'].device)
         batch["finish_step"] = torch.tensor([k["finish_step"] for k in task_records], dtype=torch.int64, device=batch['responses'].device)
         
+        output_batch = TensorDict(batch, batch_size=batch_size)
+        return DataProto(batch=output_batch)
+
+    def _prepare_validation_output_batch(self, task_records, batch_size, device):
+        """Prepare minimal output for validation to reduce host/GPU memory pressure."""
+        batch = {
+            "complete": torch.tensor(
+                [bool(k["complete"]) for k in task_records],
+                dtype=torch.bool,
+                device=device,
+            ),
+            "finish_step": torch.tensor(
+                [k["finish_step"] for k in task_records],
+                dtype=torch.int64,
+                device=device,
+            ),
+        }
         output_batch = TensorDict(batch, batch_size=batch_size)
         return DataProto(batch=output_batch)
     

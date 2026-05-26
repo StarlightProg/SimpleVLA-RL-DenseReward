@@ -252,13 +252,15 @@ trainer:
   save_freq: -1
   test_freq: -1
   critic_warmup: 0
-  logging:
-    window_updates: 8
-    ci_z: 1.96
-    log_driver_memory: True
   validation:
     target_rollouts: 100
     max_passes: 20
+    save_video: True
+    video_max_episodes: 20
+    video_per_task_limit: 1
+    video_frame_stride: 8
+    video_every_n_calls: 1
+    transition_success_threshold: 0.5
   default_hdfs_dir: ~/experiments/gsm8k/ppo/${trainer.experiment_name}
   default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   runtime_env: none

@@ -26,7 +26,7 @@ from pprint import pprint
 from typing import Callable, Type, Tuple, Union
 import uuid
 import math
-import resource
+import re
 from omegaconf import OmegaConf, open_dict
 import numpy as np
 from codetiming import Timer
@@ -39,74 +39,6 @@ from verl.trainer.ppo import core_algos
 from verl.utils.dataset.rob_dataset import BufferedDataLoader
 
 WorkerType = Type[Worker]
-
-
-class SlidingMoments:
-    """Fixed-size sliding window of aggregated moments.
-
-    Stores only (count, sum, sumsq) per update to keep RAM bounded and tiny.
-    """
-
-    def __init__(self, max_updates: int):
-        self.max_updates = max(1, int(max_updates))
-        self._entries = []
-        self._total_n = 0
-        self._total_sum = 0.0
-        self._total_sumsq = 0.0
-
-    def update(self, values):
-        if values is None:
-            return
-        flat = values.detach().float().reshape(-1)
-        if flat.numel() == 0:
-            return
-        n = int(flat.numel())
-        s = float(flat.sum().item())
-        ss = float((flat * flat).sum().item())
-        self._entries.append((n, s, ss))
-        self._total_n += n
-        self._total_sum += s
-        self._total_sumsq += ss
-
-        if len(self._entries) > self.max_updates:
-            old_n, old_s, old_ss = self._entries.pop(0)
-            self._total_n -= old_n
-            self._total_sum -= old_s
-            self._total_sumsq -= old_ss
-
-    @property
-    def count(self) -> int:
-        return self._total_n
-
-    @property
-    def updates(self) -> int:
-        return len(self._entries)
-
-    def mean(self) -> float:
-        if self._total_n == 0:
-            return 0.0
-        return self._total_sum / self._total_n
-
-    def std(self) -> float:
-        if self._total_n <= 1:
-            return 0.0
-        mean = self.mean()
-        var = max(self._total_sumsq / self._total_n - (mean * mean), 0.0)
-        return math.sqrt(var)
-
-    def ci95_halfwidth(self) -> float:
-        if self._total_n <= 1:
-            return 0.0
-        return 1.96 * self.std() / math.sqrt(self._total_n)
-
-
-def get_driver_memory_metrics() -> dict:
-    """Return lightweight host-RAM telemetry for the trainer process."""
-    # Linux returns KB. (macOS uses bytes, but this project target is Linux cluster)
-    rss_kb = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    return {
-        'system/driver_maxrss_gb': rss_kb / (1024.0 * 1024.0),
-    }
 
 
 class Role(Enum):
@@ -357,53 +289,40 @@ class RayTrainer(object):
         else:
             self.kl_ctrl = core_algos.FixedKLController(kl_coef=0.)
 
-        self._init_logging_state()
+        self.validation_call_idx = 0
+        self.prev_val_task_success_state = {}
         self._create_dataloader()
 
-    def _init_logging_state(self):
-        logging_cfg = self.config.trainer.get('logging', {})
-        self.log_window_updates = int(logging_cfg.get('window_updates', 64))
-        self.log_ci_z = float(logging_cfg.get('ci_z', 1.96))
-        self.log_driver_memory = bool(logging_cfg.get('log_driver_memory', True))
+    @staticmethod
+    def _extract_task_keys(batch: DataProto, default_suite: str):
+        """Build per-sample task keys for validation analytics/video selection."""
+        batch_size = len(batch)
+        suite_arr = batch.non_tensor_batch.get(
+            'task_suite_name',
+            np.array([default_suite] * batch_size, dtype=object),
+        )
 
-        self.success_window = SlidingMoments(self.log_window_updates)
-        self.reward_window = SlidingMoments(self.log_window_updates)
-        self.score_window = SlidingMoments(self.log_window_updates)
-        self.rollouts_window = []
+        if 'task_id' in batch.batch.keys():
+            task_ids = batch.batch['task_id']
+            if task_ids.ndim > 1:
+                task_ids = task_ids.squeeze(-1)
+            task_ids = task_ids.detach().cpu().tolist()
+        else:
+            task_ids = [-1] * batch_size
 
-    def _update_window_metrics(self, batch: DataProto):
-        rollouts_this_update = len(batch)
-        self.rollouts_window.append(rollouts_this_update)
-        if len(self.rollouts_window) > self.log_window_updates:
-            self.rollouts_window.pop(0)
+        keys = []
+        for i in range(batch_size):
+            suite = str(suite_arr[i]) if i < len(suite_arr) else str(default_suite)
+            task_id = int(task_ids[i]) if i < len(task_ids) else -1
+            if task_id >= 0:
+                keys.append(f"{suite}/task_{task_id}")
+            else:
+                keys.append(suite)
+        return keys
 
-        success_tensor = batch.batch['complete'].detach().to(dtype=torch.float32)
-        reward_tensor = batch.batch['token_level_rewards'].detach().sum(dim=-1).to(dtype=torch.float32)
-        score_tensor = batch.batch['token_level_scores'].detach().sum(dim=-1).to(dtype=torch.float32)
-
-        self.success_window.update(success_tensor)
-        self.reward_window.update(reward_tensor)
-        self.score_window.update(score_tensor)
-
-    def _build_window_metrics(self):
-        # Scale CI by configurable z-value (default 1.96 for 95% CI).
-        z_scale = self.log_ci_z / 1.96 if 1.96 > 0 else 1.0
-        metrics = {
-            'stats/rollouts_this_update': float(self.rollouts_window[-1]) if len(self.rollouts_window) > 0 else 0.0,
-            'stats/effective_rollouts_window': float(sum(self.rollouts_window)),
-            'stats/window_updates': float(len(self.rollouts_window)),
-            'stats/window_avg_rollouts_per_update': float(np.mean(self.rollouts_window)) if len(self.rollouts_window) > 0 else 0.0,
-            'stats/train_success_window_mean': self.success_window.mean(),
-            'stats/train_success_window_std': self.success_window.std(),
-            'stats/train_success_window_ci_halfwidth': self.success_window.ci95_halfwidth() * z_scale,
-            'stats/train_reward_window_mean': self.reward_window.mean(),
-            'stats/train_reward_window_std': self.reward_window.std(),
-            'stats/train_reward_window_ci_halfwidth': self.reward_window.ci95_halfwidth() * z_scale,
-            'stats/train_score_window_mean': self.score_window.mean(),
-            'stats/train_score_window_std': self.score_window.std(),
-            'stats/train_score_window_ci_halfwidth': self.score_window.ci95_halfwidth() * z_scale,
-        }
-        return metrics
+    @staticmethod
+    def _sanitize_metric_key(name: str):
+        return re.sub(r'[^0-9a-zA-Z_]', '_', name)
 
     def _create_dataloader(self):   # next fix
         from torch.utils.data import DataLoader
@@ -454,11 +373,21 @@ class RayTrainer(object):
         target_rollouts = int(validation_cfg.get('target_rollouts', 100))
         # hard cap to avoid endless loops when config is accidentally wrong
         max_passes = int(validation_cfg.get('max_passes', 20))
+        save_video = bool(validation_cfg.get('save_video', True))
+        video_every_n_calls = max(1, int(validation_cfg.get('video_every_n_calls', 1)))
+        save_video_this_call = save_video and (self.validation_call_idx % video_every_n_calls == 0)
+        video_max_episodes = int(validation_cfg.get('video_max_episodes', 20))
+        video_per_task_limit = max(1, int(validation_cfg.get('video_per_task_limit', 1)))
+        video_frame_stride = max(1, int(validation_cfg.get('video_frame_stride', 8)))
+        transition_success_threshold = float(validation_cfg.get('transition_success_threshold', 0.5))
 
         total = 0
         total_sum = 0.0
         total_sumsq = 0.0
         data_source_stats = defaultdict(lambda: [0, 0.0])  # count, sum
+        task_stats = defaultdict(lambda: [0, 0.0])  # count, sum
+        selected_video_count = 0
+        video_task_counts = defaultdict(int)
 
         passes = 0
         while total < target_rollouts and passes < max_passes:
@@ -467,12 +396,31 @@ class RayTrainer(object):
                     break
 
                 test_batch = DataProto.from_single_dict(test_data)
+                task_keys = self._extract_task_keys(test_batch, self.config.data.task_suite_name)
+                batch_size = len(task_keys)
+
+                video_mask = np.zeros(batch_size, dtype=np.bool_)
+                if save_video_this_call and selected_video_count < video_max_episodes:
+                    for i, task_key in enumerate(task_keys):
+                        if selected_video_count >= video_max_episodes:
+                            break
+                        if video_task_counts[task_key] < video_per_task_limit:
+                            video_mask[i] = True
+                            video_task_counts[task_key] += 1
+                            selected_video_count += 1
+
                 test_batch.meta_info = {
                     'eos_token_id': self.tokenizer.eos_token_id,
                     'pad_token_id': self.tokenizer.pad_token_id,
                     'recompute_log_prob': False,
                     'do_sample': False,
                     'validate': True,
+                    'minimal_validation_output': True,
+                    'save_validation_video': save_video_this_call,
+                    'validation_video_mask': video_mask,
+                    'validation_video_max_episodes': video_max_episodes,
+                    'validation_video_per_task_limit': video_per_task_limit,
+                    'validation_video_frame_stride': video_frame_stride,
                     "global_steps": global_steps
                 }
 
@@ -485,6 +433,7 @@ class RayTrainer(object):
                 remaining = target_rollouts - total
                 take_n = min(n_batch, remaining)
                 scores = scores[:take_n]
+                task_keys = task_keys[:take_n]
 
                 data_sources = test_batch.non_tensor_batch.get(
                     'data_source',
@@ -500,18 +449,28 @@ class RayTrainer(object):
                     source_key = str(data_sources[i])
                     data_source_stats[source_key][0] += 1
                     data_source_stats[source_key][1] += s
+                    task_key = str(task_keys[i])
+                    task_stats[task_key][0] += 1
+                    task_stats[task_key][1] += s
             passes += 1
 
         metric_dict = {}
         for data_source, (count, score_sum) in data_source_stats.items():
             if count > 0:
                 metric_dict[f'test_score/{data_source}'] = score_sum / count
+        for task_key, (count, score_sum) in task_stats.items():
+            if count > 0:
+                safe_key = self._sanitize_metric_key(task_key)
+                metric_dict[f'test_score_task/{safe_key}'] = score_sum / count
 
         if total == 0:
             metric_dict['test_score/all'] = 0.0
             metric_dict['test_score/all_std'] = 0.0
             metric_dict['test_score/all_ci95_halfwidth'] = 0.0
             metric_dict['test_score/num_rollouts'] = 0.0
+            metric_dict['test_transition/tasks_started_succeeding_count'] = 0.0
+            metric_dict['test_transition/tasks_started_failing_count'] = 0.0
+            self.validation_call_idx += 1
             return metric_dict
 
         mean = total_sum / total
@@ -519,10 +478,32 @@ class RayTrainer(object):
         std = math.sqrt(var)
         ci95_halfwidth = 1.96 * std / math.sqrt(total) if total > 1 else 0.0
 
+        tasks_started_succeeding = []
+        tasks_started_failing = []
+        for task_key, (count, score_sum) in task_stats.items():
+            if count <= 0:
+                continue
+            current_rate = score_sum / count
+            current_success = current_rate >= transition_success_threshold
+            previous_success = self.prev_val_task_success_state.get(task_key, None)
+            if previous_success is not None:
+                if (not previous_success) and current_success:
+                    tasks_started_succeeding.append(task_key)
+                elif previous_success and (not current_success):
+                    tasks_started_failing.append(task_key)
+            self.prev_val_task_success_state[task_key] = current_success
+
         metric_dict['test_score/all'] = mean
         metric_dict['test_score/all_std'] = std
         metric_dict['test_score/all_ci95_halfwidth'] = ci95_halfwidth
         metric_dict['test_score/num_rollouts'] = float(total)
+        metric_dict['test_transition/tasks_started_succeeding_count'] = float(len(tasks_started_succeeding))
+        metric_dict['test_transition/tasks_started_failing_count'] = float(len(tasks_started_failing))
+        if len(tasks_started_succeeding) > 0:
+            metric_dict['test_transition/tasks_started_succeeding'] = ",".join(tasks_started_succeeding)
+        if len(tasks_started_failing) > 0:
+            metric_dict['test_transition/tasks_started_failing'] = ",".join(tasks_started_failing)
+        self.validation_call_idx += 1
         return metric_dict
 
     def init_workers(self):
@@ -792,10 +773,6 @@ class RayTrainer(object):
                                               config = self.config)
                 metrics['timing/adv'] = timer.last
 
-                # Update bounded-window stats so low-rollout training remains analyzable.
-                # This uses O(1) memory per update and is safe for multi-day runs.
-                self._update_window_metrics(batch)
-
                 # critic is disabled
 
                 # implement critic warmup
@@ -829,9 +806,6 @@ class RayTrainer(object):
                     data_metrics = compute_data_metrics(batch=batch, config = self.config)
                 with Timer(name='logging2', text="{name}: {seconds:.1f} seconds") as timer:
                     metrics.update(data_metrics)
-                    metrics.update(self._build_window_metrics())
-                    if self.log_driver_memory:
-                        metrics.update(get_driver_memory_metrics())
                 with Timer(name='logging3', text="{name}: {seconds:.1f} seconds") as timer:
                     # TODO: make a canonical logger that supports various backend
                     logger.log(data=metrics, step=global_steps)
