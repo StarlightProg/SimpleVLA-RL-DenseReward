@@ -12,8 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import contextlib
+import io
 import math
 import os
+import warnings
+import logging
+
+# Keep rollout-worker logs readable: suppress known third-party startup spam.
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
+warnings.filterwarnings(
+    "ignore",
+    message="torch.utils._pytree._register_pytree_node is deprecated.*",
+)
+warnings.filterwarnings(
+    "ignore",
+    message=".*load_module\\(\\) method is deprecated and slated for removal in Python 3.12.*",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="Gym has been unmaintained since 2022.*",
+)
+try:
+    import gym_notices.notices as _gym_notices
+
+    _gym_notices.notices.clear()
+except Exception:
+    pass
+logging.getLogger("tensorflow").setLevel(logging.ERROR)
+logging.getLogger("absl").setLevel(logging.ERROR)
+logging.getLogger("robosuite").setLevel(logging.ERROR)
+logging.getLogger("robosuite_logs").setLevel(logging.ERROR)
+
 import torch
 import torch.distributed
 from tensordict import TensorDict
@@ -63,6 +93,23 @@ from codetiming import Timer
 
 # For Libero multiprocessing
 import multiprocessing
+
+SUBGOAL_NUMERIC_KEYS = [
+    "subgoal_supported",
+    "subgoal_phase_id",
+    "subgoal_progress",
+    "subgoal_best_progress",
+    "subgoal_positive_delta",
+    "subgoal_phase_completed",
+    "reward_env",
+    "reward_subgoal",
+    "reward_phase",
+    "reward_terminal",
+    "reward_smoothness",
+    "reward_total",
+    "success",
+    "action_delta_l2",
+]
 
 __all__ = ['RobHFRollout']
 
@@ -230,6 +277,35 @@ def encode_obs(observation):
     """Post-Process Observation for robotwin 2.0"""
     return observation
 
+
+def _get_subgoal_config(config):
+    if hasattr(config, "get"):
+        return config.get("reward_subgoal", None)
+    return None
+
+
+def _subgoal_enabled(config):
+    subgoal_config = _get_subgoal_config(config)
+    if subgoal_config is None or not hasattr(subgoal_config, "get"):
+        return False
+    return bool(subgoal_config.get("enabled", False))
+
+
+def _empty_subgoal_metrics():
+    return {key: 0.0 for key in SUBGOAL_NUMERIC_KEYS}
+
+
+def _accumulate_subgoal_metrics(total, subgoal_info, reward_parts):
+    for key, value in subgoal_info.items():
+        if key == "phase_name":
+            continue
+        if key in ("subgoal_phase_id", "subgoal_progress", "subgoal_best_progress", "success", "subgoal_supported"):
+            total[key] = float(value)
+        else:
+            total[key] += float(value)
+    for key, value in reward_parts.items():
+        total[key] += float(value)
+
 class RobotwinEnvWrapper:
     """Thread-safe wrapper for Robotwin environment (supports both 1.0 and 2.0)"""
     def __init__(self, task_name, trial_id, trial_seed, config, version="1.0"):
@@ -340,8 +416,9 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
     """Worker process for Libero environments"""
     from libero.libero import benchmark
     
-    benchmark_dict = benchmark.get_benchmark_dict()
-    task_suite = benchmark_dict[task_name]()
+    with contextlib.redirect_stdout(io.StringIO()):
+        benchmark_dict = benchmark.get_benchmark_dict()
+        task_suite = benchmark_dict[task_name]()
     task = task_suite.get_task(task_id)
     initial_states = task_suite.get_task_init_states(task_id)
     initial_state = initial_states[trial_id]
@@ -385,6 +462,20 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         'complete': False,
         'finish_step': 0
     })
+
+    subgoal_engine = None
+    task_metadata = {
+        "task_name": task_name,
+        "task_suite_name": task_name,
+        "task_id": task_id,
+        "trial_id": trial_id,
+        "instruction": task_description,
+        "task_description": task_description,
+    }
+    if _subgoal_enabled(config):
+        from verl.utils.subgoal_reward import LiberoSubgoalRewardEngine
+
+        subgoal_engine = LiberoSubgoalRewardEngine(_get_subgoal_config(config))
     
     active = True
     complete = False
@@ -398,11 +489,27 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
             break
         
         step_images = []
+        subgoal_metrics = _empty_subgoal_metrics() if subgoal_engine is not None else None
         for i in range(len(action)):
             a = action[i]
             normalized_action = normalize_gripper_action(a, binarize=True)
             inverted_action = invert_gripper_action(normalized_action)
+            prev_obs = obs
             obs, reward, done, info = env.step(inverted_action.tolist())
+
+            if subgoal_engine is not None:
+                subgoal_info, reward_parts = subgoal_engine.step(
+                    env_index=0,
+                    env=env,
+                    obs=prev_obs,
+                    next_obs=obs,
+                    action=inverted_action,
+                    env_reward=reward,
+                    done=done,
+                    info=info,
+                    task_metadata=task_metadata,
+                )
+                _accumulate_subgoal_metrics(subgoal_metrics, subgoal_info, reward_parts)
             
             if collect_video and (i % frame_stride == 0):
                 img = obs["agentview_image"][::-1, ::-1]
@@ -422,6 +529,8 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
             'finish_step': finish_step,
             'valid_images': step_images.copy() if collect_video else []
         }
+        if subgoal_metrics is not None:
+            output_data["subgoal_metrics"] = subgoal_metrics
         output_queue.put(output_data)
 
 # ================ Main Rollout Class ================
@@ -728,8 +837,9 @@ class RobHFRollout(BaseRollout):
         
         while step < max_steps:
             active_indices = [i for i, r in enumerate(task_records) if r['active']]
-            if len(active_indices) == 0:
-                break
+            # Keep identical forward-step counts across ranks to avoid FSDP/NCCL desync.
+            # Even if all envs are inactive on this rank, we continue stepping the model
+            # until max_steps so all ranks issue collectives in the same order/count.
                 
             current_inputs = inputs
             current_task_descriptions = task_descriptions
@@ -841,6 +951,7 @@ class RobHFRollout(BaseRollout):
         video_mask_raw = meta_info.get('validation_video_mask', None)
         minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
+        subgoal_logging_enabled = _subgoal_enabled(self.config)
 
         selected_video_indices = set()
         if collect_video:
@@ -853,6 +964,59 @@ class RobHFRollout(BaseRollout):
                 selected_video_indices = {i for i, flag in enumerate(video_mask.tolist()) if flag}
             else:
                 selected_video_indices = set(range(min(video_max_episodes, batch_size)))
+
+        libero_env_batch_size = int(getattr(self.config, "libero_env_batch_size", batch_size) or batch_size)
+        libero_env_batch_size = max(1, min(libero_env_batch_size, batch_size))
+        if libero_env_batch_size < batch_size:
+            outputs = []
+            for start in range(0, batch_size, libero_env_batch_size):
+                end = min(start + libero_env_batch_size, batch_size)
+                local_video_indices = {i - start for i in selected_video_indices if start <= i < end}
+                outputs.append(
+                    self._generate_minibatch_libero_expanded(
+                        task_id[start:end],
+                        trial_id[start:end],
+                        task_suite_name[start:end],
+                        meta_info,
+                        max_steps,
+                        collect_video,
+                        local_video_indices,
+                        video_frame_stride,
+                        minimal_validation_output,
+                        global_steps,
+                    )
+                )
+                torch.cuda.empty_cache()
+                gc.collect()
+            return DataProto.concat(outputs)
+
+        return self._generate_minibatch_libero_expanded(
+            task_id,
+            trial_id,
+            task_suite_name,
+            meta_info,
+            max_steps,
+            collect_video,
+            selected_video_indices,
+            video_frame_stride,
+            minimal_validation_output,
+            global_steps,
+        )
+
+    def _generate_minibatch_libero_expanded(
+        self,
+        task_id,
+        trial_id,
+        task_suite_name,
+        meta_info,
+        max_steps,
+        collect_video,
+        selected_video_indices,
+        video_frame_stride,
+        minimal_validation_output,
+        global_steps,
+    ):
+        batch_size = task_id.size(0)
         
         processes = []
         input_queues = []
@@ -899,8 +1063,9 @@ class RobHFRollout(BaseRollout):
 
             while step < max_steps:
                 active_indices = [i for i, r in enumerate(task_records) if r['active']]
-                if len(active_indices) == 0:
-                    break
+                # Keep identical forward-step counts across ranks to avoid FSDP/NCCL desync.
+                # Even if all envs are inactive on this rank, we continue stepping the model
+                # until max_steps so all ranks issue collectives in the same order/count.
              
                 current_inputs = inputs
                 current_task_descriptions = task_descriptions
@@ -925,6 +1090,7 @@ class RobHFRollout(BaseRollout):
                     input_queues[idx].put(actions[idx])
 
                 new_inputs = inputs.copy()
+                subgoal_step_metrics = [_empty_subgoal_metrics() for _ in range(batch_size)] if subgoal_logging_enabled else None
                 for idx in active_indices:
                     result = output_queues[idx].get(timeout=30)
                     assert result['type'] == 'step'
@@ -932,8 +1098,16 @@ class RobHFRollout(BaseRollout):
                     task_records[idx]['active'] = result['active']
                     task_records[idx]['complete'] = result['complete']
                     task_records[idx]['finish_step'] = result['finish_step']
+                    if subgoal_step_metrics is not None and "subgoal_metrics" in result:
+                        subgoal_step_metrics[idx] = result["subgoal_metrics"]
                     if collect_video and idx in selected_video_indices:
                         valid_video[task_records[idx]['task_file_name']].extend(result['valid_images'])
+
+                if subgoal_step_metrics is not None and not minimal_validation_output:
+                    device = vla_output["responses"].device
+                    for key in SUBGOAL_NUMERIC_KEYS:
+                        values = [metrics.get(key, 0.0) for metrics in subgoal_step_metrics]
+                        step_data[key] = torch.tensor(values, dtype=torch.float32, device=device)
 
                 inputs = new_inputs
                 step += self.config.action_chunks_len
@@ -1001,6 +1175,11 @@ class RobHFRollout(BaseRollout):
         if self.config.use_proprio and "robotwin" in self.config.task_suite_name:
             batch["proprio"] = []
             key_names.append("proprio")
+
+        for key in SUBGOAL_NUMERIC_KEYS:
+            if vla_history and key in vla_history[0]:
+                batch[key] = []
+                key_names.append(key)
         
         for k in key_names:
             for h in vla_history:
