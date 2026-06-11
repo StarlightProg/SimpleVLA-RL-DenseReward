@@ -82,7 +82,20 @@ class RobRewardManager():
 
         subgoal_cfg = self._subgoal_config()
         if bool(subgoal_cfg.get("enabled", False)) and bool(subgoal_cfg.get("log", True)):
-            for key in ("subgoal_progress", "subgoal_best_progress", "subgoal_positive_delta", "reward_total"):
+            for key in (
+                "subgoal_supported",
+                "subgoal_phase_id",
+                "subgoal_has_object",
+                "subgoal_has_target",
+                "subgoal_has_gripper",
+                "subgoal_progress",
+                "subgoal_best_progress",
+                "subgoal_positive_delta",
+                "reward_subgoal",
+                "reward_phase",
+                "reward_terminal",
+                "reward_total",
+            ):
                 if key in data.batch.keys():
                     reward_metrics[f"subgoal/{key}"] = data.batch[key].float().mean().item()
             if "subgoal_phase_completed" in data.batch.keys():

@@ -61,6 +61,7 @@ from .base import BaseRollout
 from transformers import GenerationConfig, AutoProcessor
 
 from verl.utils.libero_utils import save_rollout_video
+from verl.utils.validation_video import select_validation_video_indices
 try:
     from verl.utils.libero_utils import (
         get_libero_env, get_libero_dummy_action, get_libero_image, 
@@ -97,6 +98,9 @@ import multiprocessing
 SUBGOAL_NUMERIC_KEYS = [
     "subgoal_supported",
     "subgoal_phase_id",
+    "subgoal_has_object",
+    "subgoal_has_target",
+    "subgoal_has_gripper",
     "subgoal_progress",
     "subgoal_best_progress",
     "subgoal_positive_delta",
@@ -299,12 +303,22 @@ def _accumulate_subgoal_metrics(total, subgoal_info, reward_parts):
     for key, value in subgoal_info.items():
         if key == "phase_name":
             continue
-        if key in ("subgoal_phase_id", "subgoal_progress", "subgoal_best_progress", "success", "subgoal_supported"):
+        if key in (
+            "subgoal_phase_id",
+            "subgoal_progress",
+            "subgoal_best_progress",
+            "success",
+            "subgoal_supported",
+            "subgoal_has_object",
+            "subgoal_has_target",
+            "subgoal_has_gripper",
+        ):
             total[key] = float(value)
         else:
             total[key] += float(value)
     for key, value in reward_parts.items():
         total[key] += float(value)
+
 
 class RobotwinEnvWrapper:
     """Thread-safe wrapper for Robotwin environment (supports both 1.0 and 2.0)"""
@@ -414,7 +428,7 @@ class RobotwinEnvWrapper:
 
 def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, collect_video, frame_stride, global_steps, max_steps):
     """Worker process for Libero environments"""
-    from libero.libero import benchmark
+    from libero.libero import benchmark, get_libero_path
     
     with contextlib.redirect_stdout(io.StringIO()):
         benchmark_dict = benchmark.get_benchmark_dict()
@@ -471,6 +485,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         "trial_id": trial_id,
         "instruction": task_description,
         "task_description": task_description,
+        "bddl_file_path": os.path.join(get_libero_path("bddl_files"), task.problem_folder, task.bddl_file),
     }
     if _subgoal_enabled(config):
         from verl.utils.subgoal_reward import LiberoSubgoalRewardEngine
@@ -757,21 +772,18 @@ class RobHFRollout(BaseRollout):
         collect_video = is_valid and bool(meta_info.get('save_validation_video', False))
         video_max_episodes = max(0, int(meta_info.get('validation_video_max_episodes', 2)))
         video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
-        video_mask_raw = meta_info.get('validation_video_mask', None)
         minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
 
         selected_video_indices = set()
         if collect_video:
-            if video_mask_raw is not None:
-                video_mask = np.asarray(video_mask_raw, dtype=np.bool_).reshape(-1)
-                if video_mask.size * n_samples == batch_size:
-                    video_mask = np.repeat(video_mask, n_samples)
-                elif video_mask.size != batch_size:
-                    video_mask = np.zeros(batch_size, dtype=np.bool_)
-                selected_video_indices = {i for i, flag in enumerate(video_mask.tolist()) if flag}
-            else:
-                selected_video_indices = set(range(min(video_max_episodes, batch_size)))
+            selected_video_indices = select_validation_video_indices(
+                prompts.non_tensor_batch,
+                meta_info,
+                batch_size,
+                n_samples,
+                video_max_episodes,
+            )
         
         # Create environment wrappers
         env_wrappers = []
@@ -924,7 +936,8 @@ class RobHFRollout(BaseRollout):
                     self.config.experiment_name,
                     task_file,
                     global_steps,
-                    complete
+                    complete,
+                    rollout_root=getattr(self.config, "rollout_dir", None),
                 )
         
         self.module.train()
@@ -948,22 +961,19 @@ class RobHFRollout(BaseRollout):
         collect_video = is_valid and bool(meta_info.get('save_validation_video', False))
         video_max_episodes = max(0, int(meta_info.get('validation_video_max_episodes', 2)))
         video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
-        video_mask_raw = meta_info.get('validation_video_mask', None)
         minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
         subgoal_logging_enabled = _subgoal_enabled(self.config)
 
         selected_video_indices = set()
         if collect_video:
-            if video_mask_raw is not None:
-                video_mask = np.asarray(video_mask_raw, dtype=np.bool_).reshape(-1)
-                if video_mask.size * n_samples == batch_size:
-                    video_mask = np.repeat(video_mask, n_samples)
-                elif video_mask.size != batch_size:
-                    video_mask = np.zeros(batch_size, dtype=np.bool_)
-                selected_video_indices = {i for i, flag in enumerate(video_mask.tolist()) if flag}
-            else:
-                selected_video_indices = set(range(min(video_max_episodes, batch_size)))
+            selected_video_indices = select_validation_video_indices(
+                prompts.non_tensor_batch,
+                meta_info,
+                batch_size,
+                n_samples,
+                video_max_episodes,
+            )
 
         libero_env_batch_size = int(getattr(self.config, "libero_env_batch_size", batch_size) or batch_size)
         libero_env_batch_size = max(1, min(libero_env_batch_size, batch_size))
@@ -983,6 +993,7 @@ class RobHFRollout(BaseRollout):
                         local_video_indices,
                         video_frame_stride,
                         minimal_validation_output,
+                        subgoal_logging_enabled,
                         global_steps,
                     )
                 )
@@ -1000,6 +1011,7 @@ class RobHFRollout(BaseRollout):
             selected_video_indices,
             video_frame_stride,
             minimal_validation_output,
+            subgoal_logging_enabled,
             global_steps,
         )
 
@@ -1014,6 +1026,7 @@ class RobHFRollout(BaseRollout):
         selected_video_indices,
         video_frame_stride,
         minimal_validation_output,
+        subgoal_logging_enabled,
         global_steps,
     ):
         batch_size = task_id.size(0)
@@ -1122,7 +1135,8 @@ class RobHFRollout(BaseRollout):
                         self.config.experiment_name,
                         task_file,
                         global_steps,
-                        complete
+                        complete,
+                        rollout_root=getattr(self.config, "rollout_dir", None),
                     )
 
             self.module.train()

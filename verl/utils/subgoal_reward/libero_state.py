@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import lru_cache
+import re
 from typing import Any, Mapping
 
 import numpy as np
@@ -36,8 +38,9 @@ class LiberoStateExtractor:
 
         gripper_position = self._vec3(obs.get("robot0_eef_pos"))
         gripper_open = self._gripper_open(obs)
-        object_position = self._object_position(obs, gripper_position, task_metadata)
-        target_position = self._target_position(obs, task_metadata)
+        object_name, target_name = self._task_object_and_target(task_metadata)
+        object_position = self._object_position(obs, gripper_position, task_metadata, object_name)
+        target_position = self._target_position(obs, task_metadata, target_name)
         success = self._success(env, info, done)
 
         return LiberoState(
@@ -77,7 +80,7 @@ class LiberoStateExtractor:
         if qpos is None:
             return None
         try:
-            value = float(np.asarray(qpos, dtype=np.float32).reshape(-1).mean())
+            value = float(np.abs(np.asarray(qpos, dtype=np.float32).reshape(-1)).mean())
         except Exception:
             return None
         return float(np.clip(value / 0.04, 0.0, 1.0))
@@ -100,10 +103,10 @@ class LiberoStateExtractor:
         obs: Mapping[str, Any],
         gripper_position: np.ndarray | None,
         task_metadata: Mapping[str, Any],
+        object_name: str | None = None,
     ) -> np.ndarray | None:
-        object_name = task_metadata.get("object_name")
         if object_name:
-            for key in (f"{object_name}_pos", str(object_name)):
+            for key in self._position_key_candidates(str(object_name)):
                 value = self._vec3(obs.get(key))
                 if value is not None:
                     return value
@@ -124,7 +127,14 @@ class LiberoStateExtractor:
         self,
         obs: Mapping[str, Any],
         task_metadata: Mapping[str, Any],
+        target_name: str | None = None,
     ) -> np.ndarray | None:
+        if target_name:
+            for key in self._position_key_candidates(str(target_name)):
+                value = self._vec3(obs.get(key))
+                if value is not None:
+                    return value
+
         for key in ("target_position", "target_pos", "goal_position", "goal_pos"):
             value = self._vec3(task_metadata.get(key))
             if value is not None:
@@ -141,6 +151,32 @@ class LiberoStateExtractor:
                 if vec is not None:
                     return vec
         return None
+
+    def _task_object_and_target(self, task_metadata: Mapping[str, Any]) -> tuple[str | None, str | None]:
+        object_name = self._str_from(task_metadata, "object_name", "obj_name")
+        target_name = self._str_from(task_metadata, "target_name", "target_object_name", "goal_name")
+        if object_name and target_name:
+            return object_name, target_name
+
+        bddl_path = self._str_from(task_metadata, "bddl_file_path", "bddl_file")
+        if bddl_path:
+            bddl_object, bddl_target = _parse_bddl_object_and_target(bddl_path)
+            object_name = object_name or bddl_object
+            target_name = target_name or bddl_target
+
+        return object_name, target_name
+
+    def _position_key_candidates(self, name: str) -> list[str]:
+        name = name.strip()
+        if not name:
+            return []
+        normalized = name.lower().replace(" ", "_").replace("-", "_")
+        candidates = [f"{name}_pos", f"{normalized}_pos", name, normalized]
+        deduped = []
+        for candidate in candidates:
+            if candidate not in deduped:
+                deduped.append(candidate)
+        return deduped
 
     def _object_in_gripper(
         self,
@@ -170,3 +206,24 @@ class LiberoStateExtractor:
                 except Exception:
                     pass
         return bool(done)
+
+
+@lru_cache(maxsize=256)
+def _parse_bddl_object_and_target(bddl_path: str) -> tuple[str | None, str | None]:
+    try:
+        with open(bddl_path, "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return None, None
+
+    obj_interest = re.search(r"\(:obj_of_interest\s+([^)]+)\)", text, flags=re.IGNORECASE | re.DOTALL)
+    if obj_interest:
+        names = re.findall(r"[A-Za-z0-9_]+", obj_interest.group(1))
+        if len(names) >= 2:
+            return names[0], names[1]
+
+    goal = re.search(r"\(:goal\s+\(And\s+\((?:On|In)\s+([A-Za-z0-9_]+)\s+([A-Za-z0-9_]+)\)", text, flags=re.IGNORECASE)
+    if goal:
+        return goal.group(1), goal.group(2)
+
+    return None, None

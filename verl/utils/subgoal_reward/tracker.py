@@ -17,7 +17,7 @@ class SubgoalStepInfo:
     progress: float
     best_progress: float
     positive_delta: float
-    phase_completed: bool
+    phase_completed: float
     success: bool
     action_delta_l2: float
 
@@ -28,7 +28,7 @@ class SubgoalStepInfo:
             "subgoal_progress": self.progress,
             "subgoal_best_progress": self.best_progress,
             "subgoal_positive_delta": self.positive_delta,
-            "subgoal_phase_completed": float(self.phase_completed),
+            "subgoal_phase_completed": self.phase_completed,
             "success": float(self.success),
             "action_delta_l2": self.action_delta_l2,
         }
@@ -58,7 +58,7 @@ class OnlineSubgoalTracker:
                 progress=1.0 if state.success else 0.0,
                 best_progress=1.0 if state.success else 0.0,
                 positive_delta=0.0,
-                phase_completed=False,
+                phase_completed=0.0,
                 success=bool(state.success),
                 action_delta_l2=action_delta_l2,
             )
@@ -74,11 +74,19 @@ class OnlineSubgoalTracker:
             self.best_progress_so_far = progress
         self.last_progress = progress
 
-        phase_completed = bool(phase.is_done(state))
-        if phase_completed and self.phase_id < len(self.task_spec.phases) - 1:
+        completed_count = 0.0
+        while phase.is_done(state):
+            completed_count += 1.0
+            if self.phase_id >= len(self.task_spec.phases) - 1:
+                break
             self.phase_id += 1
             self.best_progress_so_far = 0.0
             self.last_progress = 0.0
+            phase = self.task_spec.phases[self.phase_id]
+
+        if state.success and self.phase_id < len(self.task_spec.phases) - 1:
+            completed_count += float(len(self.task_spec.phases) - self.phase_id - 1)
+            self.phase_id = len(self.task_spec.phases) - 1
 
         return SubgoalStepInfo(
             supported=True,
@@ -87,7 +95,7 @@ class OnlineSubgoalTracker:
             progress=progress,
             best_progress=self.best_progress_so_far,
             positive_delta=positive_delta,
-            phase_completed=phase_completed,
+            phase_completed=completed_count,
             success=bool(state.success),
             action_delta_l2=action_delta_l2,
         )

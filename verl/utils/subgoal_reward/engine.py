@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from omegaconf import OmegaConf
+try:
+    from omegaconf import OmegaConf
+except ImportError:
+    OmegaConf = None
 
 from .dense_reward import DenseRewardManager, RewardWeights
 from .libero_state import LiberoStateExtractor
@@ -14,7 +17,7 @@ from .tracker import OnlineSubgoalTracker
 def _to_container(config: Any) -> dict:
     if config is None:
         return {}
-    if OmegaConf.is_config(config):
+    if OmegaConf is not None and OmegaConf.is_config(config):
         return OmegaConf.to_container(config, resolve=True)
     if isinstance(config, Mapping):
         return dict(config)
@@ -78,6 +81,9 @@ class LiberoSubgoalRewardEngine:
                 {
                     "subgoal_supported": 0.0,
                     "subgoal_phase_id": -1.0,
+                    "subgoal_has_object": 0.0,
+                    "subgoal_has_target": 0.0,
+                    "subgoal_has_gripper": 0.0,
                     "subgoal_progress": 0.0,
                     "subgoal_best_progress": 0.0,
                     "subgoal_positive_delta": 0.0,
@@ -114,6 +120,9 @@ class LiberoSubgoalRewardEngine:
         )
 
         subgoal_info = step_info.as_numeric_dict()
+        subgoal_info["subgoal_has_object"] = float(state.object_position is not None)
+        subgoal_info["subgoal_has_target"] = float(state.target_position is not None)
+        subgoal_info["subgoal_has_gripper"] = float(state.gripper_position is not None)
         subgoal_info["phase_name"] = step_info.phase_name
         if done:
             self.reset(env_index)

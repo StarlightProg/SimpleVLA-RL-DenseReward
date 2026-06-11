@@ -82,16 +82,22 @@ class LiftObjectPhase(Phase):
 class MoveToTargetPhase(Phase):
     name = "move_to_target"
 
-    def compute_progress(self, state: LiberoState) -> float:
+    def _target_distance(self, state: LiberoState) -> float | None:
         if state.object_position is None or state.target_position is None:
+            return None
+        return float(np.linalg.norm(state.object_position[:2] - state.target_position[:2]))
+
+    def compute_progress(self, state: LiberoState) -> float:
+        dist = self._target_distance(state)
+        if dist is None:
             return 0.0
-        dist = float(np.linalg.norm(state.object_position - state.target_position))
         return _clip01(1.0 - dist / max(self.thresholds.target_distance * 5.0, 1e-6))
 
     def is_done(self, state: LiberoState) -> bool:
-        if state.object_position is None or state.target_position is None:
+        dist = self._target_distance(state)
+        if dist is None:
             return False
-        return float(np.linalg.norm(state.object_position - state.target_position)) <= self.thresholds.target_distance
+        return dist <= self.thresholds.target_distance
 
 
 class PlaceOrSuccessPhase(MoveToTargetPhase):

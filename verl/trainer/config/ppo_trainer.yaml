@@ -85,6 +85,7 @@ actor_rollout_ref:
     vla: ${actor_rollout_ref.model.vla}
     action_chunks_len: ${actor_rollout_ref.model.action_chunks_len}
     experiment_name: None
+    rollout_dir: null
     unnorm_key: libero_10
     twin2_task_config: demo_randomized
     twin2_ckpt_setting: ${actor_rollout_ref.rollout.twin2_task_config}

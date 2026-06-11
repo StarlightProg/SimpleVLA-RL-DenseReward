@@ -165,6 +165,77 @@ class RobActorRolloutRefWorker(Worker):
         if self._is_ref:
             self.config.ref.log_prob_micro_batch_size //= self.device_mesh.shape[0]
 
+    @staticmethod
+    def _normalize_fsdp_state_key(key: str) -> str:
+        while key.startswith("_fsdp_wrapped_module."):
+            key = key[len("_fsdp_wrapped_module."):]
+        return key.replace("._fsdp_wrapped_module.", ".")
+
+    def _iter_fsdp_lora_leaf_modules(self, adapter_name: str = "default"):
+        from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+        lora_markers = (
+            f"lora_A.{adapter_name}",
+            f"lora_B.{adapter_name}",
+            f"lora_embedding_A.{adapter_name}",
+            f"lora_embedding_B.{adapter_name}",
+        )
+
+        for module_name, module in self.actor_module_fsdp.named_modules():
+            if not isinstance(module, FSDP):
+                continue
+            if any(marker in module_name for marker in lora_markers):
+                yield module_name, module
+
+    def _collect_lora_state_dict_from_fsdp(self, adapter_name: str = "default"):
+        import torch.distributed as dist
+        from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+        peft_config = self.actor_module.peft_config[adapter_name]
+        if getattr(peft_config, "bias", "none") != "none":
+            raise NotImplementedError("FSDP LoRA-only save currently supports bias='none' only.")
+
+        lora_modules = list(self._iter_fsdp_lora_leaf_modules(adapter_name=adapter_name))
+        if not lora_modules:
+            raise RuntimeError(
+                "Could not find any FSDP-wrapped LoRA leaf modules to save. "
+                "This indicates the LoRA adapter structure does not match the expected FSDP wrapping layout."
+            )
+
+        lora_state = {}
+        total_tensors = 0
+
+        for module_name, module in lora_modules:
+            with FSDP.summon_full_params(
+                module,
+                recurse=False,
+                writeback=False,
+                rank0_only=True,
+                offload_to_cpu=True,
+            ):
+                if dist.get_rank() != 0:
+                    continue
+
+                wrapped_module = module._fsdp_wrapped_module
+                module_state = wrapped_module.state_dict()
+                for param_name, param_value in module_state.items():
+                    full_name = self._normalize_fsdp_state_key(f"{module_name}.{param_name}")
+                    if "lora_" not in full_name:
+                        continue
+                    lora_state[full_name] = param_value.detach().cpu().clone()
+                    total_tensors += 1
+
+        if dist.get_rank() == 0:
+            print(f"[rank-{self.rank}]: Collected {total_tensors} LoRA tensors from nested FSDP modules")
+
+        if dist.get_rank() != 0:
+            return None
+
+        if not lora_state:
+            raise RuntimeError("Collected zero LoRA tensors from FSDP modules; aborting adapter save.")
+
+        return lora_state
+
     def _build_model_optimizer(self,
                                model_path,
                                fsdp_config,
@@ -672,9 +743,9 @@ class RobActorRolloutRefWorker(Worker):
     def save_checkpoint(self, local_path, hdfs_path=None):
         assert self._is_actor
         
+        import gc
         import torch.distributed as dist
         from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-        from transformers import AutoModelForVision2Seq
         
         if self._is_offload_param:
             load_fsdp_param_and_grad(module=self.actor_module_fsdp,
@@ -689,46 +760,70 @@ class RobActorRolloutRefWorker(Worker):
             lora_save_path = os.path.join(local_path, "lora_adapter")
 
             if isinstance(self.actor_module_fsdp, FSDP):
-                with FSDP.summon_full_params(self.actor_module_fsdp, writeback=False, offload_to_cpu=True):
-                    if dist.get_rank() == 0:
-                        lora_params = get_peft_model_state_dict(self.actor_module)
-                        self.actor_module.save_pretrained(
-                            lora_save_path,
-                            state_dict=lora_params,
-                            safe_serialization=True
-                        )
+                if dist.get_rank() == 0:
+                    print(f"[rank-{self.rank}]: Saving LoRA adapter without full-model CPU gather")
+                lora_params = self._collect_lora_state_dict_from_fsdp(adapter_name="default")
+                if dist.get_rank() == 0:
+                    self.actor_module.save_pretrained(
+                        lora_save_path,
+                        state_dict=lora_params,
+                        safe_serialization=True
+                    )
+                    del lora_params
+                    gc.collect()
             else:
                 self.actor_module.save_pretrained(lora_save_path, safe_serialization=True)
 
             dist.barrier()
             if dist.get_rank() == 0:
                 print(f"[rank-{self.rank}]: Saved LoRA adapter to: {lora_save_path}")
-            
-            # save total model
-            base_vla = AutoModelForVision2Seq.from_pretrained(
-                self.model_local_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True, trust_remote_code=True, device_map="cpu"
-            )
-            merged_vla = PeftModel.from_pretrained(base_vla, lora_save_path)
-            merged_vla = merged_vla.merge_and_unload()
 
             if dist.get_rank() == 0:
-                merged_vla.save_pretrained(local_path, safe_serialization=True)
-                self.tokenizer.save_pretrained(local_path)
-                if self.config.model.vla == "openvla-oft":
-                    package_openvla_oft_checkpoint(
-                        checkpoint_dir=local_path,
-                        source_checkpoint=self.model_local_path,
-                        norm_stats=getattr(merged_vla, "norm_stats", None),
-                    )
-                print(f"Saved merged model at: {local_path}")
+                from omegaconf import OmegaConf
 
-            # Wait for merged model to be saved
+                self.tokenizer.save_pretrained(lora_save_path)
+
+                checkpoint_metadata = {
+                    "checkpoint_format": "peft_lora_adapter_only",
+                    "adapter_path": "lora_adapter",
+                    "base_model_path": self.model_local_path,
+                    "base_model_path_config": self.config.model.path,
+                    "model_type": self.config.model.vla,
+                    "use_proprio": bool(self.config.rollout.use_proprio),
+                    "lora_rank": int(self.config.model.lora_rank),
+                    "lora_alpha": int(self.config.model.lora_alpha),
+                    "target_modules": convert_to_regular_types(self.config.model.target_modules),
+                    "resume_training_supported": False,
+                    "resume_training_reason": "Optimizer, scheduler, RNG, and FSDP state are not saved in LoRA-only checkpoints.",
+                }
+
+                metadata_path = os.path.join(local_path, "checkpoint_metadata.json")
+                with open(metadata_path, "w", encoding="utf-8") as f:
+                    json.dump(checkpoint_metadata, f, indent=2)
+
+                training_config_path = os.path.join(local_path, "training_config.json")
+                with open(training_config_path, "w", encoding="utf-8") as f:
+                    json.dump(convert_to_regular_types(OmegaConf.to_container(self.config, resolve=True)), f, indent=2)
+
+                if self.config.model.vla == "openvla-oft":
+                    src_stats = os.path.join(self.model_local_path, "dataset_statistics.json")
+                    if os.path.exists(src_stats):
+                        import shutil
+                        shutil.copy2(src_stats, os.path.join(local_path, "dataset_statistics.json"))
+
+                print(f"Saved LoRA-only checkpoint at: {local_path}")
+                gc.collect()
+
+            if hdfs_path is not None and dist.get_rank() == 0:
+                print(f'Uploading actor checkpoint to {hdfs_path}')
+                hdfs_io.makedirs(hdfs_path, exist_ok=True)
+                hdfs_io.copy(src=local_path, dst=hdfs_path)
+
             dist.barrier()    
                 
         
         # TODO: support DCP and save sharded checkpoints
         else:
-            import torch.distributed
             from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, StateDictType, FullStateDictConfig
             cfg = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
             with FSDP.state_dict_type(self.actor.actor_module, StateDictType.FULL_STATE_DICT, cfg):

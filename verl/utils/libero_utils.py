@@ -2,6 +2,7 @@
 
 import math
 import os
+from pathlib import Path
 
 import imageio
 import numpy as np
@@ -248,16 +249,21 @@ def invert_gripper_action(action: np.ndarray) -> np.ndarray:
 
     return inverted_action
 
-def save_rollout_video(rollout_images, exp_name, task_name, step_idx, success ):
+def _default_rollout_root():
+    return Path(__file__).resolve().parents[2] / "rollouts"
+
+
+def save_rollout_video(rollout_images, exp_name, task_name, step_idx, success, rollout_root=None):
     """Saves an MP4 replay of an episode."""
-    rollout_dir = f"./rollouts/{exp_name}" 
-    os.makedirs(rollout_dir, exist_ok=True)
+    root = Path(rollout_root).expanduser().resolve() if rollout_root else _default_rollout_root()
+    rollout_dir = root / str(exp_name)
+    rollout_dir.mkdir(parents=True, exist_ok=True)
     ran_id = random.randint(1, 10000)
     #processed_task_description = task_description.lower().replace(" ", "_").replace("\n", "_").replace(".", "_")[:50]
-    mp4_path = f"{rollout_dir}/step={step_idx}--task={task_name}--success={success}--ran={ran_id}.mp4"
-    video_writer = imageio.get_writer(mp4_path, fps=30)
+    mp4_path = rollout_dir / f"step={step_idx}--task={task_name}--success={success}--ran={ran_id}.mp4"
+    video_writer = imageio.get_writer(str(mp4_path), fps=30)
     for img in rollout_images:
         video_writer.append_data(img)
     video_writer.close()
-    print(f"Saved rollout MP4 at path {mp4_path}")
-    return mp4_path
+    print(f"Saved rollout MP4 at path {mp4_path}", flush=True)
+    return str(mp4_path)

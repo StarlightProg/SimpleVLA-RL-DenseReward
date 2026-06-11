@@ -409,6 +409,10 @@ class RayTrainer(object):
                             video_task_counts[task_key] += 1
                             selected_video_count += 1
 
+                test_batch.non_tensor_batch['validation_video_selected'] = np.array(
+                    video_mask.tolist(),
+                    dtype=object,
+                )
                 test_batch.meta_info = {
                     'eos_token_id': self.tokenizer.eos_token_id,
                     'pad_token_id': self.tokenizer.pad_token_id,
@@ -820,32 +824,40 @@ class RayTrainer(object):
                     logger.log(data=metrics, step=global_steps)
 
                 if self.config.trainer.save_freq > 0 and (global_steps + 1) % self.config.trainer.save_freq == 0:
-                    actor_local_path = os.path.join(self.config.trainer.default_local_dir, 'actor',
-                                                    f'global_step_{global_steps}')
-                    actor_remote_path = None #if self.config.trainer.default_hdfs_dir is None else os.path.join(
-                        # self.config.trainer.default_hdfs_dir, 'actor')
-                    self.actor_rollout_wg.save_checkpoint(actor_local_path, actor_remote_path)
-
-                    if self.use_critic:
-                        critic_local_path = os.path.join(self.config.trainer.default_local_dir, 'critic',
-                                                         f'global_step_{global_steps}')
-                        critic_remote_path = None #if self.config.trainer.default_hdfs_dir is None else os.path.join(
-                            # self.config.trainer.default_hdfs_dir, 'critic')
-                        self.critic_wg.save_checkpoint(critic_local_path, critic_remote_path)
-                    if self.use_rm:
-                        prm_local_path = os.path.join(self.config.trainer.default_local_dir, 'prm',
-                                                         f'global_step_{global_steps}')
-                        prm_remote_path = None #if self.config.trainer.default_hdfs_dir is None else os.path.join(
-                            # self.config.trainer.default_hdfs_dir, 'critic')
-                        self.rm_wg.save_checkpoint(prm_local_path, prm_remote_path)
+                    self._save_checkpoint_bundle(step_name=f'global_step_{global_steps}',
+                                                 log_step=global_steps,
+                                                 reason='periodic')
 
                 global_steps += 1
+
+        if global_steps > 0:
+            self._save_checkpoint_bundle(step_name='final', log_step=global_steps - 1, reason='final')
 
         # perform validation after training
         if self.val_reward_fn is not None:
             val_metrics = self._validate(global_steps=global_steps)
             pprint(f'Final validation metrics: {val_metrics}')
             logger.log(data=val_metrics, step=global_steps)
+
+    def _save_checkpoint_bundle(self, step_name: str, log_step: int, reason: str):
+        print(f"Saving {reason} checkpoint bundle at trainer step {log_step} into {step_name}")
+
+        actor_local_path = os.path.join(self.config.trainer.default_local_dir, 'actor', step_name)
+        actor_remote_path = None  # if self.config.trainer.default_hdfs_dir is None else os.path.join(
+        #     self.config.trainer.default_hdfs_dir, 'actor')
+        self.actor_rollout_wg.save_checkpoint(actor_local_path, actor_remote_path)
+
+        if self.use_critic:
+            critic_local_path = os.path.join(self.config.trainer.default_local_dir, 'critic', step_name)
+            critic_remote_path = None  # if self.config.trainer.default_hdfs_dir is None else os.path.join(
+            #     self.config.trainer.default_hdfs_dir, 'critic')
+            self.critic_wg.save_checkpoint(critic_local_path, critic_remote_path)
+
+        if self.use_rm:
+            prm_local_path = os.path.join(self.config.trainer.default_local_dir, 'prm', step_name)
+            prm_remote_path = None  # if self.config.trainer.default_hdfs_dir is None else os.path.join(
+            #     self.config.trainer.default_hdfs_dir, 'critic')
+            self.rm_wg.save_checkpoint(prm_local_path, prm_remote_path)
 
     def filter_format(self, reward_tensor, batch, n_samples):
         """
