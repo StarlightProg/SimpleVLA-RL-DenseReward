@@ -1,18 +1,32 @@
 import unittest
+import importlib
+import sys
+import types
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 
 import numpy as np
 import torch
-from tensordict import TensorDict
 
-from verl import DataProto
-from verl.trainer.main_ppo import RobRewardManager
-from verl.trainer.ppo.core_algos import compute_grpo_outcome_advantage
 from verl.utils.subgoal_reward.engine import LiberoSubgoalRewardEngine
+from verl.utils.subgoal_reward.libero_state import LiberoStateExtractor
 from verl.utils.subgoal_reward.libero_state import LiberoState
 from verl.utils.subgoal_reward.phases import GraspObjectPhase, ReachObjectPhase, Thresholds
 from verl.utils.subgoal_reward.task_specs import TaskSpec
 from verl.utils.subgoal_reward.tracker import OnlineSubgoalTracker
+from verl.utils.validation_video import select_validation_video_indices
+
+try:
+    from tensordict import TensorDict
+    from verl import DataProto
+    from verl.trainer.ppo.core_algos import compute_grpo_outcome_advantage
+    from verl.trainer.main_ppo import RobRewardManager
+except ImportError:
+    TensorDict = None
+    DataProto = None
+    compute_grpo_outcome_advantage = None
+    RobRewardManager = None
 
 
 def state_at(distance, success=False):
@@ -25,6 +39,55 @@ def state_at(distance, success=False):
         gripper_open=1.0,
         success=success,
     )
+
+
+def libero_obs(eef, bowl, plate, gripper=0.04):
+    return {
+        "robot0_eef_pos": np.array(eef, dtype=np.float32),
+        "robot0_gripper_qpos": np.array([gripper, gripper], dtype=np.float32),
+        "akita_black_bowl_1_pos": np.array(bowl, dtype=np.float32),
+        "akita_black_bowl_2_pos": np.array([-0.20, 0.32, 0.90], dtype=np.float32),
+        "glazed_rim_porcelain_ramekin_1_pos": np.array([-0.20, 0.19, 0.90], dtype=np.float32),
+        "plate_1_pos": np.array(plate, dtype=np.float32),
+    }
+
+
+def load_libero_video_utils():
+    if "tensorflow" not in sys.modules:
+        try:
+            importlib.import_module("tensorflow")
+        except ImportError:
+            fake_tf = types.ModuleType("tensorflow")
+
+            class FakeConfig:
+                @staticmethod
+                def set_visible_devices(*args, **kwargs):
+                    return None
+
+            fake_tf.config = FakeConfig()
+            sys.modules["tensorflow"] = fake_tf
+
+    if "imageio" not in sys.modules:
+        try:
+            importlib.import_module("imageio")
+        except ImportError:
+            fake_imageio = types.ModuleType("imageio")
+
+            class FakeWriter:
+                def __init__(self, path, fps=30):
+                    self._file = open(path, "wb")
+
+                def append_data(self, img):
+                    self._file.write(np.asarray(img, dtype=np.uint8).tobytes())
+
+                def close(self):
+                    self._file.close()
+
+            fake_imageio.get_writer = lambda path, fps=30: FakeWriter(path, fps)
+            sys.modules["imageio"] = fake_imageio
+
+    libero_utils = importlib.import_module("verl.utils.libero_utils")
+    return libero_utils._default_rollout_root, libero_utils.save_rollout_video
 
 
 class SubgoalRewardTest(unittest.TestCase):
@@ -90,6 +153,143 @@ class SubgoalRewardTest(unittest.TestCase):
         self.assertEqual(engine.trackers[0].phase_id, 1)
         self.assertEqual(engine.trackers[1].phase_id, 0)
 
+    def test_validation_video_selection_uses_shard_local_mask(self):
+        meta_info = {"validation_video_mask": np.array([True, False, True, False], dtype=np.bool_)}
+        first_shard = {"validation_video_selected": np.array([True, False], dtype=object)}
+        second_shard = {"validation_video_selected": np.array([True, False], dtype=object)}
+
+        self.assertEqual(
+            select_validation_video_indices(first_shard, meta_info, batch_size=2, n_samples=1, video_max_episodes=10),
+            {0},
+        )
+        self.assertEqual(
+            select_validation_video_indices(second_shard, meta_info, batch_size=2, n_samples=1, video_max_episodes=10),
+            {0},
+        )
+
+    def test_save_rollout_video_uses_repo_rollouts_dir(self):
+        default_rollout_root, save_rollout_video = load_libero_video_utils()
+        exp_name = "__test_video_rollout__"
+        frames = [
+            np.zeros((16, 16, 3), dtype=np.uint8),
+            np.full((16, 16, 3), 255, dtype=np.uint8),
+        ]
+
+        mp4_path = Path(
+            save_rollout_video(
+                frames,
+                exp_name,
+                "dummy_task",
+                123,
+                True,
+                rollout_root=default_rollout_root(),
+            )
+        )
+        try:
+            self.assertTrue(mp4_path.exists())
+            self.assertGreater(mp4_path.stat().st_size, 0)
+            self.assertEqual(mp4_path.suffix, ".mp4")
+            self.assertEqual(mp4_path.parent, default_rollout_root() / exp_name)
+        finally:
+            if mp4_path.exists():
+                mp4_path.unlink()
+            test_dir = default_rollout_root() / exp_name
+            if test_dir.exists() and not any(test_dir.iterdir()):
+                test_dir.rmdir()
+
+    def test_bddl_obj_of_interest_selects_exact_libero_object_and_target(self):
+        with TemporaryDirectory() as tmpdir:
+            bddl_path = Path(tmpdir) / "task.bddl"
+            bddl_path.write_text(
+                """
+                (:obj_of_interest
+                  akita_black_bowl_1
+                  plate_1
+                )
+                (:goal
+                  (And (On akita_black_bowl_1 plate_1))
+                )
+                """,
+                encoding="utf-8",
+            )
+            obs = libero_obs(
+                eef=[-0.21, -0.01, 1.17],
+                bowl=[-0.06, 0.20, 0.90],
+                plate=[0.05, 0.20, 0.90],
+                gripper=0.04,
+            )
+
+            state = LiberoStateExtractor().extract(
+                obs=obs,
+                task_metadata={
+                    "instruction": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+                    "bddl_file_path": str(bddl_path),
+                },
+            )
+
+        np.testing.assert_allclose(state.object_position, obs["akita_black_bowl_1_pos"])
+        np.testing.assert_allclose(state.target_position, obs["plate_1_pos"])
+
+    def test_perfect_libero_pick_place_completes_all_phases(self):
+        with TemporaryDirectory() as tmpdir:
+            bddl_path = Path(tmpdir) / "task.bddl"
+            bddl_path.write_text(
+                """
+                (:obj_of_interest
+                  akita_black_bowl_1
+                  plate_1
+                )
+                """,
+                encoding="utf-8",
+            )
+            metadata = {
+                "instruction": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+                "bddl_file_path": str(bddl_path),
+            }
+            engine = LiberoSubgoalRewardEngine(
+                {
+                    "enabled": True,
+                    "clip_dense_reward": 1.0,
+                    "weights": {
+                        "subgoal_progress": 0.0,
+                        "phase_transition": 1.0,
+                        "terminal_success": 0.0,
+                        "smoothness": 0.0,
+                    },
+                }
+            )
+            plate = np.array([0.05, 0.20, 0.90], dtype=np.float32)
+            states = [
+                (libero_obs([0.00, 0.00, 1.00], [-0.06, 0.20, 0.90], plate, 0.04), False),
+                (libero_obs([-0.06, 0.20, 0.91], [-0.06, 0.20, 0.90], plate, 0.04), False),
+                (libero_obs([-0.06, 0.20, 0.91], [-0.06, 0.20, 0.90], plate, 0.00), False),
+                (libero_obs([-0.06, 0.20, 1.00], [-0.06, 0.20, 0.99], plate, 0.00), False),
+                (libero_obs([0.05, 0.20, 1.00], [0.05, 0.20, 0.99], plate, 0.00), False),
+                (libero_obs([0.05, 0.20, 0.93], [0.05, 0.20, 0.90], plate, 0.04), True),
+            ]
+
+            completed = 0.0
+            phase_reward = 0.0
+            previous_obs = states[0][0]
+            for obs, done in states[1:]:
+                subgoal_info, reward_parts = engine.step(
+                    env_index=0,
+                    env=None,
+                    obs=previous_obs,
+                    next_obs=obs,
+                    action=np.zeros(7, dtype=np.float32),
+                    env_reward=0.0,
+                    done=done,
+                    info={"success": done},
+                    task_metadata=metadata,
+                )
+                completed += subgoal_info["subgoal_phase_completed"]
+                phase_reward += reward_parts["reward_phase"]
+                previous_obs = obs
+
+        self.assertEqual(completed, 5.0)
+        self.assertEqual(phase_reward, 5.0)
+
     def test_resetting_one_tracker_does_not_affect_others(self):
         engine = LiberoSubgoalRewardEngine({"enabled": True})
         engine.trackers[0] = OnlineSubgoalTracker()
@@ -99,6 +299,9 @@ class SubgoalRewardTest(unittest.TestCase):
         self.assertIn(1, engine.trackers)
 
     def test_groupwise_normalization_uses_group_id_not_global(self):
+        if compute_grpo_outcome_advantage is None:
+            self.skipTest("GRPO advantage test requires full RL dependencies")
+
         rewards = torch.tensor([[1.0, 0.0], [3.0, 0.0], [10.0, 0.0], [30.0, 0.0]])
         mask = torch.ones_like(rewards)
         group_id = np.array(["a", "a", "b", "b"], dtype=object)
@@ -113,6 +316,9 @@ class SubgoalRewardTest(unittest.TestCase):
         self.assertEqual(reward_parts["reward_subgoal"], 0.0)
 
     def test_reward_manager_subgoal_modes(self):
+        if TensorDict is None or DataProto is None or RobRewardManager is None:
+            self.skipTest("reward manager test requires full RL dependencies")
+
         actor_model = self._cfg(action_token_len=7)
         actor_rollout_ref = self._cfg(model=actor_model)
         verifier = self._cfg(reward_coef=5)

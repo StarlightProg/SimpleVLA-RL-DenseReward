@@ -1,0 +1,1608 @@
+2026-05-27 11:40:46 Using LocalLogger is deprecated. The constructor API will change
+2026-05-27 11:40:46 epoch:  0
+2026-05-27 11:45:34 gen: 287.5 seconds
+2026-05-27 11:45:34 verify: 0.0 seconds
+2026-05-27 11:45:34 before filtering: 8
+2026-05-27 11:45:34 Accuracy distribution: 1.00:2
+2026-05-27 11:45:34 Filtered batch size: 8 (from original size: 8)
+2026-05-27 11:45:34 after filtering: 8
+2026-05-27 11:45:34 acc&trunc_filter: 0.4 seconds
+2026-05-27 11:45:34 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 11:45:34 rollout batch size: 8
+2026-05-27 11:45:34 reward: 0.0 seconds
+2026-05-27 11:45:34 adv: 0.0 seconds
+2026-05-27 11:57:00 update_actor: 686.0 seconds
+2026-05-27 11:57:00 logging1: 0.0 seconds
+2026-05-27 11:57:00 logging2: 0.0 seconds
+2026-05-27 11:57:00 step:0 - timing/gen:287.478 - timing/verify:0.011 - timing/acc&trunc_filter:0.351 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.016 - timing/update_actor:685.957 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 11:57:00 logging3: 0.0 seconds
+2026-05-27 12:01:34 gen: 273.8 seconds
+2026-05-27 12:01:34 verify: 0.0 seconds
+2026-05-27 12:01:34 before filtering: 8
+2026-05-27 12:01:34 Accuracy distribution: 1.00:2
+2026-05-27 12:01:34 Filtered batch size: 8 (from original size: 8)
+2026-05-27 12:01:34 after filtering: 8
+2026-05-27 12:01:34 acc&trunc_filter: 0.5 seconds
+2026-05-27 12:01:34 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 12:01:34 rollout batch size: 8
+2026-05-27 12:01:34 reward: 0.0 seconds
+2026-05-27 12:01:34 adv: 0.0 seconds
+2026-05-27 12:12:39 update_actor: 664.8 seconds
+2026-05-27 12:12:39 logging1: 0.0 seconds
+2026-05-27 12:12:39 logging2: 0.0 seconds
+2026-05-27 12:12:39 step:1 - timing/gen:273.776 - timing/verify:0.001 - timing/acc&trunc_filter:0.451 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.771 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 12:12:39 logging3: 0.0 seconds
+2026-05-27 12:17:46 gen: 307.4 seconds
+2026-05-27 12:17:46 verify: 0.0 seconds
+2026-05-27 12:17:46 before filtering: 8
+2026-05-27 12:17:46 Accuracy distribution: 0.00:1 0.75:1
+2026-05-27 12:17:47 Filtered batch size: 8 (from original size: 8)
+2026-05-27 12:17:47 after filtering: 8
+2026-05-27 12:17:47 acc&trunc_filter: 0.3 seconds
+2026-05-27 12:17:47 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 12:17:47 rollout batch size: 8
+2026-05-27 12:17:47 reward: 0.0 seconds
+2026-05-27 12:17:47 adv: 0.0 seconds
+2026-05-27 12:28:40 update_actor: 653.6 seconds
+2026-05-27 12:28:40 logging1: 0.0 seconds
+2026-05-27 12:28:40 logging2: 0.0 seconds
+2026-05-27 12:28:40 step:2 - timing/gen:307.422 - timing/verify:0.000 - timing/acc&trunc_filter:0.302 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.375 - format_score/all:1.000 - train_verify_score_wo_format/all:0.375 - timing/reward_model:0.000 - train_reward/verifier:0.375 - train_reward/reward_all:1.875 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:653.572 - actor/pg_loss:0.001 - actor/pg_clipfrac:0.028 - actor/ppo_kl:-0.003 - actor/grad_norm:1.490 - actor/lr(1e-4):0.100 - critic/score/mean:1.875 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:1.875 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.207 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.207 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-27 12:28:40 logging3: 0.1 seconds
+2026-05-27 12:33:14 gen: 273.3 seconds
+2026-05-27 12:33:14 verify: 0.0 seconds
+2026-05-27 12:33:14 before filtering: 8
+2026-05-27 12:33:14 Accuracy distribution: 1.00:2
+2026-05-27 12:33:14 Filtered batch size: 8 (from original size: 8)
+2026-05-27 12:33:14 after filtering: 8
+2026-05-27 12:33:14 acc&trunc_filter: 0.4 seconds
+2026-05-27 12:33:14 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 12:33:14 rollout batch size: 8
+2026-05-27 12:33:14 reward: 0.0 seconds
+2026-05-27 12:33:14 adv: 0.0 seconds
+2026-05-27 12:44:02 update_actor: 647.6 seconds
+2026-05-27 12:44:02 logging1: 0.0 seconds
+2026-05-27 12:44:02 logging2: 0.0 seconds
+2026-05-27 12:44:02 step:3 - timing/gen:273.308 - timing/verify:0.001 - timing/acc&trunc_filter:0.378 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:647.615 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 12:44:02 logging3: 0.0 seconds
+2026-05-27 12:48:35 gen: 273.3 seconds
+2026-05-27 12:48:35 verify: 0.0 seconds
+2026-05-27 12:48:35 before filtering: 8
+2026-05-27 12:48:35 Accuracy distribution: 1.00:2
+2026-05-27 12:48:35 Filtered batch size: 8 (from original size: 8)
+2026-05-27 12:48:35 after filtering: 8
+2026-05-27 12:48:35 acc&trunc_filter: 0.4 seconds
+2026-05-27 12:48:35 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 12:48:35 rollout batch size: 8
+2026-05-27 12:48:35 reward: 0.0 seconds
+2026-05-27 12:48:35 adv: 0.0 seconds
+2026-05-27 12:59:21 update_actor: 645.8 seconds
+2026-05-27 12:59:21 logging1: 0.0 seconds
+2026-05-27 12:59:21 logging2: 0.0 seconds
+2026-05-27 12:59:21 step:4 - timing/gen:273.342 - timing/verify:0.001 - timing/acc&trunc_filter:0.387 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:645.760 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 12:59:21 logging3: 0.0 seconds
+2026-05-27 13:03:54 gen: 273.1 seconds
+2026-05-27 13:03:54 verify: 0.0 seconds
+2026-05-27 13:03:54 before filtering: 8
+2026-05-27 13:03:54 Accuracy distribution: 1.00:2
+2026-05-27 13:03:55 Filtered batch size: 8 (from original size: 8)
+2026-05-27 13:03:55 after filtering: 8
+2026-05-27 13:03:55 acc&trunc_filter: 0.3 seconds
+2026-05-27 13:03:55 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 13:03:55 rollout batch size: 8
+2026-05-27 13:03:55 reward: 0.0 seconds
+2026-05-27 13:03:55 adv: 0.0 seconds
+2026-05-27 13:14:53 update_actor: 658.8 seconds
+2026-05-27 13:14:53 logging1: 0.0 seconds
+2026-05-27 13:14:53 logging2: 0.0 seconds
+2026-05-27 13:14:53 step:5 - timing/gen:273.112 - timing/verify:0.001 - timing/acc&trunc_filter:0.288 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:658.768 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 13:14:53 logging3: 0.0 seconds
+2026-05-27 13:19:28 gen: 274.5 seconds
+2026-05-27 13:19:28 verify: 0.0 seconds
+2026-05-27 13:19:28 before filtering: 8
+2026-05-27 13:19:28 Accuracy distribution: 1.00:2
+2026-05-27 13:19:28 Filtered batch size: 8 (from original size: 8)
+2026-05-27 13:19:28 after filtering: 8
+2026-05-27 13:19:28 acc&trunc_filter: 0.3 seconds
+2026-05-27 13:19:28 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 13:19:28 rollout batch size: 8
+2026-05-27 13:19:28 reward: 0.0 seconds
+2026-05-27 13:19:28 adv: 0.0 seconds
+2026-05-27 13:30:25 update_actor: 656.2 seconds
+2026-05-27 13:30:25 logging1: 0.0 seconds
+2026-05-27 13:30:25 logging2: 0.0 seconds
+2026-05-27 13:30:25 step:6 - timing/gen:274.535 - timing/verify:0.000 - timing/acc&trunc_filter:0.312 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:656.187 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 13:30:25 logging3: 0.0 seconds
+2026-05-27 13:34:57 gen: 272.6 seconds
+2026-05-27 13:34:57 verify: 0.0 seconds
+2026-05-27 13:34:57 before filtering: 8
+2026-05-27 13:34:57 Accuracy distribution: 1.00:2
+2026-05-27 13:34:58 Filtered batch size: 8 (from original size: 8)
+2026-05-27 13:34:58 after filtering: 8
+2026-05-27 13:34:58 acc&trunc_filter: 0.4 seconds
+2026-05-27 13:34:58 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 13:34:58 rollout batch size: 8
+2026-05-27 13:34:58 reward: 0.0 seconds
+2026-05-27 13:34:58 adv: 0.0 seconds
+2026-05-27 13:46:00 update_actor: 662.1 seconds
+2026-05-27 13:46:00 logging1: 0.0 seconds
+2026-05-27 13:46:00 logging2: 0.0 seconds
+2026-05-27 13:46:00 step:7 - timing/gen:272.648 - timing/verify:0.001 - timing/acc&trunc_filter:0.389 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:662.063 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.004 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 13:46:00 logging3: 0.0 seconds
+2026-05-27 13:50:33 gen: 273.6 seconds
+2026-05-27 13:50:33 verify: 0.0 seconds
+2026-05-27 13:50:33 before filtering: 8
+2026-05-27 13:50:33 Accuracy distribution: 1.00:2
+2026-05-27 13:50:34 Filtered batch size: 8 (from original size: 8)
+2026-05-27 13:50:34 after filtering: 8
+2026-05-27 13:50:34 acc&trunc_filter: 0.4 seconds
+2026-05-27 13:50:34 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 13:50:34 rollout batch size: 8
+2026-05-27 13:50:34 reward: 0.0 seconds
+2026-05-27 13:50:34 adv: 0.0 seconds
+2026-05-27 14:01:28 update_actor: 654.2 seconds
+2026-05-27 14:01:28 logging1: 0.0 seconds
+2026-05-27 14:01:28 logging2: 0.0 seconds
+2026-05-27 14:01:28 step:8 - timing/gen:273.618 - timing/verify:0.001 - timing/acc&trunc_filter:0.366 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:654.198 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 14:01:28 logging3: 0.1 seconds
+2026-05-27 14:06:01 gen: 273.1 seconds
+2026-05-27 14:06:01 verify: 0.0 seconds
+2026-05-27 14:06:01 before filtering: 8
+2026-05-27 14:06:01 Accuracy distribution: 1.00:2
+2026-05-27 14:06:01 Filtered batch size: 8 (from original size: 8)
+2026-05-27 14:06:01 after filtering: 8
+2026-05-27 14:06:01 acc&trunc_filter: 0.3 seconds
+2026-05-27 14:06:01 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 14:06:01 rollout batch size: 8
+2026-05-27 14:06:01 reward: 0.0 seconds
+2026-05-27 14:06:01 adv: 0.0 seconds
+2026-05-27 14:16:56 update_actor: 654.1 seconds
+2026-05-27 14:50:12 testing: 1996.2 seconds
+2026-05-27 14:50:12 step:9 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-27 14:50:12 logging1: 0.0 seconds
+2026-05-27 14:50:12 logging2: 0.0 seconds
+2026-05-27 14:50:12 step:9 - timing/gen:273.064 - timing/verify:0.001 - timing/acc&trunc_filter:0.299 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:654.116 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1996.205 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 14:50:12 logging3: 0.0 seconds
+2026-05-27 14:54:46 gen: 274.0 seconds
+2026-05-27 14:54:46 verify: 0.0 seconds
+2026-05-27 14:54:46 before filtering: 8
+2026-05-27 14:54:46 Accuracy distribution: 1.00:2
+2026-05-27 14:54:46 Filtered batch size: 8 (from original size: 8)
+2026-05-27 14:54:46 after filtering: 8
+2026-05-27 14:54:46 acc&trunc_filter: 0.4 seconds
+2026-05-27 14:54:46 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 14:54:46 rollout batch size: 8
+2026-05-27 14:54:46 reward: 0.0 seconds
+2026-05-27 14:54:46 adv: 0.0 seconds
+2026-05-27 15:05:35 update_actor: 648.6 seconds
+2026-05-27 15:05:35 logging1: 0.0 seconds
+2026-05-27 15:05:35 logging2: 0.0 seconds
+2026-05-27 15:05:35 step:10 - timing/gen:273.958 - timing/verify:0.001 - timing/acc&trunc_filter:0.409 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:648.551 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.004 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 15:05:35 logging3: 0.0 seconds
+2026-05-27 15:10:08 gen: 273.8 seconds
+2026-05-27 15:10:08 verify: 0.0 seconds
+2026-05-27 15:10:08 before filtering: 8
+2026-05-27 15:10:08 Accuracy distribution: 1.00:2
+2026-05-27 15:10:09 Filtered batch size: 8 (from original size: 8)
+2026-05-27 15:10:09 after filtering: 8
+2026-05-27 15:10:09 acc&trunc_filter: 0.3 seconds
+2026-05-27 15:10:09 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 15:10:09 rollout batch size: 8
+2026-05-27 15:10:09 reward: 0.0 seconds
+2026-05-27 15:10:09 adv: 0.0 seconds
+2026-05-27 15:21:01 update_actor: 652.2 seconds
+2026-05-27 15:21:01 logging1: 0.0 seconds
+2026-05-27 15:21:01 logging2: 0.0 seconds
+2026-05-27 15:21:01 step:11 - timing/gen:273.787 - timing/verify:0.001 - timing/acc&trunc_filter:0.292 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:652.229 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 15:21:01 logging3: 0.0 seconds
+2026-05-27 15:25:32 gen: 270.7 seconds
+2026-05-27 15:25:32 verify: 0.0 seconds
+2026-05-27 15:25:32 before filtering: 8
+2026-05-27 15:25:32 Accuracy distribution: 1.00:2
+2026-05-27 15:25:32 Filtered batch size: 8 (from original size: 8)
+2026-05-27 15:25:32 after filtering: 8
+2026-05-27 15:25:32 acc&trunc_filter: 0.4 seconds
+2026-05-27 15:25:32 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 15:25:32 rollout batch size: 8
+2026-05-27 15:25:32 reward: 0.0 seconds
+2026-05-27 15:25:32 adv: 0.0 seconds
+2026-05-27 15:36:29 update_actor: 656.5 seconds
+2026-05-27 15:36:29 logging1: 0.0 seconds
+2026-05-27 15:36:29 logging2: 0.0 seconds
+2026-05-27 15:36:29 step:12 - timing/gen:270.685 - timing/verify:0.001 - timing/acc&trunc_filter:0.362 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:656.530 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 15:36:29 logging3: 0.0 seconds
+2026-05-27 15:41:25 gen: 296.0 seconds
+2026-05-27 15:41:25 verify: 0.0 seconds
+2026-05-27 15:41:25 before filtering: 8
+2026-05-27 15:41:25 Accuracy distribution: 0.25:1 1.00:1
+2026-05-27 15:41:25 Filtered batch size: 8 (from original size: 8)
+2026-05-27 15:41:25 after filtering: 8
+2026-05-27 15:41:25 acc&trunc_filter: 0.4 seconds
+2026-05-27 15:41:25 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 15:41:25 rollout batch size: 8
+2026-05-27 15:41:25 reward: 0.0 seconds
+2026-05-27 15:41:25 adv: 0.0 seconds
+2026-05-27 15:52:27 update_actor: 661.5 seconds
+2026-05-27 15:52:27 logging1: 0.0 seconds
+2026-05-27 15:52:27 logging2: 0.0 seconds
+2026-05-27 15:52:27 step:13 - timing/gen:295.960 - timing/verify:0.001 - timing/acc&trunc_filter:0.380 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.625 - format_score/all:1.000 - train_verify_score_wo_format/all:0.625 - timing/reward_model:0.000 - train_reward/verifier:0.625 - train_reward/reward_all:3.125 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:661.517 - actor/pg_loss:0.002 - actor/pg_clipfrac:0.038 - actor/ppo_kl:-0.001 - actor/grad_norm:1.901 - actor/lr(1e-4):0.100 - critic/score/mean:3.125 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.125 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.298 - critic/advantages/max:1.500 - critic/advantages/min:-0.500 - critic/returns/mean:-0.298 - critic/returns/max:1.500 - critic/returns/min:-0.500
+2026-05-27 15:52:27 logging3: 0.0 seconds
+2026-05-27 15:56:58 gen: 271.3 seconds
+2026-05-27 15:56:58 verify: 0.0 seconds
+2026-05-27 15:56:58 before filtering: 8
+2026-05-27 15:56:58 Accuracy distribution: 1.00:2
+2026-05-27 15:56:58 Filtered batch size: 8 (from original size: 8)
+2026-05-27 15:56:58 after filtering: 8
+2026-05-27 15:56:58 acc&trunc_filter: 0.5 seconds
+2026-05-27 15:56:58 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 15:56:58 rollout batch size: 8
+2026-05-27 15:56:58 reward: 0.0 seconds
+2026-05-27 15:56:58 adv: 0.0 seconds
+2026-05-27 16:07:51 update_actor: 652.5 seconds
+2026-05-27 16:07:51 logging1: 0.0 seconds
+2026-05-27 16:07:51 logging2: 0.0 seconds
+2026-05-27 16:07:51 step:14 - timing/gen:271.340 - timing/verify:0.001 - timing/acc&trunc_filter:0.523 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.493 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 16:07:51 logging3: 0.0 seconds
+2026-05-27 16:12:24 gen: 273.3 seconds
+2026-05-27 16:12:24 verify: 0.0 seconds
+2026-05-27 16:12:24 before filtering: 8
+2026-05-27 16:12:24 Accuracy distribution: 1.00:2
+2026-05-27 16:12:25 Filtered batch size: 8 (from original size: 8)
+2026-05-27 16:12:25 after filtering: 8
+2026-05-27 16:12:25 acc&trunc_filter: 0.3 seconds
+2026-05-27 16:12:25 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 16:12:25 rollout batch size: 8
+2026-05-27 16:12:25 reward: 0.0 seconds
+2026-05-27 16:12:25 adv: 0.0 seconds
+2026-05-27 16:23:12 update_actor: 647.0 seconds
+2026-05-27 16:23:12 logging1: 0.0 seconds
+2026-05-27 16:23:12 logging2: 0.0 seconds
+2026-05-27 16:23:12 step:15 - timing/gen:273.343 - timing/verify:0.001 - timing/acc&trunc_filter:0.297 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:647.010 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 16:23:12 logging3: 0.0 seconds
+2026-05-27 16:27:46 gen: 274.3 seconds
+2026-05-27 16:27:46 verify: 0.0 seconds
+2026-05-27 16:27:46 before filtering: 8
+2026-05-27 16:27:46 Accuracy distribution: 1.00:2
+2026-05-27 16:27:46 Filtered batch size: 8 (from original size: 8)
+2026-05-27 16:27:46 after filtering: 8
+2026-05-27 16:27:46 acc&trunc_filter: 0.4 seconds
+2026-05-27 16:27:46 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 16:27:46 rollout batch size: 8
+2026-05-27 16:27:46 reward: 0.0 seconds
+2026-05-27 16:27:46 adv: 0.0 seconds
+2026-05-27 16:38:54 update_actor: 667.7 seconds
+2026-05-27 16:38:54 logging1: 0.0 seconds
+2026-05-27 16:38:54 logging2: 0.0 seconds
+2026-05-27 16:38:54 step:16 - timing/gen:274.313 - timing/verify:0.001 - timing/acc&trunc_filter:0.389 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:667.682 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 16:38:54 logging3: 0.0 seconds
+2026-05-27 16:43:26 gen: 271.8 seconds
+2026-05-27 16:43:26 verify: 0.0 seconds
+2026-05-27 16:43:26 before filtering: 8
+2026-05-27 16:43:26 Accuracy distribution: 1.00:2
+2026-05-27 16:43:26 Filtered batch size: 8 (from original size: 8)
+2026-05-27 16:43:26 after filtering: 8
+2026-05-27 16:43:26 acc&trunc_filter: 0.3 seconds
+2026-05-27 16:43:26 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 16:43:26 rollout batch size: 8
+2026-05-27 16:43:26 reward: 0.0 seconds
+2026-05-27 16:43:26 adv: 0.0 seconds
+2026-05-27 16:54:27 update_actor: 661.0 seconds
+2026-05-27 16:54:27 logging1: 0.0 seconds
+2026-05-27 16:54:27 logging2: 0.0 seconds
+2026-05-27 16:54:27 step:17 - timing/gen:271.813 - timing/verify:0.002 - timing/acc&trunc_filter:0.283 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:660.985 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 16:54:27 logging3: 0.1 seconds
+2026-05-27 16:59:04 gen: 276.3 seconds
+2026-05-27 16:59:04 verify: 0.0 seconds
+2026-05-27 16:59:04 before filtering: 8
+2026-05-27 16:59:04 Accuracy distribution: 1.00:2
+2026-05-27 16:59:04 Filtered batch size: 8 (from original size: 8)
+2026-05-27 16:59:04 after filtering: 8
+2026-05-27 16:59:04 acc&trunc_filter: 0.3 seconds
+2026-05-27 16:59:04 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 16:59:04 rollout batch size: 8
+2026-05-27 16:59:04 reward: 0.0 seconds
+2026-05-27 16:59:04 adv: 0.0 seconds
+2026-05-27 17:09:52 update_actor: 648.4 seconds
+2026-05-27 17:09:52 logging1: 0.0 seconds
+2026-05-27 17:09:52 logging2: 0.0 seconds
+2026-05-27 17:09:52 step:18 - timing/gen:276.282 - timing/verify:0.001 - timing/acc&trunc_filter:0.290 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:648.405 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 17:09:52 logging3: 0.0 seconds
+2026-05-27 17:14:37 gen: 284.3 seconds
+2026-05-27 17:14:37 verify: 0.0 seconds
+2026-05-27 17:14:37 before filtering: 8
+2026-05-27 17:14:37 Accuracy distribution: 0.75:2
+2026-05-27 17:14:37 Filtered batch size: 8 (from original size: 8)
+2026-05-27 17:14:37 after filtering: 8
+2026-05-27 17:14:37 acc&trunc_filter: 0.4 seconds
+2026-05-27 17:14:37 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 17:14:37 rollout batch size: 8
+2026-05-27 17:14:37 reward: 0.0 seconds
+2026-05-27 17:14:37 adv: 0.0 seconds
+2026-05-27 17:25:40 update_actor: 663.0 seconds
+2026-05-27 17:58:57 testing: 1997.0 seconds
+2026-05-27 17:58:57 step:19 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-27 17:58:57 logging1: 0.0 seconds
+2026-05-27 17:58:57 logging2: 0.0 seconds
+2026-05-27 17:58:57 step:19 - timing/gen:284.295 - timing/verify:0.001 - timing/acc&trunc_filter:0.390 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.750 - format_score/all:1.000 - train_verify_score_wo_format/all:0.750 - timing/reward_model:0.000 - train_reward/verifier:0.750 - train_reward/reward_all:3.750 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:663.003 - actor/pg_loss:0.002 - actor/pg_clipfrac:0.025 - actor/ppo_kl:-0.002 - actor/grad_norm:1.808 - actor/lr(1e-4):0.100 - timing/testing:1996.965 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:3.750 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.750 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.625 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.625 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-27 17:58:57 logging3: 0.0 seconds
+2026-05-27 17:58:57 epoch:  1
+2026-05-27 18:03:45 gen: 288.1 seconds
+2026-05-27 18:03:45 verify: 0.0 seconds
+2026-05-27 18:03:45 before filtering: 8
+2026-05-27 18:03:45 Accuracy distribution: 0.50:1 1.00:1
+2026-05-27 18:03:45 Filtered batch size: 8 (from original size: 8)
+2026-05-27 18:03:45 after filtering: 8
+2026-05-27 18:03:45 acc&trunc_filter: 0.2 seconds
+2026-05-27 18:03:45 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 18:03:45 rollout batch size: 8
+2026-05-27 18:03:45 reward: 0.0 seconds
+2026-05-27 18:03:45 adv: 0.0 seconds
+2026-05-27 18:14:49 update_actor: 663.9 seconds
+2026-05-27 18:14:49 logging1: 0.0 seconds
+2026-05-27 18:14:49 logging2: 0.0 seconds
+2026-05-27 18:14:49 step:20 - timing/gen:288.117 - timing/verify:0.001 - timing/acc&trunc_filter:0.248 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.750 - format_score/all:1.000 - train_verify_score_wo_format/all:0.750 - timing/reward_model:0.000 - train_reward/verifier:0.750 - train_reward/reward_all:3.750 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:663.853 - actor/pg_loss:0.003 - actor/pg_clipfrac:0.030 - actor/ppo_kl:0.001 - actor/grad_norm:1.793 - actor/lr(1e-4):0.100 - critic/score/mean:3.750 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.750 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.392 - critic/advantages/max:0.866 - critic/advantages/min:-0.866 - critic/returns/mean:-0.392 - critic/returns/max:0.866 - critic/returns/min:-0.866
+2026-05-27 18:14:49 logging3: 0.0 seconds
+2026-05-27 18:19:22 gen: 272.5 seconds
+2026-05-27 18:19:22 verify: 0.0 seconds
+2026-05-27 18:19:22 before filtering: 8
+2026-05-27 18:19:22 Accuracy distribution: 1.00:2
+2026-05-27 18:19:22 Filtered batch size: 8 (from original size: 8)
+2026-05-27 18:19:22 after filtering: 8
+2026-05-27 18:19:22 acc&trunc_filter: 0.3 seconds
+2026-05-27 18:19:22 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 18:19:22 rollout batch size: 8
+2026-05-27 18:19:22 reward: 0.0 seconds
+2026-05-27 18:19:22 adv: 0.0 seconds
+2026-05-27 18:30:20 update_actor: 657.5 seconds
+2026-05-27 18:30:20 logging1: 0.0 seconds
+2026-05-27 18:30:20 logging2: 0.0 seconds
+2026-05-27 18:30:20 step:21 - timing/gen:272.455 - timing/verify:0.001 - timing/acc&trunc_filter:0.281 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:657.494 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.005 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 18:30:20 logging3: 0.0 seconds
+2026-05-27 18:34:59 gen: 279.3 seconds
+2026-05-27 18:34:59 verify: 0.0 seconds
+2026-05-27 18:34:59 before filtering: 8
+2026-05-27 18:34:59 Accuracy distribution: 0.75:1 1.00:1
+2026-05-27 18:34:59 Filtered batch size: 8 (from original size: 8)
+2026-05-27 18:34:59 after filtering: 8
+2026-05-27 18:34:59 acc&trunc_filter: 0.3 seconds
+2026-05-27 18:34:59 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 18:34:59 rollout batch size: 8
+2026-05-27 18:34:59 reward: 0.0 seconds
+2026-05-27 18:34:59 adv: 0.0 seconds
+2026-05-27 18:45:49 update_actor: 650.0 seconds
+2026-05-27 18:45:49 logging1: 0.0 seconds
+2026-05-27 18:45:49 logging2: 0.0 seconds
+2026-05-27 18:45:49 step:22 - timing/gen:279.291 - timing/verify:0.001 - timing/acc&trunc_filter:0.318 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:649.982 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:1.537 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.497 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.497 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-27 18:45:49 logging3: 0.0 seconds
+2026-05-27 18:50:22 gen: 273.2 seconds
+2026-05-27 18:50:22 verify: 0.0 seconds
+2026-05-27 18:50:22 before filtering: 8
+2026-05-27 18:50:22 Accuracy distribution: 1.00:2
+2026-05-27 18:50:23 Filtered batch size: 8 (from original size: 8)
+2026-05-27 18:50:23 after filtering: 8
+2026-05-27 18:50:23 acc&trunc_filter: 0.5 seconds
+2026-05-27 18:50:23 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 18:50:23 rollout batch size: 8
+2026-05-27 18:50:23 reward: 0.0 seconds
+2026-05-27 18:50:23 adv: 0.0 seconds
+2026-05-27 19:01:28 update_actor: 665.0 seconds
+2026-05-27 19:01:28 logging1: 0.0 seconds
+2026-05-27 19:01:28 logging2: 0.0 seconds
+2026-05-27 19:01:28 step:23 - timing/gen:273.187 - timing/verify:0.001 - timing/acc&trunc_filter:0.519 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.982 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 19:01:28 logging3: 0.0 seconds
+2026-05-27 19:06:00 gen: 272.2 seconds
+2026-05-27 19:06:00 verify: 0.0 seconds
+2026-05-27 19:06:00 before filtering: 8
+2026-05-27 19:06:00 Accuracy distribution: 1.00:2
+2026-05-27 19:06:01 Filtered batch size: 8 (from original size: 8)
+2026-05-27 19:06:01 after filtering: 8
+2026-05-27 19:06:01 acc&trunc_filter: 0.4 seconds
+2026-05-27 19:06:01 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 19:06:01 rollout batch size: 8
+2026-05-27 19:06:01 reward: 0.0 seconds
+2026-05-27 19:06:01 adv: 0.0 seconds
+2026-05-27 19:17:02 update_actor: 661.5 seconds
+2026-05-27 19:17:02 logging1: 0.0 seconds
+2026-05-27 19:17:02 logging2: 0.0 seconds
+2026-05-27 19:17:02 step:24 - timing/gen:272.177 - timing/verify:0.000 - timing/acc&trunc_filter:0.358 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:661.511 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 19:17:02 logging3: 0.0 seconds
+2026-05-27 19:21:38 gen: 276.2 seconds
+2026-05-27 19:21:38 verify: 0.0 seconds
+2026-05-27 19:21:38 before filtering: 8
+2026-05-27 19:21:38 Accuracy distribution: 1.00:2
+2026-05-27 19:21:39 Filtered batch size: 8 (from original size: 8)
+2026-05-27 19:21:39 after filtering: 8
+2026-05-27 19:21:39 acc&trunc_filter: 0.2 seconds
+2026-05-27 19:21:39 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 19:21:39 rollout batch size: 8
+2026-05-27 19:21:39 reward: 0.0 seconds
+2026-05-27 19:21:39 adv: 0.0 seconds
+2026-05-27 19:32:23 update_actor: 644.6 seconds
+2026-05-27 19:32:23 logging1: 0.0 seconds
+2026-05-27 19:32:23 logging2: 0.0 seconds
+2026-05-27 19:32:23 step:25 - timing/gen:276.238 - timing/verify:0.000 - timing/acc&trunc_filter:0.243 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:644.576 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 19:32:23 logging3: 0.0 seconds
+2026-05-27 19:36:54 gen: 270.6 seconds
+2026-05-27 19:36:54 verify: 0.0 seconds
+2026-05-27 19:36:54 before filtering: 8
+2026-05-27 19:36:54 Accuracy distribution: 1.00:2
+2026-05-27 19:36:54 Filtered batch size: 8 (from original size: 8)
+2026-05-27 19:36:54 after filtering: 8
+2026-05-27 19:36:54 acc&trunc_filter: 0.3 seconds
+2026-05-27 19:36:54 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 19:36:54 rollout batch size: 8
+2026-05-27 19:36:54 reward: 0.0 seconds
+2026-05-27 19:36:54 adv: 0.0 seconds
+2026-05-27 19:47:51 update_actor: 657.1 seconds
+2026-05-27 19:47:51 logging1: 0.0 seconds
+2026-05-27 19:47:51 logging2: 0.0 seconds
+2026-05-27 19:47:51 step:26 - timing/gen:270.604 - timing/verify:0.001 - timing/acc&trunc_filter:0.341 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:657.091 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 19:47:51 logging3: 0.0 seconds
+2026-05-27 19:52:22 gen: 270.4 seconds
+2026-05-27 19:52:22 verify: 0.0 seconds
+2026-05-27 19:52:22 before filtering: 8
+2026-05-27 19:52:22 Accuracy distribution: 1.00:2
+2026-05-27 19:52:22 Filtered batch size: 8 (from original size: 8)
+2026-05-27 19:52:22 after filtering: 8
+2026-05-27 19:52:22 acc&trunc_filter: 0.4 seconds
+2026-05-27 19:52:22 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 19:52:22 rollout batch size: 8
+2026-05-27 19:52:22 reward: 0.0 seconds
+2026-05-27 19:52:22 adv: 0.0 seconds
+2026-05-27 20:03:17 update_actor: 655.4 seconds
+2026-05-27 20:03:18 logging1: 0.0 seconds
+2026-05-27 20:03:18 logging2: 0.0 seconds
+2026-05-27 20:03:18 step:27 - timing/gen:270.359 - timing/verify:0.000 - timing/acc&trunc_filter:0.373 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:655.450 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 20:03:18 logging3: 0.1 seconds
+2026-05-27 20:07:51 gen: 273.7 seconds
+2026-05-27 20:07:51 verify: 0.0 seconds
+2026-05-27 20:07:51 before filtering: 8
+2026-05-27 20:07:51 Accuracy distribution: 1.00:2
+2026-05-27 20:07:52 Filtered batch size: 8 (from original size: 8)
+2026-05-27 20:07:52 after filtering: 8
+2026-05-27 20:07:52 acc&trunc_filter: 0.4 seconds
+2026-05-27 20:07:52 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 20:07:52 rollout batch size: 8
+2026-05-27 20:07:52 reward: 0.0 seconds
+2026-05-27 20:07:52 adv: 0.0 seconds
+2026-05-27 20:19:04 update_actor: 672.4 seconds
+2026-05-27 20:19:04 logging1: 0.0 seconds
+2026-05-27 20:19:04 logging2: 0.0 seconds
+2026-05-27 20:19:04 step:28 - timing/gen:273.719 - timing/verify:0.001 - timing/acc&trunc_filter:0.379 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:672.394 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 20:19:04 logging3: 0.0 seconds
+2026-05-27 20:23:35 gen: 270.7 seconds
+2026-05-27 20:23:35 verify: 0.0 seconds
+2026-05-27 20:23:35 before filtering: 8
+2026-05-27 20:23:35 Accuracy distribution: 1.00:2
+2026-05-27 20:23:35 Filtered batch size: 8 (from original size: 8)
+2026-05-27 20:23:35 after filtering: 8
+2026-05-27 20:23:35 acc&trunc_filter: 0.4 seconds
+2026-05-27 20:23:35 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 20:23:35 rollout batch size: 8
+2026-05-27 20:23:35 reward: 0.0 seconds
+2026-05-27 20:23:35 adv: 0.0 seconds
+2026-05-27 20:34:27 update_actor: 651.8 seconds
+2026-05-27 21:07:46 testing: 1998.8 seconds
+2026-05-27 21:07:46 step:29 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-27 21:07:46 logging1: 0.0 seconds
+2026-05-27 21:07:46 logging2: 0.0 seconds
+2026-05-27 21:07:46 step:29 - timing/gen:270.732 - timing/verify:0.001 - timing/acc&trunc_filter:0.388 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:651.776 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1998.845 - val/test_score/libero_spatial:0.917 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.500 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.917 - val/test_score/all_std:0.276 - val/test_score/all_ci95_halfwidth:0.070 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 21:07:46 logging3: 0.0 seconds
+2026-05-27 21:12:20 gen: 273.7 seconds
+2026-05-27 21:12:20 verify: 0.0 seconds
+2026-05-27 21:12:20 before filtering: 8
+2026-05-27 21:12:20 Accuracy distribution: 1.00:2
+2026-05-27 21:12:20 Filtered batch size: 8 (from original size: 8)
+2026-05-27 21:12:20 after filtering: 8
+2026-05-27 21:12:20 acc&trunc_filter: 0.4 seconds
+2026-05-27 21:12:20 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 21:12:20 rollout batch size: 8
+2026-05-27 21:12:20 reward: 0.0 seconds
+2026-05-27 21:12:20 adv: 0.0 seconds
+2026-05-27 21:23:12 update_actor: 652.4 seconds
+2026-05-27 21:23:12 logging1: 0.0 seconds
+2026-05-27 21:23:12 logging2: 0.0 seconds
+2026-05-27 21:23:12 step:30 - timing/gen:273.701 - timing/verify:0.001 - timing/acc&trunc_filter:0.382 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.447 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.004 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 21:23:12 logging3: 0.0 seconds
+2026-05-27 21:28:08 gen: 296.0 seconds
+2026-05-27 21:28:08 verify: 0.0 seconds
+2026-05-27 21:28:08 before filtering: 8
+2026-05-27 21:28:08 Accuracy distribution: 0.25:1 1.00:1
+2026-05-27 21:28:09 Filtered batch size: 8 (from original size: 8)
+2026-05-27 21:28:09 after filtering: 8
+2026-05-27 21:28:09 acc&trunc_filter: 0.4 seconds
+2026-05-27 21:28:09 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 21:28:09 rollout batch size: 8
+2026-05-27 21:28:09 reward: 0.0 seconds
+2026-05-27 21:28:09 adv: 0.0 seconds
+2026-05-27 21:39:02 update_actor: 652.7 seconds
+2026-05-27 21:39:02 logging1: 0.0 seconds
+2026-05-27 21:39:02 logging2: 0.0 seconds
+2026-05-27 21:39:02 step:31 - timing/gen:295.963 - timing/verify:0.001 - timing/acc&trunc_filter:0.397 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.625 - format_score/all:1.000 - train_verify_score_wo_format/all:0.625 - timing/reward_model:0.000 - train_reward/verifier:0.625 - train_reward/reward_all:3.125 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.699 - actor/pg_loss:0.005 - actor/pg_clipfrac:0.037 - actor/ppo_kl:0.001 - actor/grad_norm:1.884 - actor/lr(1e-4):0.100 - critic/score/mean:3.125 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.125 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.314 - critic/advantages/max:1.500 - critic/advantages/min:-0.500 - critic/returns/mean:-0.314 - critic/returns/max:1.500 - critic/returns/min:-0.500
+2026-05-27 21:39:02 logging3: 0.0 seconds
+2026-05-27 21:43:37 gen: 275.0 seconds
+2026-05-27 21:43:37 verify: 0.0 seconds
+2026-05-27 21:43:37 before filtering: 8
+2026-05-27 21:43:37 Accuracy distribution: 1.00:2
+2026-05-27 21:43:37 Filtered batch size: 8 (from original size: 8)
+2026-05-27 21:43:37 after filtering: 8
+2026-05-27 21:43:37 acc&trunc_filter: 0.4 seconds
+2026-05-27 21:43:37 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 21:43:37 rollout batch size: 8
+2026-05-27 21:43:37 reward: 0.0 seconds
+2026-05-27 21:43:37 adv: 0.0 seconds
+2026-05-27 21:54:28 update_actor: 650.7 seconds
+2026-05-27 21:54:28 logging1: 0.0 seconds
+2026-05-27 21:54:28 logging2: 0.0 seconds
+2026-05-27 21:54:28 step:32 - timing/gen:275.022 - timing/verify:0.001 - timing/acc&trunc_filter:0.381 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:650.678 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 21:54:28 logging3: 0.0 seconds
+2026-05-27 21:59:33 gen: 304.9 seconds
+2026-05-27 21:59:33 verify: 0.0 seconds
+2026-05-27 21:59:33 before filtering: 8
+2026-05-27 21:59:33 Accuracy distribution: 0.00:1 1.00:1
+2026-05-27 21:59:33 Filtered batch size: 8 (from original size: 8)
+2026-05-27 21:59:33 after filtering: 8
+2026-05-27 21:59:33 acc&trunc_filter: 0.4 seconds
+2026-05-27 21:59:33 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 21:59:33 rollout batch size: 8
+2026-05-27 21:59:33 reward: 0.0 seconds
+2026-05-27 21:59:33 adv: 0.0 seconds
+2026-05-27 22:10:39 update_actor: 665.8 seconds
+2026-05-27 22:10:39 logging1: 0.0 seconds
+2026-05-27 22:10:39 logging2: 0.0 seconds
+2026-05-27 22:10:39 step:33 - timing/gen:304.906 - timing/verify:0.000 - timing/acc&trunc_filter:0.389 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.500 - format_score/all:1.000 - train_verify_score_wo_format/all:0.500 - timing/reward_model:0.000 - train_reward/verifier:0.500 - train_reward/reward_all:2.500 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:665.785 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:2.500 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:2.500 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 22:10:39 logging3: 0.0 seconds
+2026-05-27 22:15:12 gen: 273.0 seconds
+2026-05-27 22:15:12 verify: 0.0 seconds
+2026-05-27 22:15:12 before filtering: 8
+2026-05-27 22:15:12 Accuracy distribution: 1.00:2
+2026-05-27 22:15:12 Filtered batch size: 8 (from original size: 8)
+2026-05-27 22:15:12 after filtering: 8
+2026-05-27 22:15:12 acc&trunc_filter: 0.3 seconds
+2026-05-27 22:15:12 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 22:15:12 rollout batch size: 8
+2026-05-27 22:15:12 reward: 0.0 seconds
+2026-05-27 22:15:12 adv: 0.0 seconds
+2026-05-27 22:26:14 update_actor: 662.0 seconds
+2026-05-27 22:26:14 logging1: 0.0 seconds
+2026-05-27 22:26:14 logging2: 0.0 seconds
+2026-05-27 22:26:14 step:34 - timing/gen:273.002 - timing/verify:0.000 - timing/acc&trunc_filter:0.281 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:662.023 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 22:26:14 logging3: 0.0 seconds
+2026-05-27 22:30:57 gen: 283.0 seconds
+2026-05-27 22:30:57 verify: 0.0 seconds
+2026-05-27 22:30:57 before filtering: 8
+2026-05-27 22:30:57 Accuracy distribution: 0.75:1 1.00:1
+2026-05-27 22:30:58 Filtered batch size: 8 (from original size: 8)
+2026-05-27 22:30:58 after filtering: 8
+2026-05-27 22:30:58 acc&trunc_filter: 0.4 seconds
+2026-05-27 22:30:58 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 22:30:58 rollout batch size: 8
+2026-05-27 22:30:58 reward: 0.0 seconds
+2026-05-27 22:30:58 adv: 0.0 seconds
+2026-05-27 22:41:46 update_actor: 648.8 seconds
+2026-05-27 22:41:46 logging1: 0.0 seconds
+2026-05-27 22:41:46 logging2: 0.0 seconds
+2026-05-27 22:41:46 step:35 - timing/gen:283.002 - timing/verify:0.001 - timing/acc&trunc_filter:0.383 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:648.815 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:1.187 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.426 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.426 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-27 22:41:46 logging3: 0.0 seconds
+2026-05-27 22:46:23 gen: 276.6 seconds
+2026-05-27 22:46:23 verify: 0.0 seconds
+2026-05-27 22:46:23 before filtering: 8
+2026-05-27 22:46:23 Accuracy distribution: 1.00:2
+2026-05-27 22:46:23 Filtered batch size: 8 (from original size: 8)
+2026-05-27 22:46:23 after filtering: 8
+2026-05-27 22:46:23 acc&trunc_filter: 0.3 seconds
+2026-05-27 22:46:23 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 22:46:23 rollout batch size: 8
+2026-05-27 22:46:23 reward: 0.0 seconds
+2026-05-27 22:46:23 adv: 0.0 seconds
+2026-05-27 22:57:13 update_actor: 649.4 seconds
+2026-05-27 22:57:13 logging1: 0.0 seconds
+2026-05-27 22:57:13 logging2: 0.0 seconds
+2026-05-27 22:57:13 step:36 - timing/gen:276.594 - timing/verify:0.001 - timing/acc&trunc_filter:0.323 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:649.416 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 22:57:13 logging3: 0.1 seconds
+2026-05-27 23:01:47 gen: 274.4 seconds
+2026-05-27 23:01:47 verify: 0.0 seconds
+2026-05-27 23:01:47 before filtering: 8
+2026-05-27 23:01:47 Accuracy distribution: 1.00:2
+2026-05-27 23:01:48 Filtered batch size: 8 (from original size: 8)
+2026-05-27 23:01:48 after filtering: 8
+2026-05-27 23:01:48 acc&trunc_filter: 0.2 seconds
+2026-05-27 23:01:48 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 23:01:48 rollout batch size: 8
+2026-05-27 23:01:48 reward: 0.0 seconds
+2026-05-27 23:01:48 adv: 0.0 seconds
+2026-05-27 23:12:34 update_actor: 646.1 seconds
+2026-05-27 23:12:34 logging1: 0.0 seconds
+2026-05-27 23:12:34 logging2: 0.0 seconds
+2026-05-27 23:12:34 step:37 - timing/gen:274.439 - timing/verify:0.001 - timing/acc&trunc_filter:0.246 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:646.136 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 23:12:34 logging3: 0.0 seconds
+2026-05-27 23:17:09 gen: 275.0 seconds
+2026-05-27 23:17:09 verify: 0.0 seconds
+2026-05-27 23:17:09 before filtering: 8
+2026-05-27 23:17:09 Accuracy distribution: 1.00:2
+2026-05-27 23:17:09 Filtered batch size: 8 (from original size: 8)
+2026-05-27 23:17:09 after filtering: 8
+2026-05-27 23:17:09 acc&trunc_filter: 0.4 seconds
+2026-05-27 23:17:09 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 23:17:09 rollout batch size: 8
+2026-05-27 23:17:09 reward: 0.0 seconds
+2026-05-27 23:17:09 adv: 0.0 seconds
+2026-05-27 23:28:12 update_actor: 663.0 seconds
+2026-05-27 23:28:12 logging1: 0.0 seconds
+2026-05-27 23:28:12 logging2: 0.0 seconds
+2026-05-27 23:28:12 step:38 - timing/gen:275.035 - timing/verify:0.001 - timing/acc&trunc_filter:0.382 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:663.034 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-27 23:28:12 logging3: 0.0 seconds
+2026-05-27 23:32:47 gen: 274.3 seconds
+2026-05-27 23:32:47 verify: 0.0 seconds
+2026-05-27 23:32:47 before filtering: 8
+2026-05-27 23:32:47 Accuracy distribution: 1.00:2
+2026-05-27 23:32:47 Filtered batch size: 8 (from original size: 8)
+2026-05-27 23:32:47 after filtering: 8
+2026-05-27 23:32:47 acc&trunc_filter: 0.3 seconds
+2026-05-27 23:32:47 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-27 23:32:47 rollout batch size: 8
+2026-05-27 23:32:47 reward: 0.0 seconds
+2026-05-27 23:32:47 adv: 0.0 seconds
+2026-05-27 23:43:44 update_actor: 657.3 seconds
+2026-05-28 00:16:54 testing: 1990.0 seconds
+2026-05-28 00:16:54 step:39 - val/test_score/libero_spatial:0.933 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.933 - val/test_score/all_std:0.249 - val/test_score/all_ci95_halfwidth:0.063 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-28 00:16:54 logging1: 0.0 seconds
+2026-05-28 00:16:54 logging2: 0.0 seconds
+2026-05-28 00:16:54 step:39 - timing/gen:274.336 - timing/verify:0.001 - timing/acc&trunc_filter:0.305 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:657.296 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1990.011 - val/test_score/libero_spatial:0.933 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:0.750 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.933 - val/test_score/all_std:0.249 - val/test_score/all_ci95_halfwidth:0.063 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 00:16:54 logging3: 0.0 seconds
+2026-05-28 00:16:54 epoch:  2
+2026-05-28 00:21:28 gen: 274.1 seconds
+2026-05-28 00:21:28 verify: 0.0 seconds
+2026-05-28 00:21:28 before filtering: 8
+2026-05-28 00:21:28 Accuracy distribution: 1.00:2
+2026-05-28 00:21:29 Filtered batch size: 8 (from original size: 8)
+2026-05-28 00:21:29 after filtering: 8
+2026-05-28 00:21:29 acc&trunc_filter: 0.4 seconds
+2026-05-28 00:21:29 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 00:21:29 rollout batch size: 8
+2026-05-28 00:21:29 reward: 0.0 seconds
+2026-05-28 00:21:29 adv: 0.0 seconds
+2026-05-28 00:32:28 update_actor: 658.7 seconds
+2026-05-28 00:32:28 logging1: 0.0 seconds
+2026-05-28 00:32:28 logging2: 0.0 seconds
+2026-05-28 00:32:28 step:40 - timing/gen:274.115 - timing/verify:0.001 - timing/acc&trunc_filter:0.405 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:658.694 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 00:32:28 logging3: 0.0 seconds
+2026-05-28 00:37:02 gen: 274.5 seconds
+2026-05-28 00:37:02 verify: 0.0 seconds
+2026-05-28 00:37:02 before filtering: 8
+2026-05-28 00:37:02 Accuracy distribution: 1.00:2
+2026-05-28 00:37:02 Filtered batch size: 8 (from original size: 8)
+2026-05-28 00:37:02 after filtering: 8
+2026-05-28 00:37:02 acc&trunc_filter: 0.3 seconds
+2026-05-28 00:37:02 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 00:37:02 rollout batch size: 8
+2026-05-28 00:37:02 reward: 0.0 seconds
+2026-05-28 00:37:02 adv: 0.0 seconds
+2026-05-28 00:48:07 update_actor: 664.3 seconds
+2026-05-28 00:48:07 logging1: 0.0 seconds
+2026-05-28 00:48:07 logging2: 0.0 seconds
+2026-05-28 00:48:07 step:41 - timing/gen:274.532 - timing/verify:0.001 - timing/acc&trunc_filter:0.322 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.304 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 00:48:07 logging3: 0.0 seconds
+2026-05-28 00:52:38 gen: 271.3 seconds
+2026-05-28 00:52:38 verify: 0.0 seconds
+2026-05-28 00:52:38 before filtering: 8
+2026-05-28 00:52:38 Accuracy distribution: 1.00:2
+2026-05-28 00:52:38 Filtered batch size: 8 (from original size: 8)
+2026-05-28 00:52:38 after filtering: 8
+2026-05-28 00:52:38 acc&trunc_filter: 0.4 seconds
+2026-05-28 00:52:38 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 00:52:38 rollout batch size: 8
+2026-05-28 00:52:38 reward: 0.0 seconds
+2026-05-28 00:52:38 adv: 0.0 seconds
+2026-05-28 01:03:40 update_actor: 661.5 seconds
+2026-05-28 01:03:40 logging1: 0.0 seconds
+2026-05-28 01:03:40 logging2: 0.0 seconds
+2026-05-28 01:03:40 step:42 - timing/gen:271.285 - timing/verify:0.001 - timing/acc&trunc_filter:0.371 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:661.500 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 01:03:40 logging3: 0.0 seconds
+2026-05-28 01:08:13 gen: 273.4 seconds
+2026-05-28 01:08:13 verify: 0.0 seconds
+2026-05-28 01:08:13 before filtering: 8
+2026-05-28 01:08:13 Accuracy distribution: 1.00:2
+2026-05-28 01:08:14 Filtered batch size: 8 (from original size: 8)
+2026-05-28 01:08:14 after filtering: 8
+2026-05-28 01:08:14 acc&trunc_filter: 0.4 seconds
+2026-05-28 01:08:14 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 01:08:14 rollout batch size: 8
+2026-05-28 01:08:14 reward: 0.0 seconds
+2026-05-28 01:08:14 adv: 0.0 seconds
+2026-05-28 01:19:18 update_actor: 664.5 seconds
+2026-05-28 01:19:18 logging1: 0.0 seconds
+2026-05-28 01:19:18 logging2: 0.0 seconds
+2026-05-28 01:19:18 step:43 - timing/gen:273.359 - timing/verify:0.000 - timing/acc&trunc_filter:0.372 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.457 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 01:19:18 logging3: 0.0 seconds
+2026-05-28 01:23:51 gen: 272.7 seconds
+2026-05-28 01:23:51 verify: 0.0 seconds
+2026-05-28 01:23:51 before filtering: 8
+2026-05-28 01:23:51 Accuracy distribution: 1.00:2
+2026-05-28 01:23:51 Filtered batch size: 8 (from original size: 8)
+2026-05-28 01:23:51 after filtering: 8
+2026-05-28 01:23:51 acc&trunc_filter: 0.3 seconds
+2026-05-28 01:23:51 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 01:23:51 rollout batch size: 8
+2026-05-28 01:23:51 reward: 0.0 seconds
+2026-05-28 01:23:51 adv: 0.0 seconds
+2026-05-28 01:34:38 update_actor: 647.2 seconds
+2026-05-28 01:34:38 logging1: 0.0 seconds
+2026-05-28 01:34:38 logging2: 0.0 seconds
+2026-05-28 01:34:38 step:44 - timing/gen:272.731 - timing/verify:0.000 - timing/acc&trunc_filter:0.283 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:647.176 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 01:34:38 logging3: 0.0 seconds
+2026-05-28 01:39:11 gen: 272.5 seconds
+2026-05-28 01:39:11 verify: 0.0 seconds
+2026-05-28 01:39:11 before filtering: 8
+2026-05-28 01:39:11 Accuracy distribution: 1.00:2
+2026-05-28 01:39:11 Filtered batch size: 8 (from original size: 8)
+2026-05-28 01:39:11 after filtering: 8
+2026-05-28 01:39:11 acc&trunc_filter: 0.3 seconds
+2026-05-28 01:39:11 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 01:39:11 rollout batch size: 8
+2026-05-28 01:39:11 reward: 0.0 seconds
+2026-05-28 01:39:11 adv: 0.0 seconds
+2026-05-28 01:50:01 update_actor: 649.4 seconds
+2026-05-28 01:50:01 logging1: 0.0 seconds
+2026-05-28 01:50:01 logging2: 0.0 seconds
+2026-05-28 01:50:01 step:45 - timing/gen:272.530 - timing/verify:0.001 - timing/acc&trunc_filter:0.315 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:649.431 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 01:50:01 logging3: 0.0 seconds
+2026-05-28 01:54:34 gen: 273.6 seconds
+2026-05-28 01:54:34 verify: 0.0 seconds
+2026-05-28 01:54:34 before filtering: 8
+2026-05-28 01:54:34 Accuracy distribution: 1.00:2
+2026-05-28 01:54:35 Filtered batch size: 8 (from original size: 8)
+2026-05-28 01:54:35 after filtering: 8
+2026-05-28 01:54:35 acc&trunc_filter: 0.3 seconds
+2026-05-28 01:54:35 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 01:54:35 rollout batch size: 8
+2026-05-28 01:54:35 reward: 0.0 seconds
+2026-05-28 01:54:35 adv: 0.0 seconds
+2026-05-28 02:05:23 update_actor: 648.9 seconds
+2026-05-28 02:05:24 logging1: 0.0 seconds
+2026-05-28 02:05:24 logging2: 0.0 seconds
+2026-05-28 02:05:24 step:46 - timing/gen:273.560 - timing/verify:0.001 - timing/acc&trunc_filter:0.332 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:648.868 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.004 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 02:05:24 logging3: 0.0 seconds
+2026-05-28 02:09:56 gen: 272.7 seconds
+2026-05-28 02:09:56 verify: 0.0 seconds
+2026-05-28 02:09:56 before filtering: 8
+2026-05-28 02:09:56 Accuracy distribution: 1.00:2
+2026-05-28 02:09:56 Filtered batch size: 8 (from original size: 8)
+2026-05-28 02:09:56 after filtering: 8
+2026-05-28 02:09:56 acc&trunc_filter: 0.3 seconds
+2026-05-28 02:09:56 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 02:09:56 rollout batch size: 8
+2026-05-28 02:09:56 reward: 0.0 seconds
+2026-05-28 02:09:56 adv: 0.0 seconds
+2026-05-28 02:20:48 update_actor: 652.0 seconds
+2026-05-28 02:20:48 logging1: 0.0 seconds
+2026-05-28 02:20:48 logging2: 0.0 seconds
+2026-05-28 02:20:48 step:47 - timing/gen:272.671 - timing/verify:0.001 - timing/acc&trunc_filter:0.286 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:651.964 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 02:20:48 logging3: 0.0 seconds
+2026-05-28 02:25:23 gen: 274.9 seconds
+2026-05-28 02:25:23 verify: 0.0 seconds
+2026-05-28 02:25:23 before filtering: 8
+2026-05-28 02:25:23 Accuracy distribution: 1.00:2
+2026-05-28 02:25:24 Filtered batch size: 8 (from original size: 8)
+2026-05-28 02:25:24 after filtering: 8
+2026-05-28 02:25:24 acc&trunc_filter: 0.4 seconds
+2026-05-28 02:25:24 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 02:25:24 rollout batch size: 8
+2026-05-28 02:25:24 reward: 0.0 seconds
+2026-05-28 02:25:24 adv: 0.0 seconds
+2026-05-28 02:36:16 update_actor: 652.4 seconds
+2026-05-28 02:36:16 logging1: 0.0 seconds
+2026-05-28 02:36:16 logging2: 0.0 seconds
+2026-05-28 02:36:16 step:48 - timing/gen:274.939 - timing/verify:0.001 - timing/acc&trunc_filter:0.384 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.359 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 02:36:16 logging3: 0.0 seconds
+2026-05-28 02:40:47 gen: 270.9 seconds
+2026-05-28 02:40:47 verify: 0.0 seconds
+2026-05-28 02:40:47 before filtering: 8
+2026-05-28 02:40:47 Accuracy distribution: 1.00:2
+2026-05-28 02:40:47 Filtered batch size: 8 (from original size: 8)
+2026-05-28 02:40:47 after filtering: 8
+2026-05-28 02:40:47 acc&trunc_filter: 0.4 seconds
+2026-05-28 02:40:47 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 02:40:47 rollout batch size: 8
+2026-05-28 02:40:47 reward: 0.0 seconds
+2026-05-28 02:40:47 adv: 0.0 seconds
+2026-05-28 02:51:40 update_actor: 652.6 seconds
+2026-05-28 03:24:46 testing: 1985.6 seconds
+2026-05-28 03:24:46 step:49 - val/test_score/libero_spatial:0.950 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:0.750 - val/test_score/all:0.950 - val/test_score/all_std:0.218 - val/test_score/all_ci95_halfwidth:0.055 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-28 03:24:46 logging1: 0.0 seconds
+2026-05-28 03:24:46 logging2: 0.0 seconds
+2026-05-28 03:24:46 step:49 - timing/gen:270.857 - timing/verify:0.001 - timing/acc&trunc_filter:0.375 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.588 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1985.591 - val/test_score/libero_spatial:0.950 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:0.750 - val/test_score/all:0.950 - val/test_score/all_std:0.218 - val/test_score/all_ci95_halfwidth:0.055 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 03:24:46 logging3: 0.0 seconds
+2026-05-28 03:29:21 gen: 275.5 seconds
+2026-05-28 03:29:21 verify: 0.0 seconds
+2026-05-28 03:29:21 before filtering: 8
+2026-05-28 03:29:21 Accuracy distribution: 1.00:2
+2026-05-28 03:29:21 Filtered batch size: 8 (from original size: 8)
+2026-05-28 03:29:21 after filtering: 8
+2026-05-28 03:29:21 acc&trunc_filter: 0.3 seconds
+2026-05-28 03:29:21 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 03:29:21 rollout batch size: 8
+2026-05-28 03:29:21 reward: 0.0 seconds
+2026-05-28 03:29:21 adv: 0.0 seconds
+2026-05-28 03:40:20 update_actor: 658.7 seconds
+2026-05-28 03:40:20 logging1: 0.0 seconds
+2026-05-28 03:40:20 logging2: 0.0 seconds
+2026-05-28 03:40:20 step:50 - timing/gen:275.484 - timing/verify:0.001 - timing/acc&trunc_filter:0.295 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:658.738 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 03:40:20 logging3: 0.0 seconds
+2026-05-28 03:44:51 gen: 270.6 seconds
+2026-05-28 03:44:51 verify: 0.0 seconds
+2026-05-28 03:44:51 before filtering: 8
+2026-05-28 03:44:51 Accuracy distribution: 1.00:2
+2026-05-28 03:44:51 Filtered batch size: 8 (from original size: 8)
+2026-05-28 03:44:51 after filtering: 8
+2026-05-28 03:44:51 acc&trunc_filter: 0.3 seconds
+2026-05-28 03:44:51 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 03:44:51 rollout batch size: 8
+2026-05-28 03:44:51 reward: 0.0 seconds
+2026-05-28 03:44:51 adv: 0.0 seconds
+2026-05-28 03:55:41 update_actor: 650.0 seconds
+2026-05-28 03:55:41 logging1: 0.0 seconds
+2026-05-28 03:55:41 logging2: 0.0 seconds
+2026-05-28 03:55:41 step:51 - timing/gen:270.584 - timing/verify:0.001 - timing/acc&trunc_filter:0.315 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:649.984 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 03:55:41 logging3: 0.0 seconds
+2026-05-28 04:00:16 gen: 275.1 seconds
+2026-05-28 04:00:16 verify: 0.0 seconds
+2026-05-28 04:00:16 before filtering: 8
+2026-05-28 04:00:16 Accuracy distribution: 1.00:2
+2026-05-28 04:00:17 Filtered batch size: 8 (from original size: 8)
+2026-05-28 04:00:17 after filtering: 8
+2026-05-28 04:00:17 acc&trunc_filter: 0.3 seconds
+2026-05-28 04:00:17 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 04:00:17 rollout batch size: 8
+2026-05-28 04:00:17 reward: 0.0 seconds
+2026-05-28 04:00:17 adv: 0.0 seconds
+2026-05-28 04:11:16 update_actor: 659.2 seconds
+2026-05-28 04:11:16 logging1: 0.0 seconds
+2026-05-28 04:11:16 logging2: 0.0 seconds
+2026-05-28 04:11:16 step:52 - timing/gen:275.050 - timing/verify:0.000 - timing/acc&trunc_filter:0.336 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:659.168 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 04:11:16 logging3: 0.0 seconds
+2026-05-28 04:15:50 gen: 274.3 seconds
+2026-05-28 04:15:50 verify: 0.0 seconds
+2026-05-28 04:15:50 before filtering: 8
+2026-05-28 04:15:50 Accuracy distribution: 1.00:2
+2026-05-28 04:15:50 Filtered batch size: 8 (from original size: 8)
+2026-05-28 04:15:50 after filtering: 8
+2026-05-28 04:15:50 acc&trunc_filter: 0.4 seconds
+2026-05-28 04:15:50 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 04:15:50 rollout batch size: 8
+2026-05-28 04:15:50 reward: 0.0 seconds
+2026-05-28 04:15:50 adv: 0.0 seconds
+2026-05-28 04:26:35 update_actor: 644.6 seconds
+2026-05-28 04:26:35 logging1: 0.0 seconds
+2026-05-28 04:26:35 logging2: 0.0 seconds
+2026-05-28 04:26:35 step:53 - timing/gen:274.261 - timing/verify:0.001 - timing/acc&trunc_filter:0.374 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:644.582 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 04:26:35 logging3: 0.0 seconds
+2026-05-28 04:31:07 gen: 271.6 seconds
+2026-05-28 04:31:07 verify: 0.0 seconds
+2026-05-28 04:31:07 before filtering: 8
+2026-05-28 04:31:07 Accuracy distribution: 1.00:2
+2026-05-28 04:31:07 Filtered batch size: 8 (from original size: 8)
+2026-05-28 04:31:07 after filtering: 8
+2026-05-28 04:31:07 acc&trunc_filter: 0.4 seconds
+2026-05-28 04:31:07 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 04:31:07 rollout batch size: 8
+2026-05-28 04:31:07 reward: 0.0 seconds
+2026-05-28 04:31:07 adv: 0.0 seconds
+2026-05-28 04:41:53 update_actor: 645.6 seconds
+2026-05-28 04:41:53 logging1: 0.0 seconds
+2026-05-28 04:41:53 logging2: 0.0 seconds
+2026-05-28 04:41:53 step:54 - timing/gen:271.559 - timing/verify:0.000 - timing/acc&trunc_filter:0.387 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:645.571 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 04:41:53 logging3: 0.0 seconds
+2026-05-28 04:46:56 gen: 303.7 seconds
+2026-05-28 04:46:56 verify: 0.0 seconds
+2026-05-28 04:46:56 before filtering: 8
+2026-05-28 04:46:56 Accuracy distribution: 0.00:1 1.00:1
+2026-05-28 04:46:57 Filtered batch size: 8 (from original size: 8)
+2026-05-28 04:46:57 after filtering: 8
+2026-05-28 04:46:57 acc&trunc_filter: 0.4 seconds
+2026-05-28 04:46:57 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 04:46:57 rollout batch size: 8
+2026-05-28 04:46:57 reward: 0.0 seconds
+2026-05-28 04:46:57 adv: 0.0 seconds
+2026-05-28 04:58:02 update_actor: 665.7 seconds
+2026-05-28 04:58:02 logging1: 0.0 seconds
+2026-05-28 04:58:02 logging2: 0.0 seconds
+2026-05-28 04:58:02 step:55 - timing/gen:303.705 - timing/verify:0.000 - timing/acc&trunc_filter:0.366 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.500 - format_score/all:1.000 - train_verify_score_wo_format/all:0.500 - timing/reward_model:0.000 - train_reward/verifier:0.500 - train_reward/reward_all:2.500 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:665.660 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:2.500 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:2.500 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 04:58:02 logging3: 0.1 seconds
+2026-05-28 05:02:42 gen: 279.1 seconds
+2026-05-28 05:02:42 verify: 0.0 seconds
+2026-05-28 05:02:42 before filtering: 8
+2026-05-28 05:02:42 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 05:02:42 Filtered batch size: 8 (from original size: 8)
+2026-05-28 05:02:42 after filtering: 8
+2026-05-28 05:02:42 acc&trunc_filter: 0.3 seconds
+2026-05-28 05:02:42 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 05:02:42 rollout batch size: 8
+2026-05-28 05:02:42 reward: 0.0 seconds
+2026-05-28 05:02:42 adv: 0.0 seconds
+2026-05-28 05:13:39 update_actor: 657.4 seconds
+2026-05-28 05:13:39 logging1: 0.0 seconds
+2026-05-28 05:13:39 logging2: 0.0 seconds
+2026-05-28 05:13:39 step:56 - timing/gen:279.077 - timing/verify:0.001 - timing/acc&trunc_filter:0.333 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:657.366 - actor/pg_loss:0.003 - actor/pg_clipfrac:0.037 - actor/ppo_kl:-0.002 - actor/grad_norm:1.553 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.569 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.569 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 05:13:39 logging3: 0.0 seconds
+2026-05-28 05:18:12 gen: 272.3 seconds
+2026-05-28 05:18:12 verify: 0.0 seconds
+2026-05-28 05:18:12 before filtering: 8
+2026-05-28 05:18:12 Accuracy distribution: 1.00:2
+2026-05-28 05:18:12 Filtered batch size: 8 (from original size: 8)
+2026-05-28 05:18:12 after filtering: 8
+2026-05-28 05:18:12 acc&trunc_filter: 0.4 seconds
+2026-05-28 05:18:12 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 05:18:12 rollout batch size: 8
+2026-05-28 05:18:12 reward: 0.0 seconds
+2026-05-28 05:18:12 adv: 0.0 seconds
+2026-05-28 05:29:01 update_actor: 648.9 seconds
+2026-05-28 05:29:01 logging1: 0.0 seconds
+2026-05-28 05:29:01 logging2: 0.0 seconds
+2026-05-28 05:29:01 step:57 - timing/gen:272.277 - timing/verify:0.001 - timing/acc&trunc_filter:0.390 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:648.860 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 05:29:01 logging3: 0.0 seconds
+2026-05-28 05:33:33 gen: 271.9 seconds
+2026-05-28 05:33:33 verify: 0.0 seconds
+2026-05-28 05:33:33 before filtering: 8
+2026-05-28 05:33:33 Accuracy distribution: 1.00:2
+2026-05-28 05:33:33 Filtered batch size: 8 (from original size: 8)
+2026-05-28 05:33:33 after filtering: 8
+2026-05-28 05:33:33 acc&trunc_filter: 0.3 seconds
+2026-05-28 05:33:33 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 05:33:33 rollout batch size: 8
+2026-05-28 05:33:33 reward: 0.0 seconds
+2026-05-28 05:33:33 adv: 0.0 seconds
+2026-05-28 05:44:39 update_actor: 666.0 seconds
+2026-05-28 05:44:39 logging1: 0.0 seconds
+2026-05-28 05:44:39 logging2: 0.0 seconds
+2026-05-28 05:44:39 step:58 - timing/gen:271.870 - timing/verify:0.000 - timing/acc&trunc_filter:0.315 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:666.038 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 05:44:39 logging3: 0.0 seconds
+2026-05-28 05:49:12 gen: 272.7 seconds
+2026-05-28 05:49:12 verify: 0.0 seconds
+2026-05-28 05:49:12 before filtering: 8
+2026-05-28 05:49:12 Accuracy distribution: 1.00:2
+2026-05-28 05:49:12 Filtered batch size: 8 (from original size: 8)
+2026-05-28 05:49:12 after filtering: 8
+2026-05-28 05:49:12 acc&trunc_filter: 0.3 seconds
+2026-05-28 05:49:12 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 05:49:12 rollout batch size: 8
+2026-05-28 05:49:12 reward: 0.0 seconds
+2026-05-28 05:49:12 adv: 0.0 seconds
+2026-05-28 06:00:04 update_actor: 651.8 seconds
+2026-05-28 06:33:10 testing: 1986.0 seconds
+2026-05-28 06:33:10 step:59 - val/test_score/libero_spatial:0.933 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.250 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.933 - val/test_score/all_std:0.249 - val/test_score/all_ci95_halfwidth:0.063 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:1.000
+2026-05-28 06:33:10 logging1: 0.0 seconds
+2026-05-28 06:33:10 logging2: 0.0 seconds
+2026-05-28 06:33:10 step:59 - timing/gen:272.719 - timing/verify:0.000 - timing/acc&trunc_filter:0.300 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:651.761 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1985.997 - val/test_score/libero_spatial:0.933 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.250 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.933 - val/test_score/all_std:0.249 - val/test_score/all_ci95_halfwidth:0.063 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:1.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 06:33:10 logging3: 0.0 seconds
+2026-05-28 06:33:10 epoch:  3
+2026-05-28 06:37:43 gen: 273.0 seconds
+2026-05-28 06:37:43 verify: 0.0 seconds
+2026-05-28 06:37:43 before filtering: 8
+2026-05-28 06:37:43 Accuracy distribution: 1.00:2
+2026-05-28 06:37:43 Filtered batch size: 8 (from original size: 8)
+2026-05-28 06:37:43 after filtering: 8
+2026-05-28 06:37:43 acc&trunc_filter: 0.4 seconds
+2026-05-28 06:37:43 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 06:37:43 rollout batch size: 8
+2026-05-28 06:37:43 reward: 0.0 seconds
+2026-05-28 06:37:43 adv: 0.0 seconds
+2026-05-28 06:48:44 update_actor: 661.0 seconds
+2026-05-28 06:48:44 logging1: 0.0 seconds
+2026-05-28 06:48:44 logging2: 0.0 seconds
+2026-05-28 06:48:44 step:60 - timing/gen:273.002 - timing/verify:0.001 - timing/acc&trunc_filter:0.391 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:661.022 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 06:48:44 logging3: 0.0 seconds
+2026-05-28 06:53:16 gen: 271.4 seconds
+2026-05-28 06:53:16 verify: 0.0 seconds
+2026-05-28 06:53:16 before filtering: 8
+2026-05-28 06:53:16 Accuracy distribution: 1.00:2
+2026-05-28 06:53:16 Filtered batch size: 8 (from original size: 8)
+2026-05-28 06:53:16 after filtering: 8
+2026-05-28 06:53:16 acc&trunc_filter: 0.4 seconds
+2026-05-28 06:53:16 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 06:53:16 rollout batch size: 8
+2026-05-28 06:53:16 reward: 0.0 seconds
+2026-05-28 06:53:16 adv: 0.0 seconds
+2026-05-28 07:04:18 update_actor: 661.9 seconds
+2026-05-28 07:04:18 logging1: 0.0 seconds
+2026-05-28 07:04:18 logging2: 0.0 seconds
+2026-05-28 07:04:18 step:61 - timing/gen:271.441 - timing/verify:0.000 - timing/acc&trunc_filter:0.366 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:661.927 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 07:04:18 logging3: 0.0 seconds
+2026-05-28 07:08:55 gen: 276.4 seconds
+2026-05-28 07:08:55 verify: 0.0 seconds
+2026-05-28 07:08:55 before filtering: 8
+2026-05-28 07:08:55 Accuracy distribution: 1.00:2
+2026-05-28 07:08:55 Filtered batch size: 8 (from original size: 8)
+2026-05-28 07:08:55 after filtering: 8
+2026-05-28 07:08:55 acc&trunc_filter: 0.3 seconds
+2026-05-28 07:08:55 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 07:08:55 rollout batch size: 8
+2026-05-28 07:08:55 reward: 0.0 seconds
+2026-05-28 07:08:55 adv: 0.0 seconds
+2026-05-28 07:20:02 update_actor: 666.7 seconds
+2026-05-28 07:20:02 logging1: 0.0 seconds
+2026-05-28 07:20:02 logging2: 0.0 seconds
+2026-05-28 07:20:02 step:62 - timing/gen:276.434 - timing/verify:0.001 - timing/acc&trunc_filter:0.281 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:666.690 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 07:20:02 logging3: 0.0 seconds
+2026-05-28 07:24:35 gen: 273.5 seconds
+2026-05-28 07:24:35 verify: 0.0 seconds
+2026-05-28 07:24:35 before filtering: 8
+2026-05-28 07:24:35 Accuracy distribution: 1.00:2
+2026-05-28 07:24:36 Filtered batch size: 8 (from original size: 8)
+2026-05-28 07:24:36 after filtering: 8
+2026-05-28 07:24:36 acc&trunc_filter: 0.4 seconds
+2026-05-28 07:24:36 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 07:24:36 rollout batch size: 8
+2026-05-28 07:24:36 reward: 0.0 seconds
+2026-05-28 07:24:36 adv: 0.0 seconds
+2026-05-28 07:35:40 update_actor: 664.7 seconds
+2026-05-28 07:35:40 logging1: 0.0 seconds
+2026-05-28 07:35:40 logging2: 0.0 seconds
+2026-05-28 07:35:40 step:63 - timing/gen:273.547 - timing/verify:0.001 - timing/acc&trunc_filter:0.385 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.676 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 07:35:40 logging3: 0.0 seconds
+2026-05-28 07:40:20 gen: 280.0 seconds
+2026-05-28 07:40:20 verify: 0.0 seconds
+2026-05-28 07:40:20 before filtering: 8
+2026-05-28 07:40:20 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 07:40:21 Filtered batch size: 8 (from original size: 8)
+2026-05-28 07:40:21 after filtering: 8
+2026-05-28 07:40:21 acc&trunc_filter: 0.4 seconds
+2026-05-28 07:40:21 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 07:40:21 rollout batch size: 8
+2026-05-28 07:40:21 reward: 0.0 seconds
+2026-05-28 07:40:21 adv: 0.0 seconds
+2026-05-28 07:51:09 update_actor: 648.2 seconds
+2026-05-28 07:51:09 logging1: 0.0 seconds
+2026-05-28 07:51:09 logging2: 0.0 seconds
+2026-05-28 07:51:09 step:64 - timing/gen:280.020 - timing/verify:0.001 - timing/acc&trunc_filter:0.361 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:648.191 - actor/pg_loss:0.004 - actor/pg_clipfrac:0.036 - actor/ppo_kl:-0.001 - actor/grad_norm:1.672 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.560 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.560 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 07:51:09 logging3: 0.0 seconds
+2026-05-28 07:55:41 gen: 272.6 seconds
+2026-05-28 07:55:41 verify: 0.0 seconds
+2026-05-28 07:55:41 before filtering: 8
+2026-05-28 07:55:41 Accuracy distribution: 1.00:2
+2026-05-28 07:55:42 Filtered batch size: 8 (from original size: 8)
+2026-05-28 07:55:42 after filtering: 8
+2026-05-28 07:55:42 acc&trunc_filter: 0.4 seconds
+2026-05-28 07:55:42 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 07:55:42 rollout batch size: 8
+2026-05-28 07:55:42 reward: 0.0 seconds
+2026-05-28 07:55:42 adv: 0.0 seconds
+2026-05-28 08:06:35 update_actor: 652.8 seconds
+2026-05-28 08:06:35 logging1: 0.0 seconds
+2026-05-28 08:06:35 logging2: 0.0 seconds
+2026-05-28 08:06:35 step:65 - timing/gen:272.576 - timing/verify:0.001 - timing/acc&trunc_filter:0.372 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.750 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 08:06:35 logging3: 0.0 seconds
+2026-05-28 08:11:18 gen: 283.0 seconds
+2026-05-28 08:11:18 verify: 0.0 seconds
+2026-05-28 08:11:18 before filtering: 8
+2026-05-28 08:11:18 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 08:11:18 Filtered batch size: 8 (from original size: 8)
+2026-05-28 08:11:18 after filtering: 8
+2026-05-28 08:11:18 acc&trunc_filter: 0.4 seconds
+2026-05-28 08:11:18 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 08:11:18 rollout batch size: 8
+2026-05-28 08:11:18 reward: 0.0 seconds
+2026-05-28 08:11:18 adv: 0.0 seconds
+2026-05-28 08:22:20 update_actor: 662.3 seconds
+2026-05-28 08:22:20 logging1: 0.0 seconds
+2026-05-28 08:22:20 logging2: 0.0 seconds
+2026-05-28 08:22:20 step:66 - timing/gen:282.955 - timing/verify:0.001 - timing/acc&trunc_filter:0.376 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:662.287 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:1.549 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.464 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.464 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 08:22:20 logging3: 0.0 seconds
+2026-05-28 08:27:07 gen: 286.6 seconds
+2026-05-28 08:27:07 verify: 0.0 seconds
+2026-05-28 08:27:07 before filtering: 8
+2026-05-28 08:27:07 Accuracy distribution: 0.50:1 1.00:1
+2026-05-28 08:27:07 Filtered batch size: 8 (from original size: 8)
+2026-05-28 08:27:07 after filtering: 8
+2026-05-28 08:27:07 acc&trunc_filter: 0.3 seconds
+2026-05-28 08:27:07 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 08:27:07 rollout batch size: 8
+2026-05-28 08:27:07 reward: 0.0 seconds
+2026-05-28 08:27:07 adv: 0.0 seconds
+2026-05-28 08:38:09 update_actor: 661.7 seconds
+2026-05-28 08:38:09 logging1: 0.0 seconds
+2026-05-28 08:38:09 logging2: 0.0 seconds
+2026-05-28 08:38:09 step:67 - timing/gen:286.611 - timing/verify:0.001 - timing/acc&trunc_filter:0.259 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.750 - format_score/all:1.000 - train_verify_score_wo_format/all:0.750 - timing/reward_model:0.000 - train_reward/verifier:0.750 - train_reward/reward_all:3.750 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:661.715 - actor/pg_loss:0.005 - actor/pg_clipfrac:0.033 - actor/ppo_kl:0.003 - actor/grad_norm:1.956 - actor/lr(1e-4):0.100 - critic/score/mean:3.750 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.750 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.448 - critic/advantages/max:0.866 - critic/advantages/min:-0.866 - critic/returns/mean:-0.448 - critic/returns/max:0.866 - critic/returns/min:-0.866
+2026-05-28 08:38:09 logging3: 0.0 seconds
+2026-05-28 08:42:51 gen: 281.9 seconds
+2026-05-28 08:42:51 verify: 0.0 seconds
+2026-05-28 08:42:51 before filtering: 8
+2026-05-28 08:42:51 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 08:42:51 Filtered batch size: 8 (from original size: 8)
+2026-05-28 08:42:51 after filtering: 8
+2026-05-28 08:42:51 acc&trunc_filter: 0.4 seconds
+2026-05-28 08:42:51 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 08:42:51 rollout batch size: 8
+2026-05-28 08:42:51 reward: 0.0 seconds
+2026-05-28 08:42:51 adv: 0.0 seconds
+2026-05-28 08:53:50 update_actor: 658.5 seconds
+2026-05-28 08:53:50 logging1: 0.0 seconds
+2026-05-28 08:53:50 logging2: 0.0 seconds
+2026-05-28 08:53:50 step:68 - timing/gen:281.875 - timing/verify:0.001 - timing/acc&trunc_filter:0.362 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:658.490 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:1.200 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.426 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.426 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 08:53:50 logging3: 0.0 seconds
+2026-05-28 08:58:21 gen: 270.9 seconds
+2026-05-28 08:58:21 verify: 0.0 seconds
+2026-05-28 08:58:21 before filtering: 8
+2026-05-28 08:58:21 Accuracy distribution: 1.00:2
+2026-05-28 08:58:21 Filtered batch size: 8 (from original size: 8)
+2026-05-28 08:58:21 after filtering: 8
+2026-05-28 08:58:21 acc&trunc_filter: 0.5 seconds
+2026-05-28 08:58:21 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 08:58:21 rollout batch size: 8
+2026-05-28 08:58:21 reward: 0.0 seconds
+2026-05-28 08:58:21 adv: 0.0 seconds
+2026-05-28 09:09:15 update_actor: 653.4 seconds
+2026-05-28 09:42:15 testing: 1980.9 seconds
+2026-05-28 09:42:15 step:69 - val/test_score/libero_spatial:0.967 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.967 - val/test_score/all_std:0.180 - val/test_score/all_ci95_halfwidth:0.045 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:1.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-28 09:42:15 logging1: 0.0 seconds
+2026-05-28 09:42:15 logging2: 0.0 seconds
+2026-05-28 09:42:15 step:69 - timing/gen:270.909 - timing/verify:0.001 - timing/acc&trunc_filter:0.486 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:653.420 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1980.880 - val/test_score/libero_spatial:0.967 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:0.750 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.967 - val/test_score/all_std:0.180 - val/test_score/all_ci95_halfwidth:0.045 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:1.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 09:42:15 logging3: 0.0 seconds
+2026-05-28 09:46:48 gen: 272.9 seconds
+2026-05-28 09:46:48 verify: 0.0 seconds
+2026-05-28 09:46:48 before filtering: 8
+2026-05-28 09:46:48 Accuracy distribution: 1.00:2
+2026-05-28 09:46:49 Filtered batch size: 8 (from original size: 8)
+2026-05-28 09:46:49 after filtering: 8
+2026-05-28 09:46:49 acc&trunc_filter: 0.3 seconds
+2026-05-28 09:46:49 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 09:46:49 rollout batch size: 8
+2026-05-28 09:46:49 reward: 0.0 seconds
+2026-05-28 09:46:49 adv: 0.0 seconds
+2026-05-28 09:57:48 update_actor: 659.4 seconds
+2026-05-28 09:57:48 logging1: 0.0 seconds
+2026-05-28 09:57:48 logging2: 0.0 seconds
+2026-05-28 09:57:48 step:70 - timing/gen:272.886 - timing/verify:0.001 - timing/acc&trunc_filter:0.257 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:659.449 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 09:57:48 logging3: 0.0 seconds
+2026-05-28 10:02:20 gen: 272.4 seconds
+2026-05-28 10:02:20 verify: 0.0 seconds
+2026-05-28 10:02:20 before filtering: 8
+2026-05-28 10:02:20 Accuracy distribution: 1.00:2
+2026-05-28 10:02:21 Filtered batch size: 8 (from original size: 8)
+2026-05-28 10:02:21 after filtering: 8
+2026-05-28 10:02:21 acc&trunc_filter: 0.3 seconds
+2026-05-28 10:02:21 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 10:02:21 rollout batch size: 8
+2026-05-28 10:02:21 reward: 0.0 seconds
+2026-05-28 10:02:21 adv: 0.0 seconds
+2026-05-28 10:13:06 update_actor: 645.7 seconds
+2026-05-28 10:13:06 logging1: 0.0 seconds
+2026-05-28 10:13:06 logging2: 0.0 seconds
+2026-05-28 10:13:06 step:71 - timing/gen:272.358 - timing/verify:0.001 - timing/acc&trunc_filter:0.303 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:645.689 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 10:13:06 logging3: 0.0 seconds
+2026-05-28 10:17:40 gen: 273.2 seconds
+2026-05-28 10:17:40 verify: 0.0 seconds
+2026-05-28 10:17:40 before filtering: 8
+2026-05-28 10:17:40 Accuracy distribution: 1.00:2
+2026-05-28 10:17:40 Filtered batch size: 8 (from original size: 8)
+2026-05-28 10:17:40 after filtering: 8
+2026-05-28 10:17:40 acc&trunc_filter: 0.3 seconds
+2026-05-28 10:17:40 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 10:17:40 rollout batch size: 8
+2026-05-28 10:17:40 reward: 0.0 seconds
+2026-05-28 10:17:40 adv: 0.0 seconds
+2026-05-28 10:28:32 update_actor: 652.5 seconds
+2026-05-28 10:28:32 logging1: 0.0 seconds
+2026-05-28 10:28:32 logging2: 0.0 seconds
+2026-05-28 10:28:32 step:72 - timing/gen:273.232 - timing/verify:0.000 - timing/acc&trunc_filter:0.258 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:652.478 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 10:28:32 logging3: 0.0 seconds
+2026-05-28 10:33:13 gen: 280.7 seconds
+2026-05-28 10:33:13 verify: 0.0 seconds
+2026-05-28 10:33:13 before filtering: 8
+2026-05-28 10:33:13 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 10:33:13 Filtered batch size: 8 (from original size: 8)
+2026-05-28 10:33:13 after filtering: 8
+2026-05-28 10:33:13 acc&trunc_filter: 0.4 seconds
+2026-05-28 10:33:13 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 10:33:14 rollout batch size: 8
+2026-05-28 10:33:14 reward: 0.0 seconds
+2026-05-28 10:33:14 adv: 0.0 seconds
+2026-05-28 10:44:10 update_actor: 656.8 seconds
+2026-05-28 10:44:10 logging1: 0.0 seconds
+2026-05-28 10:44:10 logging2: 0.0 seconds
+2026-05-28 10:44:10 step:73 - timing/gen:280.679 - timing/verify:0.001 - timing/acc&trunc_filter:0.388 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:656.754 - actor/pg_loss:0.003 - actor/pg_clipfrac:0.027 - actor/ppo_kl:0.001 - actor/grad_norm:1.394 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.431 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.431 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 10:44:10 logging3: 0.0 seconds
+2026-05-28 10:49:04 gen: 293.6 seconds
+2026-05-28 10:49:04 verify: 0.0 seconds
+2026-05-28 10:49:04 before filtering: 8
+2026-05-28 10:49:04 Accuracy distribution: 0.25:1 1.00:1
+2026-05-28 10:49:04 Filtered batch size: 8 (from original size: 8)
+2026-05-28 10:49:04 after filtering: 8
+2026-05-28 10:49:04 acc&trunc_filter: 0.3 seconds
+2026-05-28 10:49:04 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 10:49:04 rollout batch size: 8
+2026-05-28 10:49:04 reward: 0.0 seconds
+2026-05-28 10:49:04 adv: 0.0 seconds
+2026-05-28 10:59:48 update_actor: 644.2 seconds
+2026-05-28 10:59:49 logging1: 0.0 seconds
+2026-05-28 10:59:49 logging2: 0.0 seconds
+2026-05-28 10:59:49 step:74 - timing/gen:293.628 - timing/verify:0.000 - timing/acc&trunc_filter:0.296 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.625 - format_score/all:1.000 - train_verify_score_wo_format/all:0.625 - timing/reward_model:0.000 - train_reward/verifier:0.625 - train_reward/reward_all:3.125 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:644.208 - actor/pg_loss:0.003 - actor/pg_clipfrac:0.032 - actor/ppo_kl:-0.002 - actor/grad_norm:1.397 - actor/lr(1e-4):0.100 - critic/score/mean:3.125 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.125 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.263 - critic/advantages/max:1.500 - critic/advantages/min:-0.500 - critic/returns/mean:-0.263 - critic/returns/max:1.500 - critic/returns/min:-0.500
+2026-05-28 10:59:49 logging3: 0.1 seconds
+2026-05-28 11:04:27 gen: 278.3 seconds
+2026-05-28 11:04:27 verify: 0.0 seconds
+2026-05-28 11:04:27 before filtering: 8
+2026-05-28 11:04:27 Accuracy distribution: 1.00:2
+2026-05-28 11:04:27 Filtered batch size: 8 (from original size: 8)
+2026-05-28 11:04:27 after filtering: 8
+2026-05-28 11:04:27 acc&trunc_filter: 0.3 seconds
+2026-05-28 11:04:27 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 11:04:27 rollout batch size: 8
+2026-05-28 11:04:27 reward: 0.0 seconds
+2026-05-28 11:04:27 adv: 0.0 seconds
+2026-05-28 11:15:20 update_actor: 653.2 seconds
+2026-05-28 11:15:20 logging1: 0.0 seconds
+2026-05-28 11:15:20 logging2: 0.0 seconds
+2026-05-28 11:15:20 step:75 - timing/gen:278.321 - timing/verify:0.001 - timing/acc&trunc_filter:0.277 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:653.193 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 11:15:20 logging3: 0.0 seconds
+2026-05-28 11:19:52 gen: 271.8 seconds
+2026-05-28 11:19:52 verify: 0.0 seconds
+2026-05-28 11:19:52 before filtering: 8
+2026-05-28 11:19:52 Accuracy distribution: 1.00:2
+2026-05-28 11:19:53 Filtered batch size: 8 (from original size: 8)
+2026-05-28 11:19:53 after filtering: 8
+2026-05-28 11:19:53 acc&trunc_filter: 0.4 seconds
+2026-05-28 11:19:53 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 11:19:53 rollout batch size: 8
+2026-05-28 11:19:53 reward: 0.0 seconds
+2026-05-28 11:19:53 adv: 0.0 seconds
+2026-05-28 11:30:41 update_actor: 648.4 seconds
+2026-05-28 11:30:41 logging1: 0.0 seconds
+2026-05-28 11:30:41 logging2: 0.0 seconds
+2026-05-28 11:30:41 step:76 - timing/gen:271.823 - timing/verify:0.001 - timing/acc&trunc_filter:0.389 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:648.450 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 11:30:41 logging3: 0.0 seconds
+2026-05-28 11:35:17 gen: 276.0 seconds
+2026-05-28 11:35:17 verify: 0.0 seconds
+2026-05-28 11:35:17 before filtering: 8
+2026-05-28 11:35:17 Accuracy distribution: 1.00:2
+2026-05-28 11:35:17 Filtered batch size: 8 (from original size: 8)
+2026-05-28 11:35:17 after filtering: 8
+2026-05-28 11:35:17 acc&trunc_filter: 0.2 seconds
+2026-05-28 11:35:17 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 11:35:17 rollout batch size: 8
+2026-05-28 11:35:17 reward: 0.0 seconds
+2026-05-28 11:35:17 adv: 0.0 seconds
+2026-05-28 11:46:12 update_actor: 654.9 seconds
+2026-05-28 11:46:12 logging1: 0.0 seconds
+2026-05-28 11:46:12 logging2: 0.0 seconds
+2026-05-28 11:46:12 step:77 - timing/gen:276.021 - timing/verify:0.001 - timing/acc&trunc_filter:0.247 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:654.873 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 11:46:12 logging3: 0.0 seconds
+2026-05-28 11:50:45 gen: 272.9 seconds
+2026-05-28 11:50:45 verify: 0.0 seconds
+2026-05-28 11:50:45 before filtering: 8
+2026-05-28 11:50:45 Accuracy distribution: 1.00:2
+2026-05-28 11:50:46 Filtered batch size: 8 (from original size: 8)
+2026-05-28 11:50:46 after filtering: 8
+2026-05-28 11:50:46 acc&trunc_filter: 0.4 seconds
+2026-05-28 11:50:46 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 11:50:46 rollout batch size: 8
+2026-05-28 11:50:46 reward: 0.0 seconds
+2026-05-28 11:50:46 adv: 0.0 seconds
+2026-05-28 12:01:50 update_actor: 664.4 seconds
+2026-05-28 12:01:50 logging1: 0.0 seconds
+2026-05-28 12:01:50 logging2: 0.0 seconds
+2026-05-28 12:01:50 step:78 - timing/gen:272.912 - timing/verify:0.001 - timing/acc&trunc_filter:0.411 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:664.437 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 12:01:50 logging3: 0.0 seconds
+2026-05-28 12:06:25 gen: 275.0 seconds
+2026-05-28 12:06:25 verify: 0.0 seconds
+2026-05-28 12:06:25 before filtering: 8
+2026-05-28 12:06:25 Accuracy distribution: 1.00:2
+2026-05-28 12:06:25 Filtered batch size: 8 (from original size: 8)
+2026-05-28 12:06:25 after filtering: 8
+2026-05-28 12:06:25 acc&trunc_filter: 0.3 seconds
+2026-05-28 12:06:25 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 12:06:25 rollout batch size: 8
+2026-05-28 12:06:25 reward: 0.0 seconds
+2026-05-28 12:06:25 adv: 0.0 seconds
+2026-05-28 12:17:23 update_actor: 657.7 seconds
+2026-05-28 12:50:18 testing: 1974.6 seconds
+2026-05-28 12:50:18 step:79 - val/test_score/libero_spatial:0.983 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:1.000 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.983 - val/test_score/all_std:0.128 - val/test_score/all_ci95_halfwidth:0.032 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-28 12:50:18 logging1: 0.0 seconds
+2026-05-28 12:50:18 logging2: 0.0 seconds
+2026-05-28 12:50:18 step:79 - timing/gen:275.011 - timing/verify:0.001 - timing/acc&trunc_filter:0.252 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:657.688 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1974.586 - val/test_score/libero_spatial:0.983 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:1.000 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.983 - val/test_score/all_std:0.128 - val/test_score/all_ci95_halfwidth:0.032 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 12:50:18 logging3: 0.0 seconds
+2026-05-28 12:50:18 epoch:  4
+2026-05-28 12:54:49 gen: 271.8 seconds
+2026-05-28 12:54:49 verify: 0.0 seconds
+2026-05-28 12:54:49 before filtering: 8
+2026-05-28 12:54:49 Accuracy distribution: 1.00:2
+2026-05-28 12:54:50 Filtered batch size: 8 (from original size: 8)
+2026-05-28 12:54:50 after filtering: 8
+2026-05-28 12:54:50 acc&trunc_filter: 0.4 seconds
+2026-05-28 12:54:50 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 12:54:50 rollout batch size: 8
+2026-05-28 12:54:50 reward: 0.0 seconds
+2026-05-28 12:54:50 adv: 0.0 seconds
+2026-05-28 13:05:54 update_actor: 663.9 seconds
+2026-05-28 13:05:54 logging1: 0.0 seconds
+2026-05-28 13:05:54 logging2: 0.0 seconds
+2026-05-28 13:05:54 step:80 - timing/gen:271.819 - timing/verify:0.001 - timing/acc&trunc_filter:0.426 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:663.940 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 13:05:54 logging3: 0.0 seconds
+2026-05-28 13:10:28 gen: 274.5 seconds
+2026-05-28 13:10:28 verify: 0.0 seconds
+2026-05-28 13:10:28 before filtering: 8
+2026-05-28 13:10:28 Accuracy distribution: 1.00:2
+2026-05-28 13:10:29 Filtered batch size: 8 (from original size: 8)
+2026-05-28 13:10:29 after filtering: 8
+2026-05-28 13:10:29 acc&trunc_filter: 0.3 seconds
+2026-05-28 13:10:29 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 13:10:29 rollout batch size: 8
+2026-05-28 13:10:29 reward: 0.0 seconds
+2026-05-28 13:10:29 adv: 0.0 seconds
+2026-05-28 13:21:29 update_actor: 660.4 seconds
+2026-05-28 13:21:29 logging1: 0.0 seconds
+2026-05-28 13:21:29 logging2: 0.0 seconds
+2026-05-28 13:21:29 step:81 - timing/gen:274.478 - timing/verify:0.002 - timing/acc&trunc_filter:0.344 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:660.407 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 13:21:29 logging3: 0.0 seconds
+2026-05-28 13:26:04 gen: 275.3 seconds
+2026-05-28 13:26:04 verify: 0.0 seconds
+2026-05-28 13:26:05 before filtering: 8
+2026-05-28 13:26:05 Accuracy distribution: 1.00:2
+2026-05-28 13:26:05 Filtered batch size: 8 (from original size: 8)
+2026-05-28 13:26:05 after filtering: 8
+2026-05-28 13:26:05 acc&trunc_filter: 0.5 seconds
+2026-05-28 13:26:05 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 13:26:05 rollout batch size: 8
+2026-05-28 13:26:05 reward: 0.0 seconds
+2026-05-28 13:26:05 adv: 0.0 seconds
+2026-05-28 13:36:58 update_actor: 653.3 seconds
+2026-05-28 13:36:58 logging1: 0.0 seconds
+2026-05-28 13:36:58 logging2: 0.0 seconds
+2026-05-28 13:36:58 step:82 - timing/gen:275.257 - timing/verify:0.001 - timing/acc&trunc_filter:0.494 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:653.299 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 13:36:58 logging3: 0.0 seconds
+2026-05-28 13:41:32 gen: 273.3 seconds
+2026-05-28 13:41:32 verify: 0.0 seconds
+2026-05-28 13:41:32 before filtering: 8
+2026-05-28 13:41:32 Accuracy distribution: 1.00:2
+2026-05-28 13:41:32 Filtered batch size: 8 (from original size: 8)
+2026-05-28 13:41:32 after filtering: 8
+2026-05-28 13:41:32 acc&trunc_filter: 0.4 seconds
+2026-05-28 13:41:32 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 13:41:32 rollout batch size: 8
+2026-05-28 13:41:32 reward: 0.0 seconds
+2026-05-28 13:41:32 adv: 0.0 seconds
+2026-05-28 13:52:28 update_actor: 656.2 seconds
+2026-05-28 13:52:28 logging1: 0.0 seconds
+2026-05-28 13:52:28 logging2: 0.0 seconds
+2026-05-28 13:52:28 step:83 - timing/gen:273.333 - timing/verify:0.001 - timing/acc&trunc_filter:0.370 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:656.192 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 13:52:28 logging3: 0.1 seconds
+2026-05-28 13:57:02 gen: 273.4 seconds
+2026-05-28 13:57:02 verify: 0.0 seconds
+2026-05-28 13:57:02 before filtering: 8
+2026-05-28 13:57:02 Accuracy distribution: 1.00:2
+2026-05-28 13:57:02 Filtered batch size: 8 (from original size: 8)
+2026-05-28 13:57:02 after filtering: 8
+2026-05-28 13:57:02 acc&trunc_filter: 0.3 seconds
+2026-05-28 13:57:02 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 13:57:02 rollout batch size: 8
+2026-05-28 13:57:02 reward: 0.0 seconds
+2026-05-28 13:57:02 adv: 0.0 seconds
+2026-05-28 14:07:52 update_actor: 649.7 seconds
+2026-05-28 14:07:52 logging1: 0.0 seconds
+2026-05-28 14:07:52 logging2: 0.0 seconds
+2026-05-28 14:07:52 step:84 - timing/gen:273.415 - timing/verify:0.000 - timing/acc&trunc_filter:0.262 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:649.673 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 14:07:52 logging3: 0.0 seconds
+2026-05-28 14:12:22 gen: 270.7 seconds
+2026-05-28 14:12:22 verify: 0.0 seconds
+2026-05-28 14:12:22 before filtering: 8
+2026-05-28 14:12:22 Accuracy distribution: 1.00:2
+2026-05-28 14:12:23 Filtered batch size: 8 (from original size: 8)
+2026-05-28 14:12:23 after filtering: 8
+2026-05-28 14:12:23 acc&trunc_filter: 0.3 seconds
+2026-05-28 14:12:23 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 14:12:23 rollout batch size: 8
+2026-05-28 14:12:23 reward: 0.0 seconds
+2026-05-28 14:12:23 adv: 0.0 seconds
+2026-05-28 14:23:24 update_actor: 661.1 seconds
+2026-05-28 14:23:24 logging1: 0.0 seconds
+2026-05-28 14:23:24 logging2: 0.0 seconds
+2026-05-28 14:23:24 step:85 - timing/gen:270.714 - timing/verify:0.001 - timing/acc&trunc_filter:0.338 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:661.125 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 14:23:24 logging3: 0.0 seconds
+2026-05-28 14:28:27 gen: 303.4 seconds
+2026-05-28 14:28:27 verify: 0.0 seconds
+2026-05-28 14:28:27 before filtering: 8
+2026-05-28 14:28:27 Accuracy distribution: 0.00:1 1.00:1
+2026-05-28 14:28:28 Filtered batch size: 8 (from original size: 8)
+2026-05-28 14:28:28 after filtering: 8
+2026-05-28 14:28:28 acc&trunc_filter: 0.4 seconds
+2026-05-28 14:28:28 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 14:28:28 rollout batch size: 8
+2026-05-28 14:28:28 reward: 0.0 seconds
+2026-05-28 14:28:28 adv: 0.0 seconds
+2026-05-28 14:39:26 update_actor: 657.9 seconds
+2026-05-28 14:39:26 logging1: 0.0 seconds
+2026-05-28 14:39:26 logging2: 0.0 seconds
+2026-05-28 14:39:26 step:86 - timing/gen:303.359 - timing/verify:0.001 - timing/acc&trunc_filter:0.363 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.500 - format_score/all:1.000 - train_verify_score_wo_format/all:0.500 - timing/reward_model:0.000 - train_reward/verifier:0.500 - train_reward/reward_all:2.500 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:657.878 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:2.500 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:2.500 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 14:39:26 logging3: 0.0 seconds
+2026-05-28 14:43:56 gen: 270.4 seconds
+2026-05-28 14:43:56 verify: 0.0 seconds
+2026-05-28 14:43:56 before filtering: 8
+2026-05-28 14:43:56 Accuracy distribution: 1.00:2
+2026-05-28 14:43:56 Filtered batch size: 8 (from original size: 8)
+2026-05-28 14:43:56 after filtering: 8
+2026-05-28 14:43:56 acc&trunc_filter: 0.3 seconds
+2026-05-28 14:43:56 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 14:43:56 rollout batch size: 8
+2026-05-28 14:43:56 reward: 0.0 seconds
+2026-05-28 14:43:56 adv: 0.0 seconds
+2026-05-28 14:55:00 update_actor: 663.9 seconds
+2026-05-28 14:55:00 logging1: 0.0 seconds
+2026-05-28 14:55:00 logging2: 0.0 seconds
+2026-05-28 14:55:00 step:87 - timing/gen:270.378 - timing/verify:0.001 - timing/acc&trunc_filter:0.282 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:663.863 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.004 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 14:55:00 logging3: 0.0 seconds
+2026-05-28 14:59:31 gen: 271.2 seconds
+2026-05-28 14:59:31 verify: 0.0 seconds
+2026-05-28 14:59:31 before filtering: 8
+2026-05-28 14:59:31 Accuracy distribution: 1.00:2
+2026-05-28 14:59:32 Filtered batch size: 8 (from original size: 8)
+2026-05-28 14:59:32 after filtering: 8
+2026-05-28 14:59:32 acc&trunc_filter: 0.5 seconds
+2026-05-28 14:59:32 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 14:59:32 rollout batch size: 8
+2026-05-28 14:59:32 reward: 0.0 seconds
+2026-05-28 14:59:32 adv: 0.0 seconds
+2026-05-28 15:10:32 update_actor: 660.0 seconds
+2026-05-28 15:10:32 logging1: 0.0 seconds
+2026-05-28 15:10:32 logging2: 0.0 seconds
+2026-05-28 15:10:32 step:88 - timing/gen:271.214 - timing/verify:0.001 - timing/acc&trunc_filter:0.492 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:660.020 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 15:10:32 logging3: 0.0 seconds
+2026-05-28 15:15:05 gen: 273.5 seconds
+2026-05-28 15:15:05 verify: 0.0 seconds
+2026-05-28 15:15:05 before filtering: 8
+2026-05-28 15:15:05 Accuracy distribution: 1.00:2
+2026-05-28 15:15:06 Filtered batch size: 8 (from original size: 8)
+2026-05-28 15:15:06 after filtering: 8
+2026-05-28 15:15:06 acc&trunc_filter: 0.3 seconds
+2026-05-28 15:15:06 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 15:15:06 rollout batch size: 8
+2026-05-28 15:15:06 reward: 0.0 seconds
+2026-05-28 15:15:06 adv: 0.0 seconds
+2026-05-28 15:26:13 update_actor: 666.9 seconds
+2026-05-28 15:59:00 testing: 1967.9 seconds
+2026-05-28 15:59:00 step:89 - val/test_score/libero_spatial:0.983 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:1.000 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.983 - val/test_score/all_std:0.128 - val/test_score/all_ci95_halfwidth:0.032 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000
+2026-05-28 15:59:00 logging1: 0.0 seconds
+2026-05-28 15:59:00 logging2: 0.0 seconds
+2026-05-28 15:59:00 step:89 - timing/gen:273.450 - timing/verify:0.001 - timing/acc&trunc_filter:0.293 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:666.906 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - timing/testing:1967.892 - val/test_score/libero_spatial:0.983 - val/test_score_task/libero_spatial_task_0:1.000 - val/test_score_task/libero_spatial_task_1:1.000 - val/test_score_task/libero_spatial_task_2:1.000 - val/test_score_task/libero_spatial_task_3:1.000 - val/test_score_task/libero_spatial_task_4:1.000 - val/test_score_task/libero_spatial_task_5:0.750 - val/test_score_task/libero_spatial_task_6:1.000 - val/test_score_task/libero_spatial_task_7:1.000 - val/test_score_task/libero_spatial_task_8:1.000 - val/test_score_task/libero_spatial_task_9:1.000 - val/test_score/all:0.983 - val/test_score/all_std:0.128 - val/test_score/all_ci95_halfwidth:0.032 - val/test_score/num_rollouts:60.000 - val/test_transition/tasks_started_succeeding_count:0.000 - val/test_transition/tasks_started_failing_count:0.000 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 15:59:00 logging3: 0.0 seconds
+2026-05-28 16:03:42 gen: 281.7 seconds
+2026-05-28 16:03:42 verify: 0.0 seconds
+2026-05-28 16:03:42 before filtering: 8
+2026-05-28 16:03:42 Accuracy distribution: 0.75:1 1.00:1
+2026-05-28 16:03:43 Filtered batch size: 8 (from original size: 8)
+2026-05-28 16:03:43 after filtering: 8
+2026-05-28 16:03:43 acc&trunc_filter: 0.4 seconds
+2026-05-28 16:03:43 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 16:03:43 rollout batch size: 8
+2026-05-28 16:03:43 reward: 0.0 seconds
+2026-05-28 16:03:43 adv: 0.0 seconds
+2026-05-28 16:14:35 update_actor: 652.3 seconds
+2026-05-28 16:14:35 logging1: 0.0 seconds
+2026-05-28 16:14:35 logging2: 0.0 seconds
+2026-05-28 16:14:35 step:90 - timing/gen:281.714 - timing/verify:0.001 - timing/acc&trunc_filter:0.389 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.875 - format_score/all:1.000 - train_verify_score_wo_format/all:0.875 - timing/reward_model:0.000 - train_reward/verifier:0.875 - train_reward/reward_all:4.375 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:652.316 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:1.285 - actor/lr(1e-4):0.100 - critic/score/mean:4.375 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:4.375 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.441 - critic/advantages/max:0.500 - critic/advantages/min:-1.500 - critic/returns/mean:-0.441 - critic/returns/max:0.500 - critic/returns/min:-1.500
+2026-05-28 16:14:35 logging3: 0.0 seconds
+2026-05-28 16:19:06 gen: 271.4 seconds
+2026-05-28 16:19:06 verify: 0.0 seconds
+2026-05-28 16:19:06 before filtering: 8
+2026-05-28 16:19:06 Accuracy distribution: 1.00:2
+2026-05-28 16:19:07 Filtered batch size: 8 (from original size: 8)
+2026-05-28 16:19:07 after filtering: 8
+2026-05-28 16:19:07 acc&trunc_filter: 0.3 seconds
+2026-05-28 16:19:07 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 16:19:07 rollout batch size: 8
+2026-05-28 16:19:07 reward: 0.0 seconds
+2026-05-28 16:19:07 adv: 0.0 seconds
+2026-05-28 16:30:06 update_actor: 659.6 seconds
+2026-05-28 16:30:06 logging1: 0.0 seconds
+2026-05-28 16:30:06 logging2: 0.0 seconds
+2026-05-28 16:30:06 step:91 - timing/gen:271.417 - timing/verify:0.001 - timing/acc&trunc_filter:0.262 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.002 - timing/update_actor:659.635 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 16:30:06 logging3: 0.0 seconds
+2026-05-28 16:34:41 gen: 274.7 seconds
+2026-05-28 16:34:41 verify: 0.0 seconds
+2026-05-28 16:34:41 before filtering: 8
+2026-05-28 16:34:41 Accuracy distribution: 1.00:2
+2026-05-28 16:34:41 Filtered batch size: 8 (from original size: 8)
+2026-05-28 16:34:41 after filtering: 8
+2026-05-28 16:34:41 acc&trunc_filter: 0.4 seconds
+2026-05-28 16:34:41 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 16:34:41 rollout batch size: 8
+2026-05-28 16:34:41 reward: 0.0 seconds
+2026-05-28 16:34:41 adv: 0.0 seconds
+2026-05-28 16:45:26 update_actor: 644.3 seconds
+2026-05-28 16:45:26 logging1: 0.0 seconds
+2026-05-28 16:45:26 logging2: 0.0 seconds
+2026-05-28 16:45:26 step:92 - timing/gen:274.691 - timing/verify:0.001 - timing/acc&trunc_filter:0.380 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:644.314 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.000 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 16:45:26 logging3: 0.0 seconds
+2026-05-28 16:49:57 gen: 271.7 seconds
+2026-05-28 16:49:57 verify: 0.0 seconds
+2026-05-28 16:49:57 before filtering: 8
+2026-05-28 16:49:57 Accuracy distribution: 1.00:2
+2026-05-28 16:49:58 Filtered batch size: 8 (from original size: 8)
+2026-05-28 16:49:58 after filtering: 8
+2026-05-28 16:49:58 acc&trunc_filter: 0.4 seconds
+2026-05-28 16:49:58 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 16:49:58 rollout batch size: 8
+2026-05-28 16:49:58 reward: 0.0 seconds
+2026-05-28 16:49:58 adv: 0.0 seconds
+2026-05-28 17:00:56 update_actor: 657.9 seconds
+2026-05-28 17:00:56 logging1: 0.0 seconds
+2026-05-28 17:00:56 logging2: 0.0 seconds
+2026-05-28 17:00:56 step:93 - timing/gen:271.740 - timing/verify:0.001 - timing/acc&trunc_filter:0.381 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:657.874 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.003 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 17:00:56 logging3: 0.0 seconds
+2026-05-28 17:05:31 gen: 274.7 seconds
+2026-05-28 17:05:31 verify: 0.0 seconds
+2026-05-28 17:05:31 before filtering: 8
+2026-05-28 17:05:31 Accuracy distribution: 1.00:2
+2026-05-28 17:05:31 Filtered batch size: 8 (from original size: 8)
+2026-05-28 17:05:31 after filtering: 8
+2026-05-28 17:05:31 acc&trunc_filter: 0.4 seconds
+2026-05-28 17:05:31 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 17:05:31 rollout batch size: 8
+2026-05-28 17:05:31 reward: 0.0 seconds
+2026-05-28 17:05:31 adv: 0.0 seconds
+2026-05-28 17:16:36 update_actor: 665.1 seconds
+2026-05-28 17:16:36 logging1: 0.0 seconds
+2026-05-28 17:16:36 logging2: 0.0 seconds
+2026-05-28 17:16:36 step:94 - timing/gen:274.667 - timing/verify:0.001 - timing/acc&trunc_filter:0.373 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:665.121 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 17:16:36 logging3: 0.0 seconds
+2026-05-28 17:21:13 gen: 277.4 seconds
+2026-05-28 17:21:13 verify: 0.0 seconds
+2026-05-28 17:21:13 before filtering: 8
+2026-05-28 17:21:13 Accuracy distribution: 1.00:2
+2026-05-28 17:21:14 Filtered batch size: 8 (from original size: 8)
+2026-05-28 17:21:14 after filtering: 8
+2026-05-28 17:21:14 acc&trunc_filter: 0.4 seconds
+2026-05-28 17:21:14 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 17:21:14 rollout batch size: 8
+2026-05-28 17:21:14 reward: 0.0 seconds
+2026-05-28 17:21:14 adv: 0.0 seconds
+2026-05-28 17:31:57 update_actor: 642.8 seconds
+2026-05-28 17:31:57 logging1: 0.0 seconds
+2026-05-28 17:31:57 logging2: 0.0 seconds
+2026-05-28 17:31:57 step:95 - timing/gen:277.434 - timing/verify:0.001 - timing/acc&trunc_filter:0.385 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:642.831 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 17:31:57 logging3: 0.0 seconds
+2026-05-28 17:36:28 gen: 270.9 seconds
+2026-05-28 17:36:28 verify: 0.0 seconds
+2026-05-28 17:36:28 before filtering: 8
+2026-05-28 17:36:28 Accuracy distribution: 1.00:2
+2026-05-28 17:36:28 Filtered batch size: 8 (from original size: 8)
+2026-05-28 17:36:28 after filtering: 8
+2026-05-28 17:36:28 acc&trunc_filter: 0.4 seconds
+2026-05-28 17:36:28 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 17:36:28 rollout batch size: 8
+2026-05-28 17:36:28 reward: 0.0 seconds
+2026-05-28 17:36:28 adv: 0.0 seconds
+2026-05-28 17:47:29 update_actor: 660.6 seconds
+2026-05-28 17:47:29 logging1: 0.0 seconds
+2026-05-28 17:47:29 logging2: 0.0 seconds
+2026-05-28 17:47:29 step:96 - timing/gen:270.863 - timing/verify:0.001 - timing/acc&trunc_filter:0.380 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:660.623 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.001 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 17:47:29 logging3: 0.0 seconds
+2026-05-28 17:52:01 gen: 272.4 seconds
+2026-05-28 17:52:01 verify: 0.0 seconds
+2026-05-28 17:52:01 before filtering: 8
+2026-05-28 17:52:01 Accuracy distribution: 1.00:2
+2026-05-28 17:52:02 Filtered batch size: 8 (from original size: 8)
+2026-05-28 17:52:02 after filtering: 8
+2026-05-28 17:52:02 acc&trunc_filter: 0.4 seconds
+2026-05-28 17:52:02 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 17:52:02 rollout batch size: 8
+2026-05-28 17:52:02 reward: 0.0 seconds
+2026-05-28 17:52:02 adv: 0.0 seconds
+2026-05-28 18:02:55 update_actor: 653.6 seconds
+2026-05-28 18:02:55 logging1: 0.0 seconds
+2026-05-28 18:02:55 logging2: 0.0 seconds
+2026-05-28 18:02:55 step:97 - timing/gen:272.359 - timing/verify:0.001 - timing/acc&trunc_filter:0.381 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:1.000 - format_score/all:1.000 - train_verify_score_wo_format/all:1.000 - timing/reward_model:0.000 - train_reward/verifier:1.000 - train_reward/reward_all:5.000 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:653.595 - actor/pg_loss:0.000 - actor/pg_clipfrac:0.000 - actor/ppo_kl:-0.002 - actor/grad_norm:0.000 - actor/lr(1e-4):0.100 - critic/score/mean:5.000 - critic/score/max:5.000 - critic/score/min:5.000 - critic/rewards/mean:5.000 - critic/rewards/max:5.000 - critic/rewards/min:5.000 - critic/advantages/mean:0.000 - critic/advantages/max:0.000 - critic/advantages/min:0.000 - critic/returns/mean:0.000 - critic/returns/max:0.000 - critic/returns/min:0.000
+2026-05-28 18:02:55 logging3: 0.0 seconds
+2026-05-28 18:07:59 gen: 303.6 seconds
+2026-05-28 18:07:59 verify: 0.0 seconds
+2026-05-28 18:07:59 before filtering: 8
+2026-05-28 18:07:59 Accuracy distribution: 0.50:1 0.75:1
+2026-05-28 18:07:59 Filtered batch size: 8 (from original size: 8)
+2026-05-28 18:07:59 after filtering: 8
+2026-05-28 18:07:59 acc&trunc_filter: 0.4 seconds
+2026-05-28 18:07:59 collected 8 / 8 rollouts and each prompt has 4 responses
+2026-05-28 18:07:59 rollout batch size: 8
+2026-05-28 18:07:59 reward: 0.0 seconds
+2026-05-28 18:07:59 adv: 0.0 seconds
+2026-05-28 18:18:49 update_actor: 650.1 seconds
+2026-05-28 18:18:49 logging1: 0.0 seconds
+2026-05-28 18:18:49 logging2: 0.0 seconds
+2026-05-28 18:18:49 step:98 - timing/gen:303.592 - timing/verify:0.001 - timing/acc&trunc_filter:0.377 - timing/filter_format_error:0.000 - timing/compute_all_entropy:0.000 - train_verify_score/all:0.625 - format_score/all:1.000 - train_verify_score_wo_format/all:0.625 - timing/reward_model:0.000 - train_reward/verifier:0.625 - train_reward/reward_all:3.125 - critic/kl:0.000 - critic/kl_coeff:0.000 - timing/adv:0.003 - timing/update_actor:650.082 - actor/pg_loss:0.001 - actor/pg_clipfrac:0.031 - actor/ppo_kl:-0.002 - actor/grad_norm:2.123 - actor/lr(1e-4):0.100 - critic/score/mean:3.125 - critic/score/max:5.000 - critic/score/min:0.000 - critic/rewards/mean:3.125 - critic/rewards/max:5.000 - critic/rewards/min:0.000 - critic/advantages/mean:-0.607 - critic/advantages/max:0.866 - critic/advantages/min:-1.500 - critic/returns/mean:-0.607 - critic/returns/max:0.866 - critic/returns/min:-1.500
+2026-05-28 18:18:49 logging3: 0.0 seconds

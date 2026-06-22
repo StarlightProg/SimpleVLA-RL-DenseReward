@@ -435,7 +435,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         task_suite = benchmark_dict[task_name]()
     task = task_suite.get_task(task_id)
     initial_states = task_suite.get_task_init_states(task_id)
-    initial_state = initial_states[trial_id]
+    initial_state = initial_states[trial_id % len(initial_states)]
     
     env = None
     while True:
@@ -561,6 +561,7 @@ class RobHFRollout(BaseRollout):
             "libero_goal": 512,
             "libero_10": 512,
             "libero_90": 512,
+            "libero_cube_place": 320,
             "robotwin2_click_bell": 200,
             "robotwin2_move_can_pot": 200,
             "robotwin2_place_phone_stand": 200,
@@ -660,7 +661,7 @@ class RobHFRollout(BaseRollout):
     def process_input(self, inputs: list, task_descriptions: list):
         """Unified input processing for both Robotwin and Libero"""
         batchdata = {"input_ids": [], "attention_mask": [], "pixel_values": []}
-        if self.config.use_proprio and "robotwin" in self.config.task_suite_name:
+        if self.config.use_proprio:
             batchdata["proprio"] = []
         
         for i in range(len(inputs)):
@@ -714,8 +715,7 @@ class RobHFRollout(BaseRollout):
             batchdata["attention_mask"].append(attention_mask)
             batchdata["pixel_values"].append(pixel_values)
             
-            # Process proprioception for Robotwin
-            if self.config.use_proprio and "robotwin" in self.config.task_suite_name:
+            if self.config.use_proprio:
                 proprio = input_data["state"]
                 proprio_norm_stats = self.module.norm_stats[self.config.unnorm_key]["proprio"]
                 proprio = normalize_proprio(proprio, proprio_norm_stats)
@@ -740,7 +740,7 @@ class RobHFRollout(BaseRollout):
             
             batchdata["pixel_values"] = torch.cat(batchdata["pixel_values"], dim=0).to(device)
             
-            if self.config.use_proprio and "robotwin" in self.config.task_suite_name:
+            if self.config.use_proprio:
                 batchdata["proprio"] = torch.stack(batchdata["proprio"], dim=0).to(device)
                 
             assert torch.all(batchdata["attention_mask"].ne(0) == batchdata["input_ids"].ne(self.processor.tokenizer.pad_token_id))
@@ -1097,6 +1097,8 @@ class RobHFRollout(BaseRollout):
                         "action": actions,
                         "step": step
                     }
+                    if vla_output.get("proprio") is not None:
+                        step_data["proprio"] = vla_output["proprio"]
                     vla_history.append(step_data)
 
                 for idx in active_indices:
@@ -1186,7 +1188,7 @@ class RobHFRollout(BaseRollout):
         }
         
         key_names = ["responses", "input_ids", "attention_mask", "pixel_values"]
-        if self.config.use_proprio and "robotwin" in self.config.task_suite_name:
+        if self.config.use_proprio:
             batch["proprio"] = []
             key_names.append("proprio")
 

@@ -40,7 +40,7 @@ class LiberoStateExtractor:
         gripper_open = self._gripper_open(obs)
         object_name, target_name = self._task_object_and_target(task_metadata)
         object_position = self._object_position(obs, gripper_position, task_metadata, object_name)
-        target_position = self._target_position(obs, task_metadata, target_name)
+        target_position = self._target_position(obs, task_metadata, target_name, env)
         success = self._success(env, info, done)
 
         return LiberoState(
@@ -128,6 +128,7 @@ class LiberoStateExtractor:
         obs: Mapping[str, Any],
         task_metadata: Mapping[str, Any],
         target_name: str | None = None,
+        env: Any = None,
     ) -> np.ndarray | None:
         if target_name:
             for key in self._position_key_candidates(str(target_name)):
@@ -142,6 +143,28 @@ class LiberoStateExtractor:
             value = self._vec3(obs.get(key))
             if value is not None:
                 return value
+
+        if env is not None:
+            sim = getattr(env, "sim", None)
+            data = getattr(sim, "data", None)
+            get_site_xpos = getattr(data, "get_site_xpos", None)
+            if callable(get_site_xpos):
+                if target_name:
+                    try:
+                        value = self._vec3(get_site_xpos(str(target_name)))
+                    except Exception:
+                        value = None
+                    if value is not None:
+                        return value
+                site_names = getattr(env, "object_sites_dict", {})
+                for site_name in site_names:
+                    if any(token in str(site_name).lower() for token in ("target", "goal")):
+                        try:
+                            value = self._vec3(get_site_xpos(str(site_name)))
+                        except Exception:
+                            continue
+                        if value is not None:
+                            return value
 
         target_tokens = ("target", "goal", "zone", "region", "site")
         for key, value in obs.items():
@@ -199,12 +222,13 @@ class LiberoStateExtractor:
             if key in info:
                 return bool(info[key])
         if env is not None:
-            checker = getattr(env, "_check_success", None)
-            if callable(checker):
-                try:
-                    return bool(checker())
-                except Exception:
-                    pass
+            for checker_name in ("check_success", "_check_success"):
+                checker = getattr(env, checker_name, None)
+                if callable(checker):
+                    try:
+                        return bool(checker())
+                    except Exception:
+                        pass
         return bool(done)
 
 

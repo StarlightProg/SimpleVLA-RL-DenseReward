@@ -24,6 +24,7 @@ DATASET_NAME="libero_spatial"
 VLA_NAME="openvla-oft"
 NUM_GPUS=2
 NUM_NODES=1
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ALIGN_PATH="/home/akornaev/workspace/vla/SimpleVLA-RL-BatchSliceFix/align.json"
 
 bash examples/overwrite_vla_ckpt_utils.sh $SFT_MODEL_PATH
@@ -82,6 +83,7 @@ HYDRA_FULL_ERROR=1 python -u -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.val_micro_batch_size=1 \
     actor_rollout_ref.rollout.temperature=1.6 \
     actor_rollout_ref.rollout.experiment_name=$EXPERIMENT_NAME \
+    actor_rollout_ref.rollout.rollout_dir=$REPO_ROOT/rollouts \
     actor_rollout_ref.rollout.micro_batch_size=1 \
     actor_rollout_ref.rollout.unnorm_key=$DATASET_NAME \
     actor_rollout_ref.rollout.model_family=openvla \
@@ -105,7 +107,7 @@ HYDRA_FULL_ERROR=1 python -u -m verl.trainer.main_ppo \
     trainer.default_local_dir=$CKPT_PATH/$PROJECT_NAME/$EXPERIMENT_NAME \
     trainer.n_gpus_per_node=$NUM_GPUS \
     trainer.nnodes=$NUM_NODES \
-    trainer.save_freq=1000 \
+    trainer.save_freq=20 \
     trainer.test_freq=10 \
     trainer.validation.target_rollouts=60 \
     trainer.validation.save_video=True \

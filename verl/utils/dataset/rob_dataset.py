@@ -80,7 +80,7 @@ class LIBERO_Dataset(Dataset):
         num_tasks_in_suite = task_suite.n_tasks
         dataframes = []
         
-        if self.task_suite_name in ["libero_10", "libero_90", "libero_goal",  "libero_object",  "libero_spatial"]:
+        if self.task_suite_name in benchmark_dict:
             for task_id in range(num_tasks_in_suite):
                 if self.train_val == "train":
                     trials_range = list(range(0, int(self.num_trials_per_task)))

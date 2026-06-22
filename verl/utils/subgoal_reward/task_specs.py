@@ -24,7 +24,8 @@ class TaskSpec:
 def infer_task_spec(state: LiberoState, thresholds: Thresholds) -> TaskSpec | None:
     text = " ".join(part for part in [state.task_name, state.instruction] if part).lower()
     looks_like_pick_place = any(word in text for word in ("put", "place", "pick")) and any(
-        word in text for word in ("on", "in", "into", "onto", "to")
+        word in text
+        for word in ("on", "in", "into", "onto", "to", "above", "right", "left", "below", "next")
     )
     if not looks_like_pick_place:
         return None

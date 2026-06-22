@@ -189,7 +189,11 @@ class RobActorRolloutRefWorker(Worker):
 
     def _collect_lora_state_dict_from_fsdp(self, adapter_name: str = "default"):
         import torch.distributed as dist
-        from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+        from torch.distributed.fsdp import (
+            FullStateDictConfig,
+            FullyShardedDataParallel as FSDP,
+            StateDictType,
+        )
 
         peft_config = self.actor_module.peft_config[adapter_name]
         if getattr(peft_config, "bias", "none") != "none":
@@ -204,26 +208,43 @@ class RobActorRolloutRefWorker(Worker):
 
         lora_state = {}
         total_tensors = 0
+        full_state_config = FullStateDictConfig(
+            offload_to_cpu=True,
+            rank0_only=True,
+        )
 
         for module_name, module in lora_modules:
-            with FSDP.summon_full_params(
+            # Each LoRA A/B projection is independently wrapped by FSDP. Asking
+            # that leaf wrapper for a full state dict reconstructs only its tiny
+            # weight instead of gathering the complete VLA model on rank 0.
+            with FSDP.state_dict_type(
                 module,
-                recurse=False,
-                writeback=False,
-                rank0_only=True,
-                offload_to_cpu=True,
+                StateDictType.FULL_STATE_DICT,
+                full_state_config,
             ):
-                if dist.get_rank() != 0:
-                    continue
+                module_state = module.state_dict()
 
-                wrapped_module = module._fsdp_wrapped_module
-                module_state = wrapped_module.state_dict()
-                for param_name, param_value in module_state.items():
-                    full_name = self._normalize_fsdp_state_key(f"{module_name}.{param_name}")
-                    if "lora_" not in full_name:
-                        continue
-                    lora_state[full_name] = param_value.detach().cpu().clone()
-                    total_tensors += 1
+            if dist.get_rank() != 0:
+                continue
+
+            normalized_module_name = self._normalize_fsdp_state_key(module_name)
+            for param_name, param_value in module_state.items():
+                param_name = self._normalize_fsdp_state_key(param_name)
+                full_name = f"{normalized_module_name}.{param_name}"
+                if "lora_" not in full_name:
+                    continue
+                if "_flat_param" in full_name:
+                    raise RuntimeError(
+                        f"FSDP returned a flattened LoRA parameter for {full_name}; "
+                        "refusing to write an unloadable PEFT adapter."
+                    )
+                if param_value.ndim < 2:
+                    raise RuntimeError(
+                        f"LoRA parameter {full_name} has invalid shape {tuple(param_value.shape)}; "
+                        "expected a reconstructed PEFT weight."
+                    )
+                lora_state[full_name] = param_value.detach().cpu().clone()
+                total_tensors += 1
 
         if dist.get_rank() == 0:
             print(f"[rank-{self.rank}]: Collected {total_tensors} LoRA tensors from nested FSDP modules")
@@ -402,20 +423,30 @@ class RobActorRolloutRefWorker(Worker):
             # lora add
             if self._is_lora:
                 ensure_peft_available()
-                print("Applying LoRA to actor module")
-
-                lora_config = {
-                    'r': self.config.model.lora_rank,
-                    'lora_alpha': self.config.model.lora_alpha,
-                    "lora_dropout": 0 ,
-                    'target_modules': resolve_vla_lora_target_modules(
+                lora_adapter_path = self.config.model.get("lora_adapter_path", None)
+                if lora_adapter_path:
+                    lora_adapter_path = copy_local_path_from_hdfs(lora_adapter_path)
+                    print(f"Loading LoRA adapter from {lora_adapter_path}")
+                    actor_module = PeftModel.from_pretrained(
                         actor_module,
-                        self.config.model.target_modules,
-                        use_proprio=self.config.rollout.use_proprio,
-                    ),
-                    'init_lora_weights': "gaussian"
-                }
-                actor_module = get_peft_model(actor_module, LoraConfig(**lora_config))
+                        lora_adapter_path,
+                        is_trainable=self._is_actor,
+                    )
+                else:
+                    print("Applying LoRA to actor module")
+
+                    lora_config = {
+                        'r': self.config.model.lora_rank,
+                        'lora_alpha': self.config.model.lora_alpha,
+                        "lora_dropout": 0 ,
+                        'target_modules': resolve_vla_lora_target_modules(
+                            actor_module,
+                            self.config.model.target_modules,
+                            use_proprio=self.config.rollout.use_proprio,
+                        ),
+                        'init_lora_weights': "gaussian"
+                    }
+                    actor_module = get_peft_model(actor_module, LoraConfig(**lora_config))
                 actor_module.print_trainable_parameters()
             # lora end
                 
