@@ -2,11 +2,8 @@
 ray stop --force 2>/dev/null || true
 sleep 1
 
-set -x
-
 export NCCL_DEBUG=WARN
 export NCCL_ASYNC_ERROR_HANDLING=1
-export WANDB_API_KEY=''
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=true
 export TF_CPP_MIN_LOG_LEVEL=3
@@ -16,18 +13,51 @@ export ROBOT_PLATFORM=LIBERO
 export MUJOCO_GL=egl
 export VERL_FSDP_SUMMON_OFFLOAD_CPU=0
 
-PROJECT_NAME='SimpleVLA-RL'
-EXPERIMENT_NAME='simplevla-rl-libero-lora-dense-020-phase-03-2L40-grad-clip-05'
-SFT_MODEL_PATH="/home/akornaev/workspace/vla/openvla_model"
-CKPT_PATH="/home/akornaev/workspace/vla/checkpoints"
-DATASET_NAME="libero_spatial"
-VLA_NAME="openvla-oft"
-NUM_GPUS=2
-NUM_NODES=1
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ALIGN_PATH="/home/akornaev/workspace/vla/SimpleVLA-RL-BatchSliceFix/align.json"
+PROJECT_NAME="${PROJECT_NAME:-SimpleVLA-RL}"
+EXPERIMENT_NAME="${EXPERIMENT_NAME:-simplevla-rl-libero-lora-dense-020-phase-03-2L40-grad-clip-05}"
+SFT_MODEL_PATH="${SFT_MODEL_PATH:-${REPO_ROOT}/../openvla_model}"
+CKPT_PATH="${CKPT_PATH:-${REPO_ROOT}/../checkpoints}"
+DATASET_NAME="${DATASET_NAME:-libero_spatial}"
+VLA_NAME="${VLA_NAME:-openvla-oft}"
+NUM_GPUS="${NUM_GPUS:-2}"
+NUM_NODES="${NUM_NODES:-1}"
+ALIGN_PATH="${ALIGN_PATH:-${REPO_ROOT}/align.json}"
+WANDB_MODE="${WANDB_MODE:-offline}"
 
-bash examples/overwrite_vla_ckpt_utils.sh $SFT_MODEL_PATH
+RUNTIME_ALIGN_PATH="${TMPDIR:-${REPO_ROOT}/tmp}/align.runtime.json"
+mkdir -p "$(dirname "${RUNTIME_ALIGN_PATH}")"
+export ALIGN_PATH RUNTIME_ALIGN_PATH
+python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+source = Path(os.environ["ALIGN_PATH"])
+target = Path(os.environ["RUNTIME_ALIGN_PATH"])
+config = json.loads(source.read_text(encoding="utf-8"))
+env_vars = config.setdefault("env_vars", {})
+if os.environ.get("WANDB_API_KEY"):
+    env_vars["WANDB_API_KEY"] = os.environ["WANDB_API_KEY"]
+else:
+    env_vars.pop("WANDB_API_KEY", None)
+target.write_text(json.dumps(config, indent=2), encoding="utf-8")
+PY
+ALIGN_PATH="${RUNTIME_ALIGN_PATH}"
+
+set -x
+
+if [ ! -f "${SFT_MODEL_PATH}/config.json" ]; then
+    echo "Missing OpenVLA-OFT checkpoint config: ${SFT_MODEL_PATH}/config.json" >&2
+    exit 1
+fi
+if [ ! -f "${SFT_MODEL_PATH}/dataset_statistics.json" ]; then
+    echo "Missing action normalization statistics: ${SFT_MODEL_PATH}/dataset_statistics.json" >&2
+    exit 1
+fi
+mkdir -p "${CKPT_PATH}" "${REPO_ROOT}/rollouts"
+
+bash examples/overwrite_vla_ckpt_utils.sh "${SFT_MODEL_PATH}"
 
 # Silence robosuite macro warning in every worker by creating macros_private.py once.
 ROBOSUITE_ROOT="$(python - <<'PY'
@@ -124,6 +154,6 @@ HYDRA_FULL_ERROR=1 python -u -m verl.trainer.main_ppo \
     reward.subgoal.mode=add \
     reward.subgoal.log=True \
     trainer.runtime_env=$ALIGN_PATH \
-    trainer.wandb_mode=online \
+    trainer.wandb_mode="${WANDB_MODE}" \
     trainer.val_before_train=False \
     "$@"

@@ -257,6 +257,57 @@ class RobActorRolloutRefWorker(Worker):
 
         return lora_state
 
+    @staticmethod
+    def _validate_saved_lora_adapter(adapter_path: str, expected_rank: int, adapter_name: str = "default"):
+        from safetensors.torch import safe_open
+
+        weights_path = os.path.join(adapter_path, "adapter_model.safetensors")
+        if not os.path.exists(weights_path):
+            raise RuntimeError(f"LoRA adapter save did not create {weights_path}")
+
+        tensor_count = 0
+        lora_a_count = 0
+        lora_b_count = 0
+        invalid_shapes = []
+
+        with safe_open(weights_path, framework="pt", device="cpu") as tensors:
+            for key in tensors.keys():
+                if "_flat_param" in key:
+                    raise RuntimeError(
+                        f"Saved LoRA adapter still contains flattened FSDP parameter {key}; "
+                        "checkpoint is not loadable as a PEFT adapter."
+                    )
+
+                if "lora_" not in key:
+                    continue
+
+                tensor = tensors.get_tensor(key)
+                tensor_count += 1
+
+                if tensor.ndim < 2:
+                    invalid_shapes.append((key, tuple(tensor.shape)))
+                    continue
+
+                if f"lora_A.{adapter_name}.weight" in key:
+                    lora_a_count += 1
+                    if tensor.shape[0] != expected_rank:
+                        invalid_shapes.append((key, tuple(tensor.shape)))
+                elif f"lora_B.{adapter_name}.weight" in key:
+                    lora_b_count += 1
+                    if tensor.shape[1] != expected_rank:
+                        invalid_shapes.append((key, tuple(tensor.shape)))
+
+        if tensor_count == 0 or lora_a_count == 0 or lora_b_count == 0:
+            raise RuntimeError(
+                f"Saved LoRA adapter at {adapter_path} is missing normal LoRA A/B tensors "
+                f"(total={tensor_count}, A={lora_a_count}, B={lora_b_count})."
+            )
+        if invalid_shapes:
+            preview = ", ".join(f"{name}: {shape}" for name, shape in invalid_shapes[:5])
+            raise RuntimeError(
+                f"Saved LoRA adapter at {adapter_path} has invalid tensor shapes for rank {expected_rank}: {preview}"
+            )
+
     def _build_model_optimizer(self,
                                model_path,
                                fsdp_config,
@@ -800,10 +851,20 @@ class RobActorRolloutRefWorker(Worker):
                         state_dict=lora_params,
                         safe_serialization=True
                     )
+                    self._validate_saved_lora_adapter(
+                        lora_save_path,
+                        expected_rank=int(self.config.model.lora_rank),
+                        adapter_name="default",
+                    )
                     del lora_params
                     gc.collect()
             else:
                 self.actor_module.save_pretrained(lora_save_path, safe_serialization=True)
+                self._validate_saved_lora_adapter(
+                    lora_save_path,
+                    expected_rank=int(self.config.model.lora_rank),
+                    adapter_name="default",
+                )
 
             dist.barrier()
             if dist.get_rank() == 0:
