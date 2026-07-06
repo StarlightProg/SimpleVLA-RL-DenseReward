@@ -36,6 +36,7 @@ from verl.single_controller.ray import RayResourcePool, RayWorkerGroup, RayClass
 from verl.single_controller.ray.base import create_colocated_worker_cls
 from verl import DataProto
 from verl.trainer.ppo import core_algos
+from verl.utils.accuracy_distribution import accuracy_distribution_counts, accuracy_distribution_metric_values
 from verl.utils.dataset.rob_dataset import BufferedDataLoader
 
 WorkerType = Type[Worker]
@@ -291,6 +292,8 @@ class RayTrainer(object):
 
         self.validation_call_idx = 0
         self.prev_val_task_success_state = {}
+        self.accuracy_distribution_cumulative_counts = Counter()
+        self.accuracy_distribution_step_counts = Counter()
         self._create_dataloader()
 
     @staticmethod
@@ -586,6 +589,22 @@ class RayTrainer(object):
         self.actor_rollout_wg = all_wg['actor_rollout']
         self.actor_rollout_wg.init_model()
 
+    def _reset_accuracy_distribution_step_counts(self):
+        self.accuracy_distribution_step_counts = Counter()
+
+    def _record_accuracy_distribution(self, acc_tensor, n_samples: int):
+        counts = accuracy_distribution_counts(acc_tensor.detach().cpu().tolist(), n_samples)
+        self.accuracy_distribution_step_counts.update(counts)
+        self.accuracy_distribution_cumulative_counts.update(counts)
+        return counts
+
+    def _accuracy_distribution_metrics(self, n_samples: int):
+        return accuracy_distribution_metric_values(
+            self.accuracy_distribution_step_counts,
+            self.accuracy_distribution_cumulative_counts,
+            n_samples,
+        )
+
     def fit(self):
         """
         The training loop of VLA-RL.
@@ -630,6 +649,7 @@ class RayTrainer(object):
                 metrics['timing/acc&trunc_filter'] = 0
                 metrics['timing/filter_format_error'] = 0
                 metrics['timing/compute_all_entropy'] = 0
+                self._reset_accuracy_distribution_step_counts()
 
                 while len(valid_batch) < batch_size * n_samples:
                     try:
@@ -819,6 +839,7 @@ class RayTrainer(object):
                     data_metrics = compute_data_metrics(batch=batch, config = self.config)
                 with Timer(name='logging2', text="{name}: {seconds:.1f} seconds") as timer:
                     metrics.update(data_metrics)
+                    metrics.update(self._accuracy_distribution_metrics(n_samples))
                 with Timer(name='logging3', text="{name}: {seconds:.1f} seconds") as timer:
                     # TODO: make a canonical logger that supports various backend
                     logger.log(data=metrics, step=global_steps)
@@ -912,7 +933,7 @@ class RayTrainer(object):
         if self.config.data.filter_accuracy:
             reward_matrix = reward_tensor.sum(-1).reshape(-1, n_samples)
             acc_tensor = torch.mean(reward_matrix, dim=-1)
-            counts = Counter(acc_tensor.tolist())
+            counts = self._record_accuracy_distribution(acc_tensor, n_samples)
             print("Accuracy distribution:", " ".join(f"{k:.2f}:{v}" for k, v in sorted(counts.items())))
 
             acc_mask = (acc_tensor >= self.config.data.accuracy_lower_bound) & (

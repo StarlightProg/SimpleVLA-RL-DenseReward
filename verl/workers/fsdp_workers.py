@@ -42,6 +42,7 @@ from codetiming import Timer
 
 
 from verl.utils.openvla_utils import update_auto_map , check_model_logic_mismatch, package_openvla_oft_checkpoint
+from verl.utils.lora_checkpoint import lora_weight_kind_from_key, validate_lora_weight_shape
 import json
 
 try:
@@ -92,6 +93,22 @@ def ensure_peft_available():
             "Install a PEFT release compatible with your OpenVLA/OpenVLA-OFT environment before setting "
             "`model.lora_rank > 0`."
         ) from PEFT_IMPORT_ERROR
+
+
+def set_vla_norm_stats(model, norm_stats):
+    targets = [model]
+    base_model = getattr(model, "base_model", None)
+    if base_model is not None:
+        targets.append(base_model)
+        wrapped_model = getattr(base_model, "model", None)
+        if wrapped_model is not None:
+            targets.append(wrapped_model)
+
+    for target in targets:
+        try:
+            target.norm_stats = norm_stats
+        except Exception:
+            pass
 
 
 def resolve_vla_lora_target_modules(model, target_modules, use_proprio=False):
@@ -288,13 +305,14 @@ class RobActorRolloutRefWorker(Worker):
                     invalid_shapes.append((key, tuple(tensor.shape)))
                     continue
 
-                if f"lora_A.{adapter_name}.weight" in key:
+                lora_kind = lora_weight_kind_from_key(key, adapter_name=adapter_name)
+                if lora_kind == "A":
                     lora_a_count += 1
-                    if tensor.shape[0] != expected_rank:
+                    if not validate_lora_weight_shape(lora_kind, tuple(tensor.shape), expected_rank):
                         invalid_shapes.append((key, tuple(tensor.shape)))
-                elif f"lora_B.{adapter_name}.weight" in key:
+                elif lora_kind == "B":
                     lora_b_count += 1
-                    if tensor.shape[1] != expected_rank:
+                    if not validate_lora_weight_shape(lora_kind, tuple(tensor.shape), expected_rank):
                         invalid_shapes.append((key, tuple(tensor.shape)))
 
         if tensor_count == 0 or lora_a_count == 0 or lora_b_count == 0:
@@ -483,6 +501,12 @@ class RobActorRolloutRefWorker(Worker):
                         lora_adapter_path,
                         is_trainable=self._is_actor,
                     )
+                    adapter_stats_path = os.path.join(os.path.dirname(lora_adapter_path), "dataset_statistics.json")
+                    if os.path.isfile(adapter_stats_path):
+                        with open(adapter_stats_path, "r") as f:
+                            adapter_norm_stats = json.load(f)
+                        set_vla_norm_stats(actor_module, adapter_norm_stats)
+                        print(f"Loaded action normalization statistics from LoRA checkpoint: {adapter_stats_path}")
                 else:
                     print("Applying LoRA to actor module")
 
