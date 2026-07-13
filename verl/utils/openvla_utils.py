@@ -14,7 +14,6 @@ import numpy as np
 import tensorflow as tf
 import torch
 from PIL import Image
-from transformers import AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor
 
 # Apply JSON numpy patch for serialization
 json_numpy.patch()
@@ -210,7 +209,6 @@ def package_openvla_oft_checkpoint(
             shutil.copy2(src_stats, dataset_statistics_path)
 
     update_auto_map(str(checkpoint_dir))
-
 
 
 

@@ -41,6 +41,16 @@ class RobRewardManager():
             return {}
         return reward_cfg.get("subgoal", {})
 
+    def _valid_response_length(self, data: DataProto):
+        model_vla = getattr(self.config.actor_rollout_ref.model, "vla", None)
+        if model_vla == "smolvla":
+            if "action" in data.batch.keys():
+                chunk_len = int(data.batch["action"].size(2))
+            else:
+                chunk_len = int(self.config.actor_rollout_ref.model.action_chunks_len)
+            return torch.div(data.batch['finish_step'] + chunk_len - 1, chunk_len, rounding_mode='floor')
+        return data.batch['finish_step'] * self.config.actor_rollout_ref.model.action_token_len
+
     def _subgoal_dense_tokens(self, data: DataProto):
         if "reward_total" not in data.batch.keys():
             return None
@@ -48,7 +58,7 @@ class RobRewardManager():
         dense_values = data.batch["reward_total"]
         dense_tokens = torch.zeros_like(data.batch['responses'], dtype=torch.float32).reshape((data.batch['responses'].shape[0], -1))
         response_tokens_per_step = data.batch['responses'].size(-1)
-        valid_response_length = data.batch['finish_step'] * self.config.actor_rollout_ref.model.action_token_len
+        valid_response_length = self._valid_response_length(data)
         for i in range(dense_tokens.shape[0]):
             valid_length = int(valid_response_length[i].item())
             for step in range(dense_values.shape[1]):
@@ -114,7 +124,7 @@ class RobRewardManager():
         reward_tensor = reward_tensor.reshape((reward_tensor.shape[0],-1))
         verifier_reward = verifier_reward.reshape((verifier_reward.shape[0],-1))
         
-        valid_response_length = data.batch['finish_step'] * self.config.actor_rollout_ref.model.action_token_len 
+        valid_response_length = self._valid_response_length(data)
        
         if 'acc' in data.batch:
             # the separated rewards have been logged; now we add format correctness back for reward shaping
@@ -124,7 +134,8 @@ class RobRewardManager():
             verifier_score, verifier_metrics, format_metrics, reward_format_metrics = self.verify(data)
             reward_metrics.update(verifier_metrics)
         for i in range(verifier_reward.shape[0]):
-            verifier_reward[i,valid_response_length[i]-1] += verifier_score[i]
+            reward_index = max(0, min(int(valid_response_length[i].item()) - 1, verifier_reward.shape[1] - 1))
+            verifier_reward[i, reward_index] += verifier_score[i]
             
         reward_tensor_dict['gt_scores'] = verifier_reward
 
@@ -194,7 +205,7 @@ def main_task(config):
 
     # instantiate tokenizer
     from verl.utils import hf_tokenizer
-    tokenizer = hf_tokenizer(local_path)
+    tokenizer = hf_tokenizer(local_path, model=config.actor_rollout_ref.model.vla)
 
     # define worker classes
     if config.actor_rollout_ref.actor.strategy == 'fsdp':

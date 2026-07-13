@@ -18,6 +18,7 @@ The main entry point to run the PPO algorithm
 import os
 import logging
 import warnings
+import contextlib
 import ray
 import torch
 import torch.distributed
@@ -43,6 +44,7 @@ from codetiming import Timer
 
 from verl.utils.openvla_utils import update_auto_map , check_model_logic_mismatch, package_openvla_oft_checkpoint
 from verl.utils.lora_checkpoint import lora_weight_kind_from_key, validate_lora_weight_shape
+from verl.utils.smolvla_utils import get_smolvla_tokenizer, load_smolvla_policy
 import json
 
 try:
@@ -135,6 +137,22 @@ def resolve_vla_lora_target_modules(model, target_modules, use_proprio=False):
     return target_modules
 
 
+def resolve_smolvla_lora_target_modules(model, target_modules):
+    target_modules = convert_to_regular_types(target_modules)
+    if isinstance(target_modules, str):
+        preset = target_modules.strip().lower()
+        if preset in {"default", "smolvla-default", "action-expert", "action_expert"}:
+            if hasattr(model, "_get_default_peft_targets"):
+                return model._get_default_peft_targets().get("target_modules")
+            return r"(model\.vlm_with_expert\.lm_expert\..*\.(q|v)_proj|model\.(state_proj|action_in_proj|action_out_proj|action_time_mlp_in|action_time_mlp_out))"
+        if preset == "all-linear":
+            return "all-linear"
+        return target_modules
+    if isinstance(target_modules, tuple):
+        return list(target_modules)
+    return target_modules
+
+
 class RobActorRolloutRefWorker(Worker):
     """
     This worker can be instantiated as a standalone actor or a standalone rollout or a standalone reference policy
@@ -218,6 +236,17 @@ class RobActorRolloutRefWorker(Worker):
 
         lora_modules = list(self._iter_fsdp_lora_leaf_modules(adapter_name=adapter_name))
         if not lora_modules:
+            if self.config.model.vla == "smolvla" and get_peft_model_state_dict is not None:
+                if dist.get_rank() == 0:
+                    lora_state = {
+                        key: value.detach().cpu().clone()
+                        for key, value in get_peft_model_state_dict(self.actor_module, adapter_name=adapter_name).items()
+                    }
+                    print(f"[rank-{self.rank}]: Collected {len(lora_state)} LoRA tensors from root FSDP module")
+                    if not lora_state:
+                        raise RuntimeError("Collected zero LoRA tensors from root FSDP module; aborting adapter save.")
+                    return lora_state
+                return None
             raise RuntimeError(
                 "Could not find any FSDP-wrapped LoRA leaf modules to save. "
                 "This indicates the LoRA adapter structure does not match the expected FSDP wrapping layout."
@@ -335,7 +364,7 @@ class RobActorRolloutRefWorker(Worker):
                                trust_remote_code=False):
         from verl.utils.model import print_model_size, update_model_config
         from verl.utils.torch_dtypes import PrecisionType
-        from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, AutoImageProcessor, AutoModelForVision2Seq, AutoProcessor
+        from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig, AutoImageProcessor, AutoProcessor
         from torch.distributed.fsdp import FullyShardedDataParallel as FSDP, ShardingStrategy, MixedPrecision, \
             CPUOffload
         from torch import optim
@@ -346,6 +375,13 @@ class RobActorRolloutRefWorker(Worker):
         #add oft
          
         if self.config.model.vla == "openvla-oft":
+            try:
+                from transformers import AutoModelForVision2Seq
+            except ImportError as exc:
+                raise ImportError(
+                    "OpenVLA/OpenVLA-OFT loading requires a Transformers version that provides "
+                    "`AutoModelForVision2Seq`. Use the OpenVLA training environment for OpenVLA runs."
+                ) from exc
             from verl.utils.vla_utils.openvla_oft.configuration_prismatic import OpenVLAConfig
             from verl.utils.vla_utils.openvla_oft.modeling_prismatic import OpenVLAForActionPrediction
             from verl.utils.vla_utils.openvla_oft.processing_prismatic import PrismaticImageProcessor, PrismaticProcessor
@@ -360,6 +396,13 @@ class RobActorRolloutRefWorker(Worker):
             torch.distributed.barrier()
             
         elif self.config.model.vla == "openvla":
+            try:
+                from transformers import AutoModelForVision2Seq
+            except ImportError as exc:
+                raise ImportError(
+                    "OpenVLA loading requires a Transformers version that provides "
+                    "`AutoModelForVision2Seq`. Use the OpenVLA training environment for OpenVLA runs."
+                ) from exc
             from verl.utils.vla_utils.openvla.configuration_prismatic import OpenVLAConfig
             from verl.utils.vla_utils.openvla.modeling_prismatic import OpenVLAForActionPrediction
             from verl.utils.vla_utils.openvla.processing_prismatic import PrismaticImageProcessor, PrismaticProcessor
@@ -376,7 +419,10 @@ class RobActorRolloutRefWorker(Worker):
 
         # note that we have to create model in fp32. Otherwise, the optimizer is in bf16, which is incorrect
         # TODO(zhangchi.usc1992): 1. support create from random initialized model. 2. Support init with FSDP directly
-        self.tokenizer = hf_tokenizer(local_path, trust_remote_code=trust_remote_code, model = self.config.model.vla)
+        if self.config.model.vla == "smolvla":
+            self.tokenizer = None
+        else:
+            self.tokenizer = hf_tokenizer(local_path, trust_remote_code=trust_remote_code, model = self.config.model.vla)
 
         torch_dtype = fsdp_config.get('model_dtype', None)
         if torch_dtype is None:
@@ -384,34 +430,41 @@ class RobActorRolloutRefWorker(Worker):
         else:
             torch_dtype = PrecisionType.to_dtype(torch_dtype)
 
-        # override model kwargs
-        actor_model_config = AutoConfig.from_pretrained(local_path, trust_remote_code=trust_remote_code)
-        if self.config.model.use_remove_padding:
-            from verl.models.registry import check_model_support_rmpad
-            check_model_support_rmpad(actor_model_config.model_type)
-        override_config_kwargs = {
-            'bos_token_id': self.tokenizer.bos_token_id,
-            'eos_token_id': self.tokenizer.eos_token_id,
-            'pad_token_id': self.tokenizer.pad_token_id,
-        }
-        if self.config.rollout.use_proprio:
-            override_config_kwargs["use_proprio"] = True
-            override_config_kwargs["proprio_dim"] = self.config.model.action_token_len
+        if self.config.model.vla == "smolvla":
+            actor_model_config = None
+            if self.rank == 0:
+                print(f"Loading SmolVLA policy from {local_path}")
         else:
-            override_config_kwargs["use_proprio"] = False
-            override_config_kwargs["proprio_dim"] = self.config.model.action_token_len
+            # override model kwargs
+            actor_model_config = AutoConfig.from_pretrained(local_path, trust_remote_code=trust_remote_code)
+            if self.config.model.use_remove_padding:
+                from verl.models.registry import check_model_support_rmpad
+                check_model_support_rmpad(actor_model_config.model_type)
+            override_config_kwargs = {
+                'bos_token_id': self.tokenizer.bos_token_id,
+                'eos_token_id': self.tokenizer.eos_token_id,
+                'pad_token_id': self.tokenizer.pad_token_id,
+            }
+            if self.config.rollout.use_proprio:
+                override_config_kwargs["use_proprio"] = True
+                override_config_kwargs["proprio_dim"] = self.config.model.action_token_len
+            else:
+                override_config_kwargs["use_proprio"] = False
+                override_config_kwargs["proprio_dim"] = self.config.model.action_token_len
 
-        override_config_kwargs.update(override_model_config)
-        update_model_config(actor_model_config, override_config_kwargs=override_config_kwargs)
-        if self.rank == 0:
-            print(f'Model config after override: {actor_model_config}')
+            override_config_kwargs.update(override_model_config)
+            update_model_config(actor_model_config, override_config_kwargs=override_config_kwargs)
+            if self.rank == 0:
+                print(f'Model config after override: {actor_model_config}')
 
         
-        init_context = get_init_weight_context_manager(use_meta_tensor=not actor_model_config.tie_word_embeddings)
+        init_context = contextlib.nullcontext if self.config.model.vla == "smolvla" else get_init_weight_context_manager(use_meta_tensor=not actor_model_config.tie_word_embeddings)
 
         with init_context(), warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            if self.config.model.vla == "openvla-oft":
+            if self.config.model.vla == "smolvla":
+                actor_module = load_smolvla_policy(local_path)
+            elif self.config.model.vla == "openvla-oft":
                 openvla_oft_load_kwargs = dict(
                     pretrained_model_name_or_path=local_path,
                     torch_dtype=torch_dtype,
@@ -486,9 +539,12 @@ class RobActorRolloutRefWorker(Worker):
                     actor_module = AutoModelForVision2Seq.from_pretrained(**openvla_load_kwargs)
            
             actor_module.to(torch_dtype)
+            if self.config.model.vla == "smolvla":
+                self.tokenizer = get_smolvla_tokenizer(actor_module)
 
             if enable_gradient_checkpointing:
-                actor_module.gradient_checkpointing_enable()
+                if hasattr(actor_module, "gradient_checkpointing_enable"):
+                    actor_module.gradient_checkpointing_enable()
             # lora add
             if self._is_lora:
                 ensure_peft_available()
@@ -510,15 +566,20 @@ class RobActorRolloutRefWorker(Worker):
                 else:
                     print("Applying LoRA to actor module")
 
+                    target_modules = (
+                        resolve_smolvla_lora_target_modules(actor_module, self.config.model.target_modules)
+                        if self.config.model.vla == "smolvla"
+                        else resolve_vla_lora_target_modules(
+                            actor_module,
+                            self.config.model.target_modules,
+                            use_proprio=self.config.rollout.use_proprio,
+                        )
+                    )
                     lora_config = {
                         'r': self.config.model.lora_rank,
                         'lora_alpha': self.config.model.lora_alpha,
                         "lora_dropout": 0 ,
-                        'target_modules': resolve_vla_lora_target_modules(
-                            actor_module,
-                            self.config.model.target_modules,
-                            use_proprio=self.config.rollout.use_proprio,
-                        ),
+                        'target_modules': target_modules,
                         'init_lora_weights': "gaussian"
                     }
                     actor_module = get_peft_model(actor_module, LoraConfig(**lora_config))
@@ -550,7 +611,10 @@ class RobActorRolloutRefWorker(Worker):
             mixed_precision = None
         
         #oft add
-        auto_wrap_policy = get_fsdp_wrap_policy_vla(module=actor_module, config=fsdp_config.get('wrap_policy', None), is_lora=self.config.model.get('lora_rank', 0) > 0)
+        if self.config.model.vla == "smolvla":
+            auto_wrap_policy = get_fsdp_wrap_policy(module=actor_module, config=fsdp_config.get('wrap_policy', None))
+        else:
+            auto_wrap_policy = get_fsdp_wrap_policy_vla(module=actor_module, config=fsdp_config.get('wrap_policy', None), is_lora=self.config.model.get('lora_rank', 0) > 0)
         #oft add end
         
 
@@ -566,7 +630,7 @@ class RobActorRolloutRefWorker(Worker):
         actor_module_fsdp = FSDP(
             actor_module,
             param_init_fn=init_fn,
-            use_orig_params=False,
+            use_orig_params=self.config.model.vla == "smolvla",
             auto_wrap_policy=auto_wrap_policy,
             device_id=torch.cuda.current_device(),
             sharding_strategy=sharding_strategy,  # zero3
@@ -700,7 +764,7 @@ class RobActorRolloutRefWorker(Worker):
         if self._is_offload_param:
             load_fsdp_param_and_grad(module=self.actor_module_fsdp,
                                      device_id=torch.cuda.current_device(),
-                                     load_grad=self._is_offload_grad)
+                                     load_grad=self._is_offload_grad and self.config.model.vla != "smolvla")
         if self._is_offload_optimizer:
             load_fsdp_optimizer(optimizer=self.actor_optimizer, device_id=torch.cuda.current_device())
 
@@ -793,7 +857,7 @@ class RobActorRolloutRefWorker(Worker):
         # with Timer(name=f'gen seq end ,  old log will begin', text="{name}: {seconds:.1f} seconds") as timer:    
         #     print("gen seq end ,  old log will begin")
         
-        if self._is_actor and recompute_log_prob:
+        if self._is_actor and recompute_log_prob and self.config.model.vla != "smolvla":
             # we should always recompute old_log_probs when it is HybridEngine
             
             output.meta_info['micro_batch_size'] = self.config.rollout.log_prob_micro_batch_size
@@ -819,6 +883,8 @@ class RobActorRolloutRefWorker(Worker):
     @register(dispatch_mode=Dispatch.DP_COMPUTE_PROTO)
     def compute_ref_log_prob(self, data: DataProto):
         assert self._is_ref
+        if self.config.model.vla == "smolvla":
+            raise NotImplementedError("SmolVLA does not expose token log-probs; set algorithm.kl_ctrl.kl_coef=0.")
 
         data = data.to('cuda')
 
@@ -853,7 +919,8 @@ class RobActorRolloutRefWorker(Worker):
         import torch.distributed as dist
         from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
         
-        if self._is_offload_param:
+        smolvla_checkpoint = self.config.model.vla == "smolvla"
+        if self._is_offload_param and not smolvla_checkpoint:
             load_fsdp_param_and_grad(module=self.actor_module_fsdp,
                                      device_id=torch.cuda.current_device(),
                                      load_grad=self._is_offload_grad)
@@ -870,11 +937,18 @@ class RobActorRolloutRefWorker(Worker):
                     print(f"[rank-{self.rank}]: Saving LoRA adapter without full-model CPU gather")
                 lora_params = self._collect_lora_state_dict_from_fsdp(adapter_name="default")
                 if dist.get_rank() == 0:
-                    self.actor_module.save_pretrained(
-                        lora_save_path,
-                        state_dict=lora_params,
-                        safe_serialization=True
-                    )
+                    if self.config.model.vla == "smolvla":
+                        from safetensors.torch import save_file as safe_save_file
+
+                        os.makedirs(lora_save_path, exist_ok=True)
+                        safe_save_file(lora_params, os.path.join(lora_save_path, "adapter_model.safetensors"))
+                        self.actor_module.peft_config["default"].save_pretrained(lora_save_path)
+                    else:
+                        self.actor_module.save_pretrained(
+                            lora_save_path,
+                            state_dict=lora_params,
+                            safe_serialization=True
+                        )
                     self._validate_saved_lora_adapter(
                         lora_save_path,
                         expected_rank=int(self.config.model.lora_rank),

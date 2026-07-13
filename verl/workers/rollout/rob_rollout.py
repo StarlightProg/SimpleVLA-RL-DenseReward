@@ -62,6 +62,12 @@ from transformers import GenerationConfig, AutoProcessor
 
 from verl.utils.libero_utils import save_rollout_video
 from verl.utils.validation_video import select_validation_video_indices
+from verl.utils.smolvla_utils import (
+    ACTION_KEY as SMOLVLA_ACTION_KEY,
+    build_smolvla_batch,
+    get_smolvla_tokenizer,
+    smolvla_action_chunk_len,
+)
 try:
     from verl.utils.libero_utils import (
         get_libero_env, get_libero_dummy_action, get_libero_image, 
@@ -434,7 +440,16 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         benchmark_dict = benchmark.get_benchmark_dict()
         task_suite = benchmark_dict[task_name]()
     task = task_suite.get_task(task_id)
-    initial_states = task_suite.get_task_init_states(task_id)
+    torch_load = torch.load
+    try:
+        def torch_load_libero_init_states(*args, **kwargs):
+            kwargs.setdefault("weights_only", False)
+            return torch_load(*args, **kwargs)
+
+        torch.load = torch_load_libero_init_states
+        initial_states = task_suite.get_task_init_states(task_id)
+    finally:
+        torch.load = torch_load
     initial_state = initial_states[trial_id % len(initial_states)]
     
     env = None
@@ -442,8 +457,9 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         try:
             env, task_description = get_libero_env(task, config.model_family, resolution=256)
             break
-        except:
-            print(f"*** env initialization failed ***")
+        except Exception as e:
+            print(f"*** env initialization failed: {type(e).__name__}: {e} ***", flush=True)
+            traceback.print_exc()
             if env is not None:
                 try:
                     env.close()
@@ -584,7 +600,12 @@ class RobHFRollout(BaseRollout):
             "robotwin2_place_shoe": 250,
             "robotwin2_move_pillbottle_pad": 200,
         }
-        self.processor = AutoProcessor.from_pretrained(config.pretrained_checkpoint, trust_remote_code=True)
+        self.processor = None
+        if self.config.vla == "smolvla":
+            self.processor = get_smolvla_tokenizer(self.module)
+            self.config.action_chunks_len = smolvla_action_chunk_len(self.module)
+        else:
+            self.processor = AutoProcessor.from_pretrained(config.pretrained_checkpoint, trust_remote_code=True)
         self.vla_preprocess()
         
         # Setup execution pool based on task suite
@@ -660,6 +681,15 @@ class RobHFRollout(BaseRollout):
     
     def process_input(self, inputs: list, task_descriptions: list):
         """Unified input processing for both Robotwin and Libero"""
+        if self.config.vla == "smolvla":
+            return build_smolvla_batch(
+                self.module,
+                inputs,
+                task_descriptions,
+                device=torch.device("cuda"),
+                max_prompt_length=int(self.config.max_prompt_length),
+            )
+
         batchdata = {"input_ids": [], "attention_mask": [], "pixel_values": []}
         if self.config.use_proprio:
             batchdata["proprio"] = []
@@ -756,6 +786,11 @@ class RobHFRollout(BaseRollout):
             return self._generate_minibatch_robotwin(prompts)
         else:
             return self._generate_minibatch_libero(prompts)
+
+    def _action_for_env(self, action):
+        if isinstance(action, torch.Tensor):
+            return action.detach().cpu().numpy()
+        return action
     
     def _generate_minibatch_robotwin(self, prompts):
         """Generate minibatch for Robotwin using threading"""
@@ -864,14 +899,18 @@ class RobHFRollout(BaseRollout):
             actions = vla_output["action"]
             
             if not minimal_validation_output:
-                step_data = {
-                    "responses": vla_output["responses"],
-                    "input_ids": vla_output["input_ids"],
-                    "attention_mask": vla_output["attention_mask"],
-                    "pixel_values": vla_output["pixel_values"],
-                    "action": actions,
-                    "step": step
-                }
+                if self.config.vla == "smolvla":
+                    step_data = {key: value for key, value in vla_output.items() if isinstance(value, torch.Tensor)}
+                    step_data["step"] = step
+                else:
+                    step_data = {
+                        "responses": vla_output["responses"],
+                        "input_ids": vla_output["input_ids"],
+                        "attention_mask": vla_output["attention_mask"],
+                        "pixel_values": vla_output["pixel_values"],
+                        "action": actions,
+                        "step": step
+                    }
                 if vla_output.get("proprio") is not None:
                     step_data["proprio"] = vla_output["proprio"]
                 vla_history.append(step_data)
@@ -881,7 +920,7 @@ class RobHFRollout(BaseRollout):
             for idx in active_indices:
                 future = self.env_thread_pool.submit(
                     env_wrappers[idx].step,
-                    actions[idx]
+                    self._action_for_env(actions[idx])
                 )
                 step_futures.append((idx, future))
             
@@ -1089,20 +1128,24 @@ class RobHFRollout(BaseRollout):
                 actions = vla_output["action"]
 
                 if not minimal_validation_output:
-                    step_data = {
-                        "responses": vla_output["responses"],
-                        "input_ids": vla_output["input_ids"],
-                        "attention_mask": vla_output["attention_mask"],
-                        "pixel_values": vla_output["pixel_values"],
-                        "action": actions,
-                        "step": step
-                    }
+                    if self.config.vla == "smolvla":
+                        step_data = {key: value for key, value in vla_output.items() if isinstance(value, torch.Tensor)}
+                        step_data["step"] = step
+                    else:
+                        step_data = {
+                            "responses": vla_output["responses"],
+                            "input_ids": vla_output["input_ids"],
+                            "attention_mask": vla_output["attention_mask"],
+                            "pixel_values": vla_output["pixel_values"],
+                            "action": actions,
+                            "step": step
+                        }
                     if vla_output.get("proprio") is not None:
                         step_data["proprio"] = vla_output["proprio"]
                     vla_history.append(step_data)
 
                 for idx in active_indices:
-                    input_queues[idx].put(actions[idx])
+                    input_queues[idx].put(self._action_for_env(actions[idx]))
 
                 new_inputs = inputs.copy()
                 subgoal_step_metrics = [_empty_subgoal_metrics() for _ in range(batch_size)] if subgoal_logging_enabled else None
@@ -1180,15 +1223,31 @@ class RobHFRollout(BaseRollout):
     
     def _prepare_output_batch(self, vla_history, task_records, batch_size):
         """Prepare the output batch from VLA history"""
-        batch = {
-            'responses': [],
-            'input_ids': [],
-            'attention_mask': [],
-            'pixel_values': []
-        }
-        
-        key_names = ["responses", "input_ids", "attention_mask", "pixel_values"]
-        if self.config.use_proprio:
+        batch = {'responses': []}
+        key_names = ["responses"]
+        if self.config.vla == "smolvla":
+            for required_key in (
+                "actions",
+                SMOLVLA_ACTION_KEY,
+                "observation.state",
+                "observation.language.tokens",
+                "observation.language.attention_mask",
+            ):
+                batch[required_key] = []
+                key_names.append(required_key)
+            for h in vla_history:
+                for key in h.keys():
+                    if key.startswith("observation.image") and key not in batch:
+                        batch[key] = []
+                        key_names.append(key)
+        else:
+            batch.update({
+                'input_ids': [],
+                'attention_mask': [],
+                'pixel_values': [],
+            })
+            key_names.extend(["input_ids", "attention_mask", "pixel_values"])
+        if self.config.use_proprio and self.config.vla != "smolvla":
             batch["proprio"] = []
             key_names.append("proprio")
 
@@ -1234,8 +1293,36 @@ class RobHFRollout(BaseRollout):
             return self._generate_one_step_oft(prompts)
         elif self.config.vla == "openvla":
             return self._generate_one_step_openvla(prompts)
+        elif self.config.vla == "smolvla":
+            return self._generate_one_step_smolvla(prompts)
         else:
             raise ValueError(f"Unknown VLA type: {self.config.vla}")
+
+    def _generate_one_step_smolvla(self, prompts: dict):
+        """Generate one continuous action chunk for SmolVLA."""
+        policy_batch = {
+            key: value
+            for key, value in prompts.items()
+            if isinstance(value, torch.Tensor)
+        }
+        with self._fsdp_summon_context():
+            with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+                actions = self.module.predict_action_chunk(policy_batch)
+
+        actions = actions.to(dtype=torch.float32)
+        dummy_responses = torch.zeros(
+            actions.size(0),
+            1,
+            dtype=torch.long,
+            device=actions.device,
+        )
+        batch = {
+            "responses": dummy_responses,
+            "actions": actions,
+            SMOLVLA_ACTION_KEY: actions,
+        }
+        batch.update(policy_batch)
+        return batch
     
     def _generate_one_step_oft(self, prompts: dict):
         """Generate one step for OpenVLA-OFT"""

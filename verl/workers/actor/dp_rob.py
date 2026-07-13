@@ -30,6 +30,7 @@ from verl.utils.torch_functional import logprobs_from_logits, log_probs_from_log
 from verl.utils.seqlen_balancing import rearrange_micro_batches, get_reverse_idx
 import verl.utils.torch_functional as verl_F
 from codetiming import Timer
+from verl.utils.smolvla_utils import ACTION_KEY as SMOLVLA_ACTION_KEY
 
 try:
     from flash_attn.bert_padding import pad_input, unpad_input, rearrange, index_first_axis
@@ -349,6 +350,79 @@ class RobDataParallelPPOActor(BasePPOActor):
         self.actor_optimizer.step()
         return grad_norm
 
+    def _update_policy_smolvla(self, data: DataProto):
+        self.actor_module.train()
+        assert self.config.ppo_mini_batch_size % self.config.ppo_micro_batch_size == 0
+        self.gradient_accumulation = self.config.ppo_mini_batch_size // self.config.ppo_micro_batch_size
+
+        select_keys = [
+            'responses',
+            'advantages',
+            'finish_step',
+            SMOLVLA_ACTION_KEY,
+            'observation.state',
+            'observation.language.tokens',
+            'observation.language.attention_mask',
+        ]
+        select_keys.extend([key for key in data.batch.keys() if str(key).startswith("observation.image")])
+        batch = data.select(batch_keys=select_keys).batch
+        dataloader = batch.split(self.config.ppo_mini_batch_size)
+        metrics = {}
+        beta = float(self.config.get("flow_weight_beta", 1.0))
+        max_weight = float(self.config.get("flow_weight_max", 20.0))
+
+        for mini_batch in dataloader:
+            micro_batches = mini_batch.split(self.config.ppo_micro_batch_size)
+            self.actor_optimizer.zero_grad()
+
+            for micro_batch in micro_batches:
+                micro_batch = micro_batch.cuda()
+                batch_size = micro_batch['responses'].size(0)
+                traj_len = micro_batch['responses'].size(1)
+                chunk_len = micro_batch[SMOLVLA_ACTION_KEY].size(2)
+
+                chunk_start = torch.arange(traj_len, device=micro_batch['finish_step'].device) * chunk_len
+                valid_mask = chunk_start.unsqueeze(0) < micro_batch['finish_step'].unsqueeze(1)
+                valid_count = valid_mask.sum().clamp_min(1)
+
+                advantages = micro_batch['advantages'].reshape(batch_size, traj_len, -1).mean(dim=-1)
+                centered_advantages = advantages - advantages[valid_mask].mean()
+                weights = torch.exp(centered_advantages / max(beta, 1e-6)).clamp(max=max_weight)
+                weights = torch.where(valid_mask, weights, torch.zeros_like(weights))
+
+                flat_batch = {}
+                for key, value in micro_batch.items():
+                    if key in {'responses', 'advantages', 'finish_step'}:
+                        continue
+                    if value.size(0) != batch_size or value.size(1) != traj_len:
+                        continue
+                    flat_batch[key] = value[valid_mask]
+
+                with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
+                    per_sample_loss, loss_info = self.actor_module(flat_batch, reduction="none")
+                flow_loss = (per_sample_loss * weights[valid_mask]).sum() / valid_count
+                loss = flow_loss / self.gradient_accumulation
+                loss.backward()
+
+                append_to_dict(metrics, {
+                    'actor/flow_loss': flow_loss.detach().item(),
+                    'actor/flow_weight_mean': (weights.sum() / valid_count).detach().item(),
+                    'actor/flow_valid_chunks': float(valid_count.detach().item()),
+                })
+                for key, value in loss_info.items():
+                    if isinstance(value, (int, float)):
+                        append_to_dict(metrics, {f'actor/{key}': float(value)})
+
+            grad_norm = self._optimizer_step()
+            append_to_dict(metrics, {'actor/grad_norm': grad_norm.detach().item()})
+            torch.cuda.empty_cache()
+
+        self.actor_optimizer.zero_grad()
+        torch.cuda.synchronize()
+        torch.distributed.barrier()
+        torch.cuda.empty_cache()
+        return metrics
+
     def compute_log_prob(self, data: DataProto) -> torch.Tensor:
         """Compute the log probability of the responses given input_ids, attention_mask and position_ids
 
@@ -403,6 +477,9 @@ class RobDataParallelPPOActor(BasePPOActor):
         return log_probs
 
     def update_policy(self, data: DataProto):
+        if self.config.vla == "smolvla":
+            return self._update_policy_smolvla(data)
+
         self.actor_module.train()
 
         assert self.config.ppo_mini_batch_size % self.config.ppo_micro_batch_size == 0
@@ -536,6 +613,8 @@ class RobDataParallelPPOActor(BasePPOActor):
 
     
     def compute_entropy(self, bacth_data: DataProto):
+        if self.config.vla == "smolvla":
+            return {}
         
         if bacth_data.meta_info['train_mode'] ==True:
             self.actor_module.train()

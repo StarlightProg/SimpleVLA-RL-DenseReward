@@ -71,6 +71,9 @@ def hf_tokenizer(name_or_path, correct_pad_token=True, correct_gemma2=True, **kw
         AutoProcessor.register(OpenVLAConfig, PrismaticProcessor)
         processor = AutoProcessor.from_pretrained(name_or_path, trust_remote_code=True)
         tokenizer=processor.tokenizer
+    elif model == "smolvla":
+        from verl.utils.smolvla_utils import MinimalTokenizer
+        tokenizer = MinimalTokenizer()
     else:
         tokenizer = AutoTokenizer.from_pretrained(name_or_path, **kwargs)
         

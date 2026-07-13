@@ -85,19 +85,26 @@ import torch
 from verl.utils.torch_functional import masked_mean
 
 
-def apply_kl_penalty(data: DataProto, kl_ctrl: core_algos.AdaptiveKLController, kl_penalty='kl', action_token_len=7, action_chunks_len=8):
+def _response_mask_from_finish(data: DataProto, config):
     responses = data.batch['responses']
-    
-    traj_length = responses.size(1) * action_chunks_len  
-    action_length = action_token_len  # next fix
+    response_length = responses.reshape(responses.size(0), -1).size(1)
+    if config.actor_rollout_ref.model.vla == "smolvla":
+        if "action" in data.batch.keys():
+            chunk_len = int(data.batch["action"].size(2))
+        else:
+            chunk_len = int(config.actor_rollout_ref.model.action_chunks_len)
+        valid_length = torch.div(data.batch['finish_step'] + chunk_len - 1, chunk_len, rounding_mode='floor')
+    else:
+        valid_length = data.batch['finish_step'] * config.actor_rollout_ref.model.action_token_len
+    valid_length = valid_length.clamp(max=response_length)
+    steps = torch.arange(response_length, device=responses.device)
+    return steps.unsqueeze(0).expand(responses.size(0), -1) < valid_length.unsqueeze(1)
+
+
+def apply_kl_penalty(data: DataProto, kl_ctrl: core_algos.AdaptiveKLController, kl_penalty='kl', action_token_len=7, action_chunks_len=8, config=None):
     token_level_scores = data.batch['token_level_scores']
     batch_size = data.batch.batch_size[0]
-    #attention_mask = data.batch['attention_mask']
-    finish_step = data.batch['finish_step'] * action_length
-    
-    steps = torch.arange(traj_length*action_length, device=data.batch['responses'].device)  # (traj_len,)
-    steps_expanded = steps.unsqueeze(0).expand(data.batch['responses'].size(0), -1)
-    response_mask = steps_expanded < finish_step.unsqueeze(1)  # (batch_size, traj_len)
+    response_mask = _response_mask_from_finish(data, config) if config is not None else torch.ones_like(token_level_scores, dtype=torch.bool)
 
     # compute kl between ref_policy and current policy
     if 'ref_log_prob' in data.batch.keys():
@@ -126,12 +133,7 @@ def apply_kl_penalty(data: DataProto, kl_ctrl: core_algos.AdaptiveKLController, 
 def compute_advantage(data: DataProto, gamma, lam, adv_estimator, config):
 
     responses = data.batch['responses']
-    response_length = responses.size(1) *  responses.size(2)
-    # attention_mask = data.batch['attention_mask']
-    finish_step = data.batch['finish_step'] * config.actor_rollout_ref.model.action_token_len 
-    steps = torch.arange(response_length, device=data.batch['responses'].device)  # (traj_len,)
-    steps_expanded = steps.unsqueeze(0).expand(data.batch['responses'].size(0), -1)
-    response_mask = steps_expanded < finish_step.unsqueeze(1)  # (batch_size, traj_len)
+    response_mask = _response_mask_from_finish(data, config)
 
     token_level_rewards = data.batch['token_level_rewards'] if 'token_level_rewards' in list(data.batch.keys()) else data.batch['token_level_scores']
 
@@ -163,12 +165,7 @@ def compute_advantage(data: DataProto, gamma, lam, adv_estimator, config):
     elif adv_estimator == 'grpo':
         token_level_rewards = data.batch['token_level_rewards']
         index = data.non_tensor_batch.get('group_id', data.non_tensor_batch['uid'])
-        responses = data.batch['responses']
-        response_length = responses.size(1) *  responses.size(2)
-        finish_step = data.batch['finish_step'] * config.actor_rollout_ref.model.action_token_len 
-        steps = torch.arange(response_length, device=data.batch['responses'].device)  # (traj_len,)
-        steps_expanded = steps.unsqueeze(0).expand(data.batch['responses'].size(0), -1)
-        response_mask = steps_expanded < finish_step.unsqueeze(1)  # (batch_size, traj_len)
+        response_mask = _response_mask_from_finish(data, config)
         advantages, returns = core_algos.compute_grpo_outcome_advantage(token_level_rewards=token_level_rewards,
                                                                         eos_mask=response_mask,
                                                                         index=index)
@@ -220,10 +217,7 @@ def compute_data_metrics(batch,config):
     advantages = batch.batch['advantages']
     returns = batch.batch['returns']
     #add
-    finish_step = batch.batch['finish_step'] * config.actor_rollout_ref.model.action_token_len 
-    steps = torch.arange(batch.batch['responses'].size(1)*batch.batch['responses'].size(2), device=advantages.device)  # (traj_len,)
-    steps_expanded = steps.unsqueeze(0).expand(batch.batch['responses'].size(0), -1)
-    response_mask = steps_expanded < finish_step.unsqueeze(1)  # (batch_size, traj_len)
+    response_mask = _response_mask_from_finish(batch, config)
     #
     metrics = {
         # score
@@ -364,7 +358,11 @@ class RayTrainer(object):
         print(f'Size of train dataloader: {len(self.train_dataloader)}')
         print(f'Size of val dataloader: {len(self.val_dataloader)}')
 
-        total_training_steps = len(self.train_dataloader) * self.config.trainer.total_epochs
+        configured_training_steps = self.config.trainer.get('total_training_steps', None)
+        if configured_training_steps is not None and configured_training_steps > 0:
+            total_training_steps = int(configured_training_steps)
+        else:
+            total_training_steps = len(self.train_dataloader) * self.config.trainer.total_epochs
 
         OmegaConf.set_struct(self.config, True)
         with open_dict(self.config):
@@ -623,6 +621,8 @@ class RayTrainer(object):
         dp_size = self.actor_rollout_wg.world_size // self.config.actor_rollout_ref.rollout.tensor_model_parallel_size
         batch_size = self.config.data.train_batch_size
         n_samples = self.config.data.n_samples
+        configured_training_steps = self.config.trainer.get('total_training_steps', None)
+        max_training_steps = int(configured_training_steps) if configured_training_steps is not None and configured_training_steps > 0 else None
 
         # perform validation before training
         # currently, we only support validation using the reward_function.
@@ -638,6 +638,9 @@ class RayTrainer(object):
             print("epoch: ", epoch)
             self.train_dataloader.start_new_epoch()
             while True:
+                if max_training_steps is not None and global_steps >= max_training_steps:
+                    print(f"Reached configured total_training_steps={max_training_steps}; stopping training loop.")
+                    break
                 valid_batch = []
                 buffer_batch = []
 
@@ -795,7 +798,8 @@ class RayTrainer(object):
                                                          kl_ctrl=self.kl_ctrl,
                                                          kl_penalty=self.config.algorithm.kl_penalty,
                                                          action_token_len=self.config.actor_rollout_ref.model.action_token_len, 
-                                                         action_chunks_len=self.config.actor_rollout_ref.model.action_chunks_len,)
+                                                         action_chunks_len=self.config.actor_rollout_ref.model.action_chunks_len,
+                                                         config=self.config)
                     metrics.update(kl_metrics)
 
                     # compute advantages, executed on the driver process
@@ -851,11 +855,14 @@ class RayTrainer(object):
 
                 global_steps += 1
 
-        if global_steps > 0:
+            if max_training_steps is not None and global_steps >= max_training_steps:
+                break
+
+        if global_steps > 0 and self.config.trainer.get('final_save_after_train', True):
             self._save_checkpoint_bundle(step_name='final', log_step=global_steps - 1, reason='final')
 
         # perform validation after training
-        if self.val_reward_fn is not None:
+        if self.val_reward_fn is not None and self.config.trainer.get('final_val_after_train', True):
             val_metrics = self._validate(global_steps=global_steps)
             pprint(f'Final validation metrics: {val_metrics}')
             logger.log(data=val_metrics, step=global_steps)
