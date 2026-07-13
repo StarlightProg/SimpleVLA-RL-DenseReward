@@ -276,6 +276,7 @@ trainer:
   critic_warmup: 0
   validation:
     target_rollouts: 100
+    start_index: 0
     max_passes: 20
     save_video: True
     video_max_episodes: 20

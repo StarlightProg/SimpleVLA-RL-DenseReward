@@ -328,7 +328,7 @@ class RayTrainer(object):
         return re.sub(r'[^0-9a-zA-Z_]', '_', name)
 
     def _create_dataloader(self):   # next fix
-        from torch.utils.data import DataLoader
+        from torch.utils.data import DataLoader, Subset
         # TODO: we have to make sure the batch size is divisible by the dp size
         from verl.utils.dataset.rob_dataset import LIBERO_Dataset, Robotwin_Dataset, collate_fn
         if "libero" in self.config.data.task_suite_name:
@@ -347,6 +347,19 @@ class RayTrainer(object):
         else:
             raise ValueError(f'Unsupported task suite name: {self.config.data.task_suite_name}')
 
+        validation_cfg = self.config.trainer.get('validation', {})
+        val_start_index = int(validation_cfg.get('start_index', 0))
+        if val_start_index < 0:
+            raise ValueError(f"trainer.validation.start_index must be >= 0, got {val_start_index}")
+        if val_start_index > 0:
+            if val_start_index >= len(self.val_dataset):
+                raise ValueError(
+                    f"trainer.validation.start_index={val_start_index} is outside "
+                    f"validation dataset length {len(self.val_dataset)}"
+                )
+            self.val_dataset = Subset(self.val_dataset, range(val_start_index, len(self.val_dataset)))
+            print(f"Validation dataset starts at global index {val_start_index}; sliced len: {len(self.val_dataset)}")
+
         self.train_dataloader = BufferedDataLoader(DataLoader(dataset=self.train_dataset,
                                            batch_size=int(self.config.data.train_batch_size*self.config.data.oversample_factor),
                                            shuffle=True,
@@ -363,6 +376,20 @@ class RayTrainer(object):
 
         print(f'Size of train dataloader: {len(self.train_dataloader)}')
         print(f'Size of val dataloader: {len(self.val_dataloader)}')
+        val_batch_size = int(self.config.data.val_batch_size)
+        validation_cfg = self.config.trainer.get('validation', {})
+        target_rollouts = int(validation_cfg.get('target_rollouts', 100))
+        effective_val_rollouts = len(self.val_dataloader) * val_batch_size
+        print(
+            f'Validation can run {effective_val_rollouts} unique rollouts per pass '
+            f'(batch_size={val_batch_size}, target_rollouts={target_rollouts})'
+        )
+        if target_rollouts > effective_val_rollouts:
+            print(
+                f'WARNING: trainer.validation.target_rollouts={target_rollouts} is larger than '
+                f'the available {effective_val_rollouts} rollouts in one validation pass. '
+                'Validation will repeat the same sliced dataset until max_passes is reached.'
+            )
 
         total_training_steps = len(self.train_dataloader) * self.config.trainer.total_epochs
 
@@ -372,6 +399,8 @@ class RayTrainer(object):
             self.config.critic.optim.total_training_steps = total_training_steps
 
     def _validate(self, global_steps=0):
+        from tqdm import tqdm
+
         validation_cfg = self.config.trainer.get('validation', {})
         target_rollouts = int(validation_cfg.get('target_rollouts', 100))
         # hard cap to avoid endless loops when config is accidentally wrong
@@ -393,73 +422,81 @@ class RayTrainer(object):
         video_task_counts = defaultdict(int)
 
         passes = 0
-        while total < target_rollouts and passes < max_passes:
-            for test_data in self.val_dataloader:
-                if total >= target_rollouts:
-                    break
+        with tqdm(
+            total=target_rollouts,
+            desc=f"validation step {global_steps}",
+            dynamic_ncols=True,
+        ) as progress:
+            while total < target_rollouts and passes < max_passes:
+                for test_data in self.val_dataloader:
+                    if total >= target_rollouts:
+                        break
 
-                test_batch = DataProto.from_single_dict(test_data)
-                task_keys = self._extract_task_keys(test_batch, self.config.data.task_suite_name)
-                batch_size = len(task_keys)
+                    test_batch = DataProto.from_single_dict(test_data)
+                    task_keys = self._extract_task_keys(test_batch, self.config.data.task_suite_name)
+                    batch_size = len(task_keys)
 
-                video_mask = np.zeros(batch_size, dtype=np.bool_)
-                if save_video_this_call and selected_video_count < video_max_episodes:
-                    for i, task_key in enumerate(task_keys):
-                        if selected_video_count >= video_max_episodes:
-                            break
-                        if video_task_counts[task_key] < video_per_task_limit:
-                            video_mask[i] = True
-                            video_task_counts[task_key] += 1
-                            selected_video_count += 1
+                    video_mask = np.zeros(batch_size, dtype=np.bool_)
+                    if save_video_this_call and selected_video_count < video_max_episodes:
+                        for i, task_key in enumerate(task_keys):
+                            if selected_video_count >= video_max_episodes:
+                                break
+                            if video_task_counts[task_key] < video_per_task_limit:
+                                video_mask[i] = True
+                                video_task_counts[task_key] += 1
+                                selected_video_count += 1
 
-                test_batch.non_tensor_batch['validation_video_selected'] = np.array(
-                    video_mask.tolist(),
-                    dtype=object,
-                )
-                test_batch.meta_info = {
-                    'eos_token_id': self.tokenizer.eos_token_id,
-                    'pad_token_id': self.tokenizer.pad_token_id,
-                    'recompute_log_prob': False,
-                    'do_sample': False,
-                    'validate': True,
-                    'minimal_validation_output': True,
-                    'save_validation_video': save_video_this_call,
-                    'validation_video_mask': video_mask,
-                    'validation_video_max_episodes': video_max_episodes,
-                    'validation_video_per_task_limit': video_per_task_limit,
-                    'validation_video_frame_stride': video_frame_stride,
-                    "global_steps": global_steps
-                }
+                    test_batch.non_tensor_batch['validation_video_selected'] = np.array(
+                        video_mask.tolist(),
+                        dtype=object,
+                    )
+                    test_batch.meta_info = {
+                        'eos_token_id': self.tokenizer.eos_token_id,
+                        'pad_token_id': self.tokenizer.pad_token_id,
+                        'recompute_log_prob': False,
+                        'do_sample': False,
+                        'validate': True,
+                        'minimal_validation_output': True,
+                        'save_validation_video': save_video_this_call,
+                        'validation_video_mask': video_mask,
+                        'validation_video_max_episodes': video_max_episodes,
+                        'validation_video_per_task_limit': video_per_task_limit,
+                        'validation_video_frame_stride': video_frame_stride,
+                        "global_steps": global_steps
+                    }
 
-                test_output_gen_batch = self.actor_rollout_wg.generate_sequences(test_batch)
-                test_batch = test_batch.union(test_output_gen_batch)
+                    test_output_gen_batch = self.actor_rollout_wg.generate_sequences(test_batch)
+                    test_batch = test_batch.union(test_output_gen_batch)
 
-                verifier_score, _, _, _ = self.val_reward_fn.verify(test_batch)
-                scores = verifier_score if isinstance(verifier_score, list) else list(verifier_score)
-                n_batch = len(scores)
-                remaining = target_rollouts - total
-                take_n = min(n_batch, remaining)
-                scores = scores[:take_n]
-                task_keys = task_keys[:take_n]
+                    verifier_score, _, _, _ = self.val_reward_fn.verify(test_batch)
+                    scores = verifier_score if isinstance(verifier_score, list) else list(verifier_score)
+                    n_batch = len(scores)
+                    remaining = target_rollouts - total
+                    take_n = min(n_batch, remaining)
+                    scores = scores[:take_n]
+                    task_keys = task_keys[:take_n]
 
-                data_sources = test_batch.non_tensor_batch.get(
-                    'data_source',
-                    np.array([self.config.data.task_suite_name] * n_batch, dtype=object),
-                )
-                data_sources = data_sources[:take_n]
+                    data_sources = test_batch.non_tensor_batch.get(
+                        'data_source',
+                        np.array([self.config.data.task_suite_name] * n_batch, dtype=object),
+                    )
+                    data_sources = data_sources[:take_n]
 
-                for i in range(take_n):
-                    s = float(scores[i])
-                    total += 1
-                    total_sum += s
-                    total_sumsq += s * s
-                    source_key = str(data_sources[i])
-                    data_source_stats[source_key][0] += 1
-                    data_source_stats[source_key][1] += s
-                    task_key = str(task_keys[i])
-                    task_stats[task_key][0] += 1
-                    task_stats[task_key][1] += s
-            passes += 1
+                    for i in range(take_n):
+                        s = float(scores[i])
+                        total += 1
+                        total_sum += s
+                        total_sumsq += s * s
+                        source_key = str(data_sources[i])
+                        data_source_stats[source_key][0] += 1
+                        data_source_stats[source_key][1] += s
+                        task_key = str(task_keys[i])
+                        task_stats[task_key][0] += 1
+                        task_stats[task_key][1] += s
+
+                    progress.update(take_n)
+                    progress.set_postfix(pass_idx=passes + 1, score=(total_sum / total if total else 0.0))
+                passes += 1
 
         metric_dict = {}
         for data_source, (count, score_sum) in data_source_stats.items():
