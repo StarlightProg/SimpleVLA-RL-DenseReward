@@ -67,6 +67,8 @@ from verl.utils.smolvla_utils import (
     build_smolvla_batch,
     get_smolvla_tokenizer,
     smolvla_action_chunk_len,
+    smolvla_image_resize_size,
+    unnormalize_smolvla_actions,
 )
 try:
     from verl.utils.libero_utils import (
@@ -301,6 +303,17 @@ def _subgoal_enabled(config):
     return bool(subgoal_config.get("enabled", False))
 
 
+def _is_smolvla_config(config):
+    return str(getattr(config, "model_family", "")).lower() == "smolvla" or str(getattr(config, "vla", "")).lower() == "smolvla"
+
+
+def _prepare_libero_action_for_env(action, config):
+    if _is_smolvla_config(config):
+        return np.clip(np.asarray(action, dtype=np.float32), -1.0, 1.0)
+    normalized_action = normalize_gripper_action(action, binarize=True)
+    return invert_gripper_action(normalized_action)
+
+
 def _empty_subgoal_metrics():
     return {key: 0.0 for key in SUBGOAL_NUMERIC_KEYS}
 
@@ -523,10 +536,9 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         subgoal_metrics = _empty_subgoal_metrics() if subgoal_engine is not None else None
         for i in range(len(action)):
             a = action[i]
-            normalized_action = normalize_gripper_action(a, binarize=True)
-            inverted_action = invert_gripper_action(normalized_action)
+            env_action = _prepare_libero_action_for_env(a, config)
             prev_obs = obs
-            obs, reward, done, info = env.step(inverted_action.tolist())
+            obs, reward, done, info = env.step(env_action.tolist())
 
             if subgoal_engine is not None:
                 subgoal_info, reward_parts = subgoal_engine.step(
@@ -534,7 +546,7 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
                     env=env,
                     obs=prev_obs,
                     next_obs=obs,
-                    action=inverted_action,
+                    action=env_action,
                     env_reward=reward,
                     done=done,
                     info=info,
@@ -603,9 +615,32 @@ class RobHFRollout(BaseRollout):
         self.processor = None
         if self.config.vla == "smolvla":
             self.processor = get_smolvla_tokenizer(self.module)
-            self.config.action_chunks_len = smolvla_action_chunk_len(self.module)
+            self.smolvla_action_mode = str(getattr(self.config, "smolvla_action_mode", "chunk"))
+            if self.smolvla_action_mode not in {"chunk", "select_action"}:
+                raise ValueError(f"Unsupported smolvla_action_mode={self.smolvla_action_mode!r}")
+            chunk_len = smolvla_action_chunk_len(self.module)
+            if self.smolvla_action_mode == "select_action":
+                requested_steps = getattr(self.config, "smolvla_n_action_steps", None)
+                if requested_steps is None:
+                    requested_steps = getattr(getattr(self.module, "config", None), "n_action_steps", 1)
+                n_action_steps = max(1, min(int(requested_steps), chunk_len))
+                self.module.config.n_action_steps = n_action_steps
+                if hasattr(self.module, "reset"):
+                    self.module.reset()
+                self.config.action_chunks_len = n_action_steps
+                self.smolvla_chunk_steps = chunk_len
+            else:
+                requested_steps = getattr(self.config, "smolvla_chunk_steps", None)
+                if requested_steps is None:
+                    requested_steps = chunk_len
+                self.smolvla_chunk_steps = max(1, min(int(requested_steps), chunk_len))
+                self.config.action_chunks_len = self.smolvla_chunk_steps
+            self.image_resize_size = smolvla_image_resize_size(self.module)
         else:
             self.processor = AutoProcessor.from_pretrained(config.pretrained_checkpoint, trust_remote_code=True)
+            self.smolvla_action_mode = "chunk"
+            self.smolvla_chunk_steps = None
+            self.image_resize_size = 224
         self.vla_preprocess()
         
         # Setup execution pool based on task suite
@@ -795,6 +830,8 @@ class RobHFRollout(BaseRollout):
     def _generate_minibatch_robotwin(self, prompts):
         """Generate minibatch for Robotwin using threading"""
         self.module.eval()
+        if self.config.vla == "smolvla" and self.smolvla_action_mode == "select_action" and hasattr(self.module, "reset"):
+            self.module.reset()
         meta_info = prompts.meta_info
         n_samples = meta_info.get('n_samples', 1)
         task_id = prompts.batch['task_id'].repeat_interleave(n_samples, dim=0)
@@ -896,7 +933,7 @@ class RobHFRollout(BaseRollout):
             vla_input.update(meta_info)
             
             vla_output = self._generate_one_step(vla_input)
-            actions = vla_output["action"]
+            actions = vla_output.get("env_action", vla_output["action"])
             
             if not minimal_validation_output:
                 if self.config.vla == "smolvla":
@@ -989,6 +1026,8 @@ class RobHFRollout(BaseRollout):
     def _generate_minibatch_libero(self, prompts):
         """Generate minibatch for Libero using multiprocessing"""
         self.module.eval()
+        if self.config.vla == "smolvla" and self.smolvla_action_mode == "select_action" and hasattr(self.module, "reset"):
+            self.module.reset()
         meta_info = prompts.meta_info
         n_samples = meta_info.get('n_samples', 1)
         task_id = prompts.batch['task_id'].repeat_interleave(n_samples, dim=0)
@@ -1069,6 +1108,8 @@ class RobHFRollout(BaseRollout):
         global_steps,
     ):
         batch_size = task_id.size(0)
+        if self.config.vla == "smolvla" and self.smolvla_action_mode == "select_action" and hasattr(self.module, "reset"):
+            self.module.reset()
         
         processes = []
         input_queues = []
@@ -1125,7 +1166,7 @@ class RobHFRollout(BaseRollout):
                 vla_input = self.process_input(current_inputs, current_task_descriptions)
                 vla_input.update(meta_info)
                 vla_output = self._generate_one_step(vla_input)
-                actions = vla_output["action"]
+                actions = vla_output.get("env_action", vla_output["action"])
 
                 if not minimal_validation_output:
                     if self.config.vla == "smolvla":
@@ -1307,9 +1348,16 @@ class RobHFRollout(BaseRollout):
         }
         with self._fsdp_summon_context():
             with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
-                actions = self.module.predict_action_chunk(policy_batch)
+                if self.smolvla_action_mode == "select_action":
+                    actions = self.module.select_action(policy_batch).unsqueeze(1)
+                else:
+                    actions = self.module.predict_action_chunk(policy_batch)
+                    chunk_steps = getattr(self, "smolvla_chunk_steps", None)
+                    if chunk_steps is not None:
+                        actions = actions[:, :chunk_steps]
 
         actions = actions.to(dtype=torch.float32)
+        env_actions = unnormalize_smolvla_actions(self.module, actions).to(dtype=torch.float32).clamp(-1.0, 1.0)
         dummy_responses = torch.zeros(
             actions.size(0),
             1,
@@ -1320,6 +1368,7 @@ class RobHFRollout(BaseRollout):
             "responses": dummy_responses,
             "actions": actions,
             SMOLVLA_ACTION_KEY: actions,
+            "env_action": env_actions,
         }
         batch.update(policy_batch)
         return batch
@@ -1488,13 +1537,13 @@ class RobHFRollout(BaseRollout):
             
             if self.config.num_images_in_input > 1:
                 return {
-                    "full_image": get_libero_image(obs, 224),
-                    "wrist_image": get_libero_wrist_image(obs, 224),
+                    "full_image": get_libero_image(obs, self.image_resize_size),
+                    "wrist_image": get_libero_wrist_image(obs, self.image_resize_size),
                     "state": state
                 }
             else:
                 return {
-                    "full_image": get_libero_image(obs, 224),
+                    "full_image": get_libero_image(obs, self.image_resize_size),
                     "state": state
                 }
         else:

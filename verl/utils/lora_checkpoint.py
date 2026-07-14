@@ -2,8 +2,22 @@ def lora_weight_kind_from_key(key: str, adapter_name: str = "default"):
     """Return LoRA weight kind for PEFT keys saved with or without adapter_name."""
 
     suffixes = {
-        "A": (f".lora_A.{adapter_name}.weight", ".lora_A.weight"),
-        "B": (f".lora_B.{adapter_name}.weight", ".lora_B.weight"),
+        "A": (
+            f".lora_A.{adapter_name}.weight",
+            f".lora_A.{adapter_name}",
+            f".lora_embedding_A.{adapter_name}.weight",
+            f".lora_embedding_A.{adapter_name}",
+            ".lora_A.weight",
+            ".lora_embedding_A.weight",
+        ),
+        "B": (
+            f".lora_B.{adapter_name}.weight",
+            f".lora_B.{adapter_name}",
+            f".lora_embedding_B.{adapter_name}.weight",
+            f".lora_embedding_B.{adapter_name}",
+            ".lora_B.weight",
+            ".lora_embedding_B.weight",
+        ),
     }
     for kind, candidates in suffixes.items():
         for suffix in candidates:

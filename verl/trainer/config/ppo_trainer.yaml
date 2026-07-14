@@ -100,6 +100,9 @@ actor_rollout_ref:
     libero_env_batch_size: 1
     libero_mp_start_method: fork
     num_steps_wait: 10
+    smolvla_action_mode: chunk  # chunk | select_action
+    smolvla_chunk_steps: null
+    smolvla_n_action_steps: null
     use_proprio: False
     pretrained_checkpoint: None
     center_crop: True

@@ -396,7 +396,10 @@ class RobDataParallelPPOActor(BasePPOActor):
                         continue
                     if value.size(0) != batch_size or value.size(1) != traj_len:
                         continue
-                    flat_batch[key] = value[valid_mask]
+                    flat_value = value[valid_mask]
+                    if str(key).startswith("observation.image") and torch.is_floating_point(flat_value):
+                        flat_value = flat_value.to(dtype=torch.bfloat16)
+                    flat_batch[key] = flat_value
 
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
                     per_sample_loss, loss_info = self.actor_module(flat_batch, reduction="none")

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+import warnings
 
 import numpy as np
 import torch
@@ -18,6 +20,8 @@ ACTION_KEY = "action"
 OBS_STATE_KEY = "observation.state"
 OBS_LANGUAGE_TOKENS_KEY = "observation.language.tokens"
 OBS_LANGUAGE_ATTENTION_MASK_KEY = "observation.language.attention_mask"
+PREPROCESSOR_NORM_FILE = "policy_preprocessor_step_5_normalizer_processor.safetensors"
+POSTPROCESSOR_NORM_FILE = "policy_postprocessor_step_1_unnormalizer_processor.safetensors"
 
 
 @dataclass
@@ -48,8 +52,49 @@ def require_smolvla_policy():
 def load_smolvla_policy(model_path: str, **kwargs: Any):
     policy_cls = require_smolvla_policy()
     policy = policy_cls.from_pretrained(model_path, **kwargs)
+    policy._verl_smolvla_norm_stats = load_smolvla_processor_stats(model_path)
     _wrap_frozen_image_embed_no_grad(policy)
     return policy
+
+
+def _resolve_processor_state_file(model_path: str, filename: str) -> str | None:
+    local_path = Path(model_path) / filename
+    if local_path.exists():
+        return str(local_path)
+
+    if Path(model_path).exists():
+        return None
+
+    try:
+        from huggingface_hub import hf_hub_download
+
+        return hf_hub_download(repo_id=model_path, filename=filename)
+    except Exception:
+        return None
+
+
+def load_smolvla_processor_stats(model_path: str) -> dict[str, dict[str, torch.Tensor]]:
+    """Load LeRobot SmolVLA normalizer/unnormalizer stats when present."""
+    try:
+        from safetensors.torch import load_file
+    except Exception as exc:
+        warnings.warn(f"Could not import safetensors to load SmolVLA processor stats: {exc}")
+        return {}
+
+    stats = {}
+    for name, filename in (
+        ("preprocessor", PREPROCESSOR_NORM_FILE),
+        ("postprocessor", POSTPROCESSOR_NORM_FILE),
+    ):
+        state_path = _resolve_processor_state_file(str(model_path), filename)
+        if state_path is None:
+            warnings.warn(
+                f"SmolVLA checkpoint {model_path!r} is missing {filename}; "
+                "state normalization/action unnormalization will be skipped."
+            )
+            continue
+        stats[name] = load_file(state_path, device="cpu")
+    return stats
 
 
 def _wrap_frozen_image_embed_no_grad(policy: Any) -> None:
@@ -128,6 +173,61 @@ def smolvla_action_chunk_len(policy: Any) -> int:
     return int(getattr(config, "chunk_size", getattr(config, "n_action_steps", 1)))
 
 
+def smolvla_image_resize_size(policy: Any) -> int | tuple[int, int]:
+    """Return the visual input size expected by a loaded SmolVLA checkpoint."""
+    config = smolvla_policy_config(policy)
+    input_features = getattr(config, "input_features", None)
+    if not input_features:
+        return 224
+
+    features = input_features.values() if isinstance(input_features, dict) else input_features
+    for feature in features:
+        feature_type = getattr(feature, "type", None)
+        if feature_type is None and isinstance(feature, dict):
+            feature_type = feature.get("type")
+        if str(feature_type).split(".")[-1].upper() != "VISUAL":
+            continue
+
+        shape = getattr(feature, "shape", None)
+        if shape is None and isinstance(feature, dict):
+            shape = feature.get("shape")
+        if shape is None or len(shape) < 3:
+            continue
+        height, width = int(shape[-2]), int(shape[-1])
+        return height if height == width else (height, width)
+
+    return 224
+
+
+def _norm_stats(policy: Any, processor: str, key: str):
+    policy = unwrap_smolvla_policy(policy)
+    stats = getattr(policy, "_verl_smolvla_norm_stats", {}) or {}
+    processor_stats = stats.get(processor, {})
+    mean = processor_stats.get(f"{key}.mean")
+    std = processor_stats.get(f"{key}.std")
+    if mean is None or std is None:
+        return None, None
+    return mean, std
+
+
+def normalize_smolvla_state(policy: Any, state: torch.Tensor) -> torch.Tensor:
+    mean, std = _norm_stats(policy, "preprocessor", OBS_STATE_KEY)
+    if mean is None or std is None:
+        return state
+    mean = mean.to(device=state.device, dtype=state.dtype)
+    std = std.to(device=state.device, dtype=state.dtype).clamp_min(1e-8)
+    return (state - mean) / std
+
+
+def unnormalize_smolvla_actions(policy: Any, actions: torch.Tensor) -> torch.Tensor:
+    mean, std = _norm_stats(policy, "postprocessor", ACTION_KEY)
+    if mean is None or std is None:
+        return actions
+    mean = mean.to(device=actions.device, dtype=actions.dtype)
+    std = std.to(device=actions.device, dtype=actions.dtype).clamp_min(1e-8)
+    return actions * std + mean
+
+
 def _image_to_tensor(image: np.ndarray, device: torch.device) -> torch.Tensor:
     tensor = torch.from_numpy(np.asarray(image)).to(device=device, dtype=torch.float32)
     if tensor.ndim != 3:
@@ -143,7 +243,7 @@ def tokenize_smolvla_tasks(policy: Any, task_descriptions: list[str], device: to
     if callable(tokenizer):
         tokens = tokenizer(
             prompts,
-            padding=True,
+            padding="max_length",
             truncation=True,
             max_length=max_length,
             return_tensors="pt",
@@ -171,10 +271,11 @@ def build_smolvla_batch(
 ) -> dict[str, torch.Tensor]:
     image_keys = smolvla_image_feature_keys(policy)
     batch = tokenize_smolvla_tasks(policy, task_descriptions, device, max_prompt_length)
-    batch[OBS_STATE_KEY] = torch.stack(
+    state = torch.stack(
         [torch.as_tensor(item["state"], dtype=torch.float32, device=device) for item in inputs],
         dim=0,
     )
+    batch[OBS_STATE_KEY] = normalize_smolvla_state(policy, state)
 
     for feature_idx, feature_key in enumerate(image_keys):
         source_key = "full_image" if feature_idx == 0 else "wrist_image"

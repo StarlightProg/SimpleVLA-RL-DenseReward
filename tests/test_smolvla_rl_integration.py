@@ -17,7 +17,13 @@ from tensordict import TensorDict
 
 from verl import DataProto
 from verl.trainer.main_ppo import RobRewardManager
+from verl.utils.smolvla_utils import (
+    build_smolvla_batch,
+    smolvla_image_resize_size,
+    unnormalize_smolvla_actions,
+)
 from verl.workers.actor.dp_rob import RobDataParallelPPOActor
+from verl.workers.rollout.rob_rollout import RobHFRollout, _prepare_libero_action_for_env
 
 
 def smolvla_trainer_config(*, dense_mode="log_only", reward_coef=5.0):
@@ -168,6 +174,191 @@ def test_smolvla_flow_weighted_loss_changes_with_advantage():
     expected_skewed = (torch.exp(torch.tensor(-1.0)) + torch.exp(torch.tensor(1.0))) / 2
     assert skewed_metrics["actor/flow_loss"][0] == pytest.approx(float(expected_skewed), rel=1e-5)
     assert skewed_metrics["actor/flow_loss"][0] > flat_metrics["actor/flow_loss"][0]
+
+
+def test_smolvla_tokenizer_pads_to_max_prompt_length_across_workers():
+    class FakeTokenizer:
+        def __call__(self, prompts, padding, truncation, max_length, return_tensors):
+            assert padding == "max_length"
+            assert truncation is True
+            assert return_tensors == "pt"
+            batch_size = len(prompts)
+            return {
+                "input_ids": torch.zeros(batch_size, max_length, dtype=torch.long),
+                "attention_mask": torch.ones(batch_size, max_length, dtype=torch.long),
+            }
+
+    fake_policy = SimpleNamespace(
+        config=SimpleNamespace(image_features=["observation.image"]),
+        model=SimpleNamespace(
+            vlm_with_expert=SimpleNamespace(
+                processor=SimpleNamespace(tokenizer=FakeTokenizer()),
+            )
+        ),
+    )
+
+    batch = build_smolvla_batch(
+        fake_policy,
+        [
+            {
+                "state": np.zeros(8, dtype=np.float32),
+                "full_image": np.zeros((8, 8, 3), dtype=np.uint8),
+            }
+        ],
+        ["short"],
+        device=torch.device("cpu"),
+        max_prompt_length=17,
+    )
+
+    assert batch["observation.language.tokens"].shape == (1, 17)
+    assert batch["observation.language.attention_mask"].shape == (1, 17)
+
+
+def test_fsdp_batch_size_normalization_never_returns_zero():
+    from verl.workers.fsdp_workers import _divide_batch_size_for_mesh
+
+    assert _divide_batch_size_for_mesh(1, 2) == 1
+    assert _divide_batch_size_for_mesh(4, 2) == 2
+    assert _divide_batch_size_for_mesh(64, 8) == 8
+
+
+def test_smolvla_uses_checkpoint_visual_input_size():
+    fake_policy = SimpleNamespace(
+        config=SimpleNamespace(
+            input_features={
+                "observation.images.image": {"type": "VISUAL", "shape": [3, 256, 256]},
+                "observation.state": {"type": "STATE", "shape": [8]},
+            }
+        )
+    )
+
+    assert smolvla_image_resize_size(fake_policy) == 256
+
+
+def test_smolvla_applies_state_and_action_normalization_stats():
+    class FakeTokenizer:
+        def __call__(self, prompts, padding, truncation, max_length, return_tensors):
+            return {
+                "input_ids": torch.zeros(len(prompts), max_length, dtype=torch.long),
+                "attention_mask": torch.ones(len(prompts), max_length, dtype=torch.long),
+            }
+
+    fake_policy = SimpleNamespace(
+        config=SimpleNamespace(image_features=["observation.image"]),
+        model=SimpleNamespace(
+            vlm_with_expert=SimpleNamespace(
+                processor=SimpleNamespace(tokenizer=FakeTokenizer()),
+            )
+        ),
+        _verl_smolvla_norm_stats={
+            "preprocessor": {
+                "observation.state.mean": torch.tensor([1.0, 2.0]),
+                "observation.state.std": torch.tensor([2.0, 4.0]),
+            },
+            "postprocessor": {
+                "action.mean": torch.tensor([10.0, 20.0]),
+                "action.std": torch.tensor([2.0, 4.0]),
+            },
+        },
+    )
+
+    batch = build_smolvla_batch(
+        fake_policy,
+        [
+            {
+                "state": np.array([3.0, 10.0], dtype=np.float32),
+                "full_image": np.zeros((8, 8, 3), dtype=np.uint8),
+            }
+        ],
+        ["task"],
+        device=torch.device("cpu"),
+        max_prompt_length=4,
+    )
+
+    assert torch.allclose(batch["observation.state"], torch.tensor([[1.0, 2.0]]))
+    actions = unnormalize_smolvla_actions(fake_policy, torch.tensor([[[1.0, -1.0]]]))
+    assert torch.allclose(actions, torch.tensor([[[12.0, 16.0]]]))
+
+
+def test_smolvla_libero_action_keeps_gripper_convention():
+    config = SimpleNamespace(model_family="smolvla", vla="smolvla")
+    action = np.array([2.0, -2.0, 0.5, 0.0, 0.0, 0.0, -1.0], dtype=np.float32)
+
+    env_action = _prepare_libero_action_for_env(action, config)
+
+    assert env_action.tolist() == pytest.approx([1.0, -1.0, 0.5, 0.0, 0.0, 0.0, -1.0])
+
+
+def test_smolvla_select_action_mode_returns_single_action(monkeypatch):
+    class FakeSelectPolicy(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.config = SimpleNamespace(n_action_steps=1)
+            self.select_calls = 0
+
+        def select_action(self, batch):
+            self.select_calls += 1
+            return torch.tensor(
+                [
+                    [0.5, -2.0, 0.0, 0.0, 0.0, 0.0, 1.5],
+                    [-0.5, 2.0, 0.0, 0.0, 0.0, 0.0, -1.5],
+                ],
+                dtype=torch.float32,
+            )
+
+    rollout = RobHFRollout.__new__(RobHFRollout)
+    rollout.module = FakeSelectPolicy()
+    rollout.config = SimpleNamespace(vla="smolvla")
+    rollout.smolvla_action_mode = "select_action"
+    rollout._fsdp_summon_context = lambda: contextlib.nullcontext()
+
+    out = rollout._generate_one_step_smolvla(
+        {
+            "observation.state": torch.zeros(2, 8),
+            "observation.language.tokens": torch.zeros(2, 4, dtype=torch.long),
+            "observation.language.attention_mask": torch.ones(2, 4, dtype=torch.bool),
+            "observation.image": torch.zeros(2, 3, 8, 8),
+        }
+    )
+
+    assert rollout.module.select_calls == 1
+    assert out["action"].shape == (2, 1, 7)
+    assert out["env_action"].shape == (2, 1, 7)
+    assert out["env_action"].amin().item() >= -1.0
+    assert out["env_action"].amax().item() <= 1.0
+
+
+def test_smolvla_chunk_mode_can_execute_shorter_prefix():
+    class FakeChunkPolicy(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.predict_calls = 0
+
+        def predict_action_chunk(self, batch):
+            self.predict_calls += 1
+            return torch.arange(2 * 6 * 7, dtype=torch.float32).reshape(2, 6, 7)
+
+    rollout = RobHFRollout.__new__(RobHFRollout)
+    rollout.module = FakeChunkPolicy()
+    rollout.config = SimpleNamespace(vla="smolvla")
+    rollout.smolvla_action_mode = "chunk"
+    rollout.smolvla_chunk_steps = 3
+    rollout._fsdp_summon_context = lambda: contextlib.nullcontext()
+
+    out = rollout._generate_one_step_smolvla(
+        {
+            "observation.state": torch.zeros(2, 8),
+            "observation.language.tokens": torch.zeros(2, 4, dtype=torch.long),
+            "observation.language.attention_mask": torch.ones(2, 4, dtype=torch.bool),
+            "observation.image": torch.zeros(2, 3, 8, 8),
+        }
+    )
+
+    expected = torch.arange(2 * 6 * 7, dtype=torch.float32).reshape(2, 6, 7)[:, :3]
+    assert rollout.module.predict_calls == 1
+    assert out["action"].shape == (2, 3, 7)
+    assert torch.equal(out["action"], expected)
+    assert out["env_action"].shape == (2, 3, 7)
 
 
 def test_smolvla_validation_minimal_output_produces_scores():

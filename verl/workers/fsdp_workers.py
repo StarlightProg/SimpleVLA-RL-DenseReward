@@ -88,6 +88,13 @@ def convert_to_regular_types(obj):
     return obj
 
 
+def _divide_batch_size_for_mesh(value, mesh_size: int) -> int:
+    """Scale a configured batch size per FSDP rank without producing zero."""
+    value = int(value)
+    mesh_size = max(int(mesh_size), 1)
+    return max(value // mesh_size, 1)
+
+
 def ensure_peft_available():
     if PEFT_IMPORT_ERROR is not None:
         raise ImportError(
@@ -193,12 +200,20 @@ class RobActorRolloutRefWorker(Worker):
 
         # normalize config
         if self._is_actor:
-            self.config.actor.ppo_mini_batch_size //= self.device_mesh.shape[0]
-            self.config.actor.ppo_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.actor.ppo_mini_batch_size = _divide_batch_size_for_mesh(
+                self.config.actor.ppo_mini_batch_size, self.device_mesh.shape[0]
+            )
+            self.config.actor.ppo_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.actor.ppo_micro_batch_size, self.device_mesh.shape[0]
+            )
         if self._is_rollout:
-            self.config.rollout.log_prob_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.rollout.log_prob_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.rollout.log_prob_micro_batch_size, self.device_mesh.shape[0]
+            )
         if self._is_ref:
-            self.config.ref.log_prob_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.ref.log_prob_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.ref.log_prob_micro_batch_size, self.device_mesh.shape[0]
+            )
 
     @staticmethod
     def _normalize_fsdp_state_key(key: str) -> str:
@@ -1078,12 +1093,20 @@ class ActorRolloutRefWorker(Worker):
 
         # normalize config
         if self._is_actor:
-            self.config.actor.ppo_mini_batch_size //= self.device_mesh.shape[0]
-            self.config.actor.ppo_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.actor.ppo_mini_batch_size = _divide_batch_size_for_mesh(
+                self.config.actor.ppo_mini_batch_size, self.device_mesh.shape[0]
+            )
+            self.config.actor.ppo_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.actor.ppo_micro_batch_size, self.device_mesh.shape[0]
+            )
         if self._is_rollout:
-            self.config.rollout.log_prob_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.rollout.log_prob_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.rollout.log_prob_micro_batch_size, self.device_mesh.shape[0]
+            )
         if self._is_ref:
-            self.config.ref.log_prob_micro_batch_size //= self.device_mesh.shape[0]
+            self.config.ref.log_prob_micro_batch_size = _divide_batch_size_for_mesh(
+                self.config.ref.log_prob_micro_batch_size, self.device_mesh.shape[0]
+            )
 
     def _build_model_optimizer(self,
                                model_path,
@@ -1497,8 +1520,12 @@ class CriticWorker(Worker):
         self._is_offload_optimizer = self.config.model.fsdp_config.optimizer_offload
 
         # normalize config
-        self.config.ppo_mini_batch_size //= torch.distributed.get_world_size()
-        self.config.ppo_micro_batch_size //= torch.distributed.get_world_size()
+        self.config.ppo_mini_batch_size = _divide_batch_size_for_mesh(
+            self.config.ppo_mini_batch_size, torch.distributed.get_world_size()
+        )
+        self.config.ppo_micro_batch_size = _divide_batch_size_for_mesh(
+            self.config.ppo_micro_batch_size, torch.distributed.get_world_size()
+        )
 
     def _build_critic_model_optimizer(self, config):
         # the following line is necessary
@@ -1705,7 +1732,9 @@ class RewardModelWorker(Worker):
             torch.distributed.init_process_group(backend="nccl")
         self.config = config
 
-        self.config.micro_batch_size //= torch.distributed.get_world_size()
+        self.config.micro_batch_size = _divide_batch_size_for_mesh(
+            self.config.micro_batch_size, torch.distributed.get_world_size()
+        )
 
     def _build_model(self, config):
         # the following line is necessary
@@ -1871,8 +1900,8 @@ class PRIMERewardModelWorker(Worker):
         self.config = config
 
         world_size = torch.distributed.get_world_size()
-        self.config.mini_batch_size //= world_size
-        self.config.micro_batch_size //= world_size
+        self.config.mini_batch_size = _divide_batch_size_for_mesh(self.config.mini_batch_size, world_size)
+        self.config.micro_batch_size = _divide_batch_size_for_mesh(self.config.micro_batch_size, world_size)
         # build device mesh
         
         from torch.distributed.device_mesh import init_device_mesh
