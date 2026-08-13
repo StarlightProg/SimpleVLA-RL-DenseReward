@@ -259,8 +259,13 @@ class Robot:
         print("right ee: ", self.right_ee.get_name())
 
     def set_planner(self, scene=None):
-        abs_left_curobo_yml_path = os.path.join(CONFIGS.ROOT_PATH, self.left_curobo_yml_path)
-        abs_right_curobo_yml_path = os.path.join(CONFIGS.ROOT_PATH, self.right_curobo_yml_path)
+        def resolve_curobo_yml(path):
+            if os.path.isabs(path):
+                return path
+            return os.path.join(CONFIGS.ROOT_PATH, path)
+
+        abs_left_curobo_yml_path = resolve_curobo_yml(self.left_curobo_yml_path)
+        abs_right_curobo_yml_path = resolve_curobo_yml(self.right_curobo_yml_path)
 
         self.communication_flag = (abs_left_curobo_yml_path != abs_right_curobo_yml_path)
         assert  self.communication_flag == False #test

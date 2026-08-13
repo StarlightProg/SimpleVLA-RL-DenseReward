@@ -28,6 +28,17 @@ def _get(config: Mapping[str, Any], key: str, default: Any) -> Any:
     return config.get(key, default)
 
 
+def _as_string_set(value: Any) -> set[str]:
+    if value is None:
+        return set()
+    if isinstance(value, str):
+        return {item.strip() for item in value.split(",") if item.strip()}
+    try:
+        return {str(item).strip() for item in value if str(item).strip()}
+    except TypeError:
+        return {str(value).strip()}
+
+
 class LiberoSubgoalRewardEngine:
     def __init__(self, config: Any = None):
         cfg = _to_container(config)
@@ -37,6 +48,8 @@ class LiberoSubgoalRewardEngine:
         self.unsupported_task_behavior = str(_get(cfg, "unsupported_task_behavior", "terminal_only"))
         self.use_best_progress = bool(_get(cfg, "use_best_progress", True))
         self.clip_dense_reward = _get(cfg, "clip_dense_reward", 0.05)
+        self.excluded_task_ids = _as_string_set(_get(cfg, "excluded_task_ids", None))
+        self.excluded_task_names = _as_string_set(_get(cfg, "excluded_task_names", None))
 
         thresholds_cfg = _to_container(cfg.get("thresholds"))
         self.thresholds = Thresholds(
@@ -102,6 +115,9 @@ class LiberoSubgoalRewardEngine:
                 },
             )
 
+        if self._is_excluded_task(task_metadata):
+            return self._excluded_step(env, obs, next_obs, done, info, task_metadata)
+
         state = self.extractor.extract(
             env=env,
             obs=next_obs,
@@ -141,3 +157,55 @@ class LiberoSubgoalRewardEngine:
         tracker = OnlineSubgoalTracker(task_spec=task_spec, use_best_progress=self.use_best_progress)
         self.trackers[env_index] = tracker
         return tracker
+
+    def _is_excluded_task(self, task_metadata: Mapping[str, Any] | None) -> bool:
+        task_metadata = task_metadata or {}
+        task_id = task_metadata.get("task_id")
+        if task_id is not None and str(task_id) in self.excluded_task_ids:
+            return True
+        for key in ("task_name", "task_suite_name", "instruction", "task_description"):
+            value = task_metadata.get(key)
+            if value is not None and str(value) in self.excluded_task_names:
+                return True
+        return False
+
+    def _excluded_step(
+        self,
+        env: Any,
+        obs: Any,
+        next_obs: Any,
+        done: bool,
+        info: Mapping[str, Any] | None,
+        task_metadata: Mapping[str, Any] | None,
+    ) -> tuple[dict[str, Any], dict[str, float]]:
+        state = self.extractor.extract(
+            env=env,
+            obs=next_obs,
+            info=info,
+            task_metadata=task_metadata,
+            done=done,
+        )
+        return (
+            {
+                "subgoal_supported": 0.0,
+                "subgoal_phase_id": -1.0,
+                "subgoal_has_object": float(state.object_position is not None),
+                "subgoal_has_target": float(state.target_position is not None),
+                "subgoal_has_gripper": float(state.gripper_position is not None),
+                "subgoal_progress": 0.0,
+                "subgoal_best_progress": 0.0,
+                "subgoal_positive_delta": 0.0,
+                "subgoal_phase_completed": 0.0,
+                "success": float(state.success),
+                "action_delta_l2": 0.0,
+                "phase_name": "excluded",
+            },
+            {
+                "reward_env": 0.0,
+                "reward_subgoal": 0.0,
+                "reward_phase": 0.0,
+                "reward_terminal": 0.0,
+                "reward_smoothness": 0.0,
+                "reward_total": 0.0,
+            },
+        )

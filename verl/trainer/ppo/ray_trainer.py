@@ -42,6 +42,14 @@ from verl.utils.dataset.rob_dataset import BufferedDataLoader
 WorkerType = Type[Worker]
 
 
+def _optional_int(value):
+    if value is None:
+        return None
+    if isinstance(value, str) and value.strip().lower() in {"", "none", "null"}:
+        return None
+    return int(value)
+
+
 class Role(Enum):
     """
     To create more roles dynamically, you can subclass Role and add new members
@@ -657,6 +665,7 @@ class RayTrainer(object):
                           config=OmegaConf.to_container(self.config, resolve=True))
 
         global_steps = 0
+        max_steps = _optional_int(self.config.trainer.get("max_steps", None))
         dp_size = self.actor_rollout_wg.world_size // self.config.actor_rollout_ref.rollout.tensor_model_parallel_size
         batch_size = self.config.data.train_batch_size
         n_samples = self.config.data.n_samples
@@ -887,6 +896,12 @@ class RayTrainer(object):
                                                  reason='periodic')
 
                 global_steps += 1
+                if max_steps is not None and max_steps > 0 and global_steps >= max_steps:
+                    print(f"Reached trainer.max_steps={max_steps}; stopping training loop.")
+                    break
+
+            if max_steps is not None and max_steps > 0 and global_steps >= max_steps:
+                break
 
         if global_steps > 0:
             self._save_checkpoint_bundle(step_name='final', log_step=global_steps - 1, reason='final')

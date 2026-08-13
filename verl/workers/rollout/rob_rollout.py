@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import contextlib
+import fcntl
 import io
 import math
 import os
@@ -64,13 +65,13 @@ from verl.utils.libero_utils import save_rollout_video
 from verl.utils.validation_video import select_validation_video_indices
 try:
     from verl.utils.libero_utils import (
-        get_libero_env, get_libero_dummy_action, get_libero_image, 
-        get_libero_wrist_image, quat2axisangle, normalize_gripper_action, 
+        get_libero_env, get_libero_dummy_action, get_libero_image,
+        get_libero_wrist_image, quat2axisangle, normalize_gripper_action,
         invert_gripper_action
     )
 except ImportError as e:
     print(f"Warning : can't import libero: {e}")
-    
+
 from verl.utils.vla_utils.openvla_oft.constants import (
     ACTION_DIM,
     ACTION_PROPRIO_NORMALIZATION_TYPE,
@@ -119,6 +120,61 @@ __all__ = ['RobHFRollout']
 
 # Environment initialization lock for Robotwin
 _ENV_INIT_LOCK = threading.Lock()
+
+
+def _config_bool(config, name, default=True):
+    value = getattr(config, name, default)
+    if value is None:
+        return default
+    if isinstance(value, str):
+        return value.strip().lower() not in {"0", "false", "no", "off", "none", "null"}
+    return bool(value)
+
+
+def _first_visible_cuda_device():
+    visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", "").strip()
+    if not visible_devices:
+        return 0
+    first_device = visible_devices.split(",")[0].strip()
+    try:
+        return int(first_device)
+    except ValueError:
+        return 0
+
+
+def _libero_egl_init_lock_path(config):
+    lock_path = getattr(config, "libero_egl_init_lock_path", None)
+    if lock_path is None or str(lock_path).strip().lower() in {"", "none", "null"}:
+        lock_root = os.environ.get("LIBERO_EGL_INIT_LOCK_DIR")
+        if not lock_root:
+            lock_root = os.environ.get("RAY_TMPDIR") or os.environ.get("TMPDIR") or "/tmp"
+        lock_path = os.environ.get("LIBERO_EGL_INIT_LOCK_PATH") or os.path.join(
+            lock_root, "libero_egl_init.lock"
+        )
+    return Path(str(lock_path))
+
+
+@contextlib.contextmanager
+def _libero_egl_init_lock(config):
+    if not _config_bool(config, "libero_egl_init_lock", default=True):
+        yield
+        return
+
+    lock_path = _libero_egl_init_lock_path(config)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("w") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def _stagger_libero_egl_init(config):
+    stagger_seconds = float(getattr(config, "libero_egl_init_stagger_seconds", 0.0) or 0.0)
+    if stagger_seconds <= 0:
+        return
+    time.sleep(stagger_seconds * _first_visible_cuda_device())
 
 OPENVLA_V01_SYSTEM_PROMPT = (
     "A chat between a curious user and an artificial intelligence assistant. "
@@ -187,7 +243,7 @@ def normalize_proprio(proprio, norm_stats):
         proprio_high, proprio_low = np.array(norm_stats["q99"]), np.array(norm_stats["q01"])
     else:
         raise ValueError("Unsupported action/proprio normalization type detected!")
-    
+
     normalized_proprio = np.clip(
         np.where(
             mask,
@@ -206,48 +262,48 @@ def get_robotwin2_task(task_name, config):
     robotwin2_path = os.path.join(os.path.dirname(__file__), '..', '..', 'utils', 'envs', 'robotwin2')
     if robotwin2_path not in sys.path:
         sys.path.append(robotwin2_path)
-        
+
     robotwin2_utils_path = os.path.join(os.path.dirname(__file__), '..', '..', 'utils', 'envs', 'robotwin2', "description", "utils")
     if robotwin2_utils_path not in sys.path:
         sys.path.append(robotwin2_utils_path)
-    
+
     from envs import CONFIGS_PATH
-    
+
     envs_module = importlib.import_module(f"envs.{task_name}")
     try:
         env_class = getattr(envs_module, task_name)
         env_instance = env_class()
     except:
         raise SystemExit(f"No Task: {task_name}")
-    
+
     task_config = config.get('twin2_task_config', 'demo_randomized')
     config_file = os.path.join(robotwin2_path, f"task_config/{task_config}.yml")
-    
+
     with open(config_file, "r", encoding="utf-8") as f:
         args = yaml.load(f.read(), Loader=yaml.FullLoader)
-    
+
     args['task_name'] = task_name
     args['task_config'] = task_config
     args['ckpt_setting'] = config.get('twin2_ckpt_setting', 'demo_randomized')
-    
+
     embodiment_type = args.get("embodiment")
     embodiment_config_path = os.path.join(CONFIGS_PATH, "_embodiment_config.yml")
-    
+
     with open(embodiment_config_path, "r", encoding="utf-8") as f:
         _embodiment_types = yaml.load(f.read(), Loader=yaml.FullLoader)
-    
+
     def get_embodiment_file(embodiment_type):
         robot_file = _embodiment_types[embodiment_type]["file_path"]
         if robot_file is None:
             raise ValueError("No embodiment files")
         return robot_file
-    
+
     def get_embodiment_config(robot_file):
         robot_config_file = os.path.join(robot_file, "config.yml")
         with open(robot_config_file, "r", encoding="utf-8") as f:
             embodiment_args = yaml.load(f.read(), Loader=yaml.FullLoader)
         return embodiment_args
-    
+
     if len(embodiment_type) == 1:
         args["left_robot_file"] = get_embodiment_file(embodiment_type[0])
         args["right_robot_file"] = get_embodiment_file(embodiment_type[0])
@@ -259,22 +315,22 @@ def get_robotwin2_task(task_name, config):
         args["dual_arm_embodied"] = False
     else:
         raise ValueError("embodiment items should be 1 or 3")
-    
+
     args["left_embodiment_config"] = get_embodiment_config(args["left_robot_file"])
     args["right_embodiment_config"] = get_embodiment_config(args["right_robot_file"])
-    
+
     with open(CONFIGS_PATH + "_camera_config.yml", "r", encoding="utf-8") as f:
         _camera_config = yaml.load(f.read(), Loader=yaml.FullLoader)
-    
+
     head_camera_type = args["camera"]["head_camera_type"]
     args["head_camera_h"] = _camera_config[head_camera_type]["h"]
     args["head_camera_w"] = _camera_config[head_camera_type]["w"]
-    
+
     args["eval_mode"] = True
     args["eval_video_log"] = False
     args["render_freq"] = 0
     args['instruction_type'] = config.get('twin2_instruction_type', 'unseen')
-    
+
     return env_instance, args
 
 def encode_obs(observation):
@@ -335,7 +391,9 @@ class RobotwinEnvWrapper:
         self.finish_step = 0
         self.lock = threading.Lock()
         self.instruction = None
-        
+        self.subgoal_engine = None
+        self.task_metadata = None
+
     def initialize(self):
         """Initialize the environment"""
         with _ENV_INIT_LOCK:
@@ -355,13 +413,25 @@ class RobotwinEnvWrapper:
                     self.env, self.args = get_robotwin2_task(self.task_name, self.config)
                     self.env.setup_demo(now_ep_num=self.trial_id, seed=self.trial_seed, is_test=True, **self.args)
                     episode_info_list = [self.env.get_info()]
-                
-                
+
+
                 from generate_episode_instructions import generate_episode_descriptions
                 results = generate_episode_descriptions(self.task_name, episode_info_list, 1, seed=self.trial_id)
                 self.instruction = np.random.choice(results[0][self.args["instruction_type"]])
                 self.env.set_instruction(instruction=self.instruction)
-                
+                self.task_metadata = {
+                    "task_name": self.task_name,
+                    "task_suite_name": f"robotwin2_{self.task_name}",
+                    "trial_id": self.trial_id,
+                    "trial_seed": self.trial_seed,
+                    "instruction": self.instruction,
+                    "task_description": self.instruction,
+                }
+                if _subgoal_enabled(self.config):
+                    from verl.utils.subgoal_reward import Robotwin2SubgoalRewardEngine
+
+                    self.subgoal_engine = Robotwin2SubgoalRewardEngine(_get_subgoal_config(self.config))
+
     def get_obs(self):
         """Get observation from environment"""
         with self.lock:
@@ -374,42 +444,55 @@ class RobotwinEnvWrapper:
                 gc.collect()
                 geted_obs = self.env.get_obs()
                 return geted_obs
-    
+
     def get_instruction(self):
         """Get instruction for the task"""
         with self.lock:
-            
+
             return self.env.get_instruction()
-            
+
     def step(self, action):
         """Execute action in environment"""
         with self.lock:
             try:
-                
+
                 self.env.take_action(action)
                 done = self.env.eval_success
-                    
+
             except Exception as e:
                 done = False
                 error_msg = f"****** action execution ERROR: {type(e).__name__}: {str(e)} ******"
                 print(error_msg, flush=True)
                 traceback.print_exc()
-                
+
             try:
                 obs = self.env.get_obs()
                 obs = encode_obs(obs)
             except Exception as e:
                 print(f"****** env.get_obs ERROR {e} ******", flush=True)
                 obs = None
-                
+
             self.finish_step += action.shape[0]
-            
+
             if done or self.finish_step >= self.env.step_lim:
                 self.active = False
                 self.complete = done
-            
-            return obs, done
-            
+
+            subgoal_metrics = None
+            if self.subgoal_engine is not None:
+                subgoal_metrics = _empty_subgoal_metrics()
+                subgoal_info, reward_parts = self.subgoal_engine.step(
+                    env_index=0,
+                    env=self.env,
+                    action=action,
+                    env_reward=float(done),
+                    done=done,
+                    task_metadata=self.task_metadata,
+                )
+                _accumulate_subgoal_metrics(subgoal_metrics, subgoal_info, reward_parts)
+
+            return obs, done, subgoal_metrics
+
     def close(self):
         """Close the environment"""
         with self.lock:
@@ -423,49 +506,115 @@ class RobotwinEnvWrapper:
                     self.env = None
                     self.args = None
                     self.instruction = None
+                    self.subgoal_engine = None
+                    self.task_metadata = None
 
 # ================ Libero-specific functions ================
 
 def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, collect_video, frame_stride, global_steps, max_steps):
     """Worker process for Libero environments"""
-    from libero.libero import benchmark, get_libero_path
-    
-    with contextlib.redirect_stdout(io.StringIO()):
-        benchmark_dict = benchmark.get_benchmark_dict()
-        task_suite = benchmark_dict[task_name]()
-    task = task_suite.get_task(task_id)
-    initial_states = task_suite.get_task_init_states(task_id)
-    initial_state = initial_states[trial_id % len(initial_states)]
-    
-    env = None
-    while True:
+    def send_error(stage, exc, extra=None):
+        error_data = {
+            "type": "error",
+            "stage": stage,
+            "message": str(exc),
+            "traceback": traceback.format_exc(),
+            "task_name": str(task_name),
+            "task_id": int(task_id),
+            "trial_id": int(trial_id),
+            "pid": os.getpid(),
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES", ""),
+            "mujoco_gl": os.environ.get("MUJOCO_GL", ""),
+            "pyopengl_platform": os.environ.get("PYOPENGL_PLATFORM", ""),
+            "mujoco_egl_device_id": os.environ.get("MUJOCO_EGL_DEVICE_ID", ""),
+        }
+        if extra:
+            error_data.update(extra)
         try:
-            env, task_description = get_libero_env(task, config.model_family, resolution=256)
+            output_queue.put(error_data)
+        except Exception:
+            print(f"Failed to send LIBERO worker error: {error_data}", flush=True)
+
+    try:
+        from libero.libero import benchmark, get_libero_path
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            benchmark_dict = benchmark.get_benchmark_dict()
+            task_suite = benchmark_dict[task_name]()
+        task = task_suite.get_task(task_id)
+        initial_states = task_suite.get_task_init_states(task_id)
+        initial_state = initial_states[trial_id % len(initial_states)]
+    except Exception as exc:
+        send_error("benchmark_setup", exc)
+        return
+
+    env = None
+    task_description = None
+    max_init_attempts = int(getattr(config, "libero_env_init_max_retries", 3) or 3)
+    retry_sleep = float(getattr(config, "libero_env_init_retry_sleep", 2.0) or 0.0)
+    last_exc = None
+    last_traceback = None
+    _stagger_libero_egl_init(config)
+    for attempt in range(1, max_init_attempts + 1):
+        try:
+            with _libero_egl_init_lock(config):
+                env, task_description = get_libero_env(task, config.model_family, resolution=256)
             break
-        except:
-            print(f"*** env initialization failed ***")
+        except Exception as exc:
+            last_exc = exc
+            last_traceback = traceback.format_exc()
+            print(
+                "*** env initialization failed "
+                f"(attempt {attempt}/{max_init_attempts}, task={task_name}, "
+                f"task_id={task_id}, trial_id={trial_id}, pid={os.getpid()}, "
+                f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES', '')}, "
+                f"MUJOCO_GL={os.environ.get('MUJOCO_GL', '')}, "
+                f"PYOPENGL_PLATFORM={os.environ.get('PYOPENGL_PLATFORM', '')}, "
+                f"MUJOCO_EGL_DEVICE_ID={os.environ.get('MUJOCO_EGL_DEVICE_ID', '')}): {exc}",
+                flush=True,
+            )
+            print(last_traceback, flush=True)
             if env is not None:
                 try:
                     env.close()
                 except Exception as e:
-                    print(f"error when close the env: {e}")
+                    print(f"error when close the env: {e}", flush=True)
+                env = None
             torch.cuda.empty_cache()
             gc.collect()
-            print("gc collect finish")
-    
-    env.reset()
-    obs = env.set_init_state(initial_state)
-    
-    t = 0
-    valid_images = []
-    while t < config.num_steps_wait:
-        obs, _, _, _ = env.step(get_libero_dummy_action(config.model_family))
-        t += 1
-        
+            print("gc collect finish", flush=True)
+            if attempt < max_init_attempts and retry_sleep > 0:
+                time.sleep(retry_sleep)
+    else:
+        send_error(
+            "env_init",
+            last_exc or RuntimeError("LIBERO env initialization failed"),
+            {"traceback": last_traceback or traceback.format_exc()},
+        )
+        return
+
+    try:
+        env.reset()
+        obs = env.set_init_state(initial_state)
+
+        t = 0
+        valid_images = []
+        while t < config.num_steps_wait:
+            obs, _, _, _ = env.step(get_libero_dummy_action(config.model_family))
+            t += 1
+    except Exception as exc:
+        send_error("env_reset_or_warmup", exc)
+        try:
+            if env is not None:
+                env.close()
+        except Exception:
+            pass
+        return
+
     if collect_video:
         img = obs["agentview_image"][::-1, ::-1]
         valid_images.append(img)
-    
+
     output_queue.put({
         'type': 'init',
         'obs': obs,
@@ -491,51 +640,59 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         from verl.utils.subgoal_reward import LiberoSubgoalRewardEngine
 
         subgoal_engine = LiberoSubgoalRewardEngine(_get_subgoal_config(config))
-    
+
     active = True
     complete = False
     finish_step = 0
-    
+
     while True:
         action = input_queue.get()
         if action is None:
             env.close()
             output_queue.put({'type': 'terminate'})
             break
-        
+
         step_images = []
         subgoal_metrics = _empty_subgoal_metrics() if subgoal_engine is not None else None
-        for i in range(len(action)):
-            a = action[i]
-            normalized_action = normalize_gripper_action(a, binarize=True)
-            inverted_action = invert_gripper_action(normalized_action)
-            prev_obs = obs
-            obs, reward, done, info = env.step(inverted_action.tolist())
+        try:
+            for i in range(len(action)):
+                a = action[i]
+                normalized_action = normalize_gripper_action(a, binarize=True)
+                inverted_action = invert_gripper_action(normalized_action)
+                prev_obs = obs
+                obs, reward, done, info = env.step(inverted_action.tolist())
 
-            if subgoal_engine is not None:
-                subgoal_info, reward_parts = subgoal_engine.step(
-                    env_index=0,
-                    env=env,
-                    obs=prev_obs,
-                    next_obs=obs,
-                    action=inverted_action,
-                    env_reward=reward,
-                    done=done,
-                    info=info,
-                    task_metadata=task_metadata,
-                )
-                _accumulate_subgoal_metrics(subgoal_metrics, subgoal_info, reward_parts)
-            
-            if collect_video and (i % frame_stride == 0):
-                img = obs["agentview_image"][::-1, ::-1]
-                step_images.append(img)
-            
-            finish_step += 1
-            if done or finish_step >= max_steps:
-                active = False
-                complete = done
-                break
-        
+                if subgoal_engine is not None:
+                    subgoal_info, reward_parts = subgoal_engine.step(
+                        env_index=0,
+                        env=env,
+                        obs=prev_obs,
+                        next_obs=obs,
+                        action=inverted_action,
+                        env_reward=reward,
+                        done=done,
+                        info=info,
+                        task_metadata=task_metadata,
+                    )
+                    _accumulate_subgoal_metrics(subgoal_metrics, subgoal_info, reward_parts)
+
+                if collect_video and (i % frame_stride == 0):
+                    img = obs["agentview_image"][::-1, ::-1]
+                    step_images.append(img)
+
+                finish_step += 1
+                if done or finish_step >= max_steps:
+                    active = False
+                    complete = done
+                    break
+        except Exception as exc:
+            send_error("env_step", exc, {"finish_step": int(finish_step)})
+            try:
+                env.close()
+            except Exception:
+                pass
+            break
+
         output_data = {
             'type': 'step',
             'obs': obs,
@@ -586,21 +743,21 @@ class RobHFRollout(BaseRollout):
         }
         self.processor = AutoProcessor.from_pretrained(config.pretrained_checkpoint, trust_remote_code=True)
         self.vla_preprocess()
-        
+
         # Setup execution pool based on task suite
         if "robotwin" in self.config.task_suite_name:
             self.env_thread_pool = ThreadPoolExecutor(max_workers=16)
             self.robotwin_version = self._detect_robotwin_version()
         else:
-            # Libero runs in subprocesses; allow start method control for stability.
-            # On Linux, "fork" is typically lighter/faster for this workload than "spawn".
-            mp_start_method = getattr(self.config, "libero_mp_start_method", "fork")
+            # Libero workers touch CUDA/EGL after the policy has initialized CUDA.
+            # Spawn avoids inheriting a stale CUDA context into the render process.
+            mp_start_method = getattr(self.config, "libero_mp_start_method", "spawn")
             try:
                 self.mp_ctx = multiprocessing.get_context(mp_start_method)
             except ValueError:
-                print(f"Invalid libero_mp_start_method={mp_start_method}, fallback to 'fork'", flush=True)
-                self.mp_ctx = multiprocessing.get_context("fork")
-        
+                print(f"Invalid libero_mp_start_method={mp_start_method}, fallback to 'spawn'", flush=True)
+                self.mp_ctx = multiprocessing.get_context("spawn")
+
     def _detect_robotwin_version(self):
         """Detect which version of robotwin to use based on config"""
         if hasattr(self.config, 'robotwin_version'):
@@ -610,12 +767,64 @@ class RobHFRollout(BaseRollout):
         else:
             print("RobotWin 2.0 fully encompasses RobotWin 1.0, therefore we prioritize support for RobotWin 2.0")
             raise ValueError
-        
+
     def _get_max_steps(self, task_suite_name: str) -> int:
         override = getattr(self.config, "max_episode_steps", None)
         if override is not None:
             return int(override)
         return self.max_steps.get(task_suite_name, 800)
+
+    def _get_libero_worker_message(self, output_queue, process, expected_type, timeout, task_label):
+        """Read one LIBERO worker message while surfacing child-process failures."""
+        deadline = time.monotonic() + float(timeout)
+        poll_interval = 5.0
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                alive = process.is_alive()
+                raise TimeoutError(
+                    f"Timed out after {timeout}s waiting for LIBERO worker {process.pid} "
+                    f"to send {expected_type!r} for {task_label}; alive={alive}, "
+                    f"exitcode={process.exitcode}."
+                )
+
+            try:
+                message = output_queue.get(timeout=min(poll_interval, remaining))
+            except queue.Empty:
+                if not process.is_alive():
+                    raise RuntimeError(
+                        f"LIBERO worker {process.pid} exited with code {process.exitcode} "
+                        f"before sending {expected_type!r} for {task_label}."
+                    )
+                continue
+
+            if not isinstance(message, dict):
+                raise RuntimeError(
+                    f"LIBERO worker {process.pid} sent unexpected non-dict message "
+                    f"while waiting for {expected_type!r} for {task_label}: {message!r}"
+                )
+
+            message_type = message.get("type")
+            if message_type == "error":
+                raise RuntimeError(
+                    "LIBERO worker failed during "
+                    f"{message.get('stage', 'unknown')} for {task_label}: "
+                    f"{message.get('message', '')}\n"
+                    f"pid={message.get('pid')}, "
+                    f"CUDA_VISIBLE_DEVICES={message.get('cuda_visible_devices')}, "
+                    f"MUJOCO_GL={message.get('mujoco_gl')}, "
+                    f"PYOPENGL_PLATFORM={message.get('pyopengl_platform')}, "
+                    f"MUJOCO_EGL_DEVICE_ID={message.get('mujoco_egl_device_id')}\n"
+                    f"{message.get('traceback', '')}"
+                )
+
+            if message_type != expected_type:
+                raise RuntimeError(
+                    f"LIBERO worker {process.pid} sent message type {message_type!r} "
+                    f"while waiting for {expected_type!r} for {task_label}."
+                )
+
+            return message
 
     def _fsdp_summon_context(self):
         if not isinstance(self.module, FSDP):
@@ -631,7 +840,7 @@ class RobHFRollout(BaseRollout):
                 tf.config.set_visible_devices([], "GPU")
             except Exception:
                 pass
-        
+
         if self.config.vla in ["openvla-oft"]:
             if "libero" in self.config.task_suite_name:
                 if self.config.unnorm_key not in self.module.norm_stats and f"{self.config.unnorm_key}_no_noops" in self.module.norm_stats:
@@ -642,7 +851,7 @@ class RobHFRollout(BaseRollout):
 
     def generate_sequences(self, prompts):
         batch_size = prompts.batch.batch_size[0]
-        
+
         if prompts.meta_info.get('n_samples') is None:
             micro_batch_size = self.config.val_micro_batch_size if self.config.val_micro_batch_size is not None else 1
         else:
@@ -657,26 +866,26 @@ class RobHFRollout(BaseRollout):
         output = [self._generate_minibatch(p) for p in batch_prompts]
         output = DataProto.concat(output)
         return output
-    
+
     def process_input(self, inputs: list, task_descriptions: list):
         """Unified input processing for both Robotwin and Libero"""
         batchdata = {"input_ids": [], "attention_mask": [], "pixel_values": []}
         if self.config.use_proprio:
             batchdata["proprio"] = []
-        
+
         for i in range(len(inputs)):
             input_data = inputs[i]
             task_description = task_descriptions[i]
-            
+
             # Process main image
             image = Image.fromarray(input_data["full_image"]).convert("RGB")
             if self.config.center_crop:
                 image = center_crop_image(image)
             prompt = f"In: What action should the robot take to {task_description.lower()}?\nOut:"
             batch_feature = self.processor(prompt, image)
-            
+
             pixel_values_list = [batch_feature["pixel_values"]]
-            
+
             # Process additional images (wrist cameras)
             if "robotwin" in self.config.task_suite_name:
                 # Robotwin may have multiple wrist images
@@ -695,13 +904,13 @@ class RobHFRollout(BaseRollout):
                         wrist_image = center_crop_image(wrist_image)
                     wrist_batch_feature = self.processor(prompt, wrist_image)
                     pixel_values_list.append(wrist_batch_feature["pixel_values"])
-            
+
             batch_feature["pixel_values"] = torch.cat(pixel_values_list, dim=1)
-            
+
             input_ids = batch_feature["input_ids"]
             attention_mask = batch_feature["attention_mask"]
             pixel_values = batch_feature["pixel_values"]
-            
+
             if not torch.all(input_ids[:, -1] == 29871):
                 input_ids = torch.cat(
                     (input_ids, torch.unsqueeze(torch.Tensor([29871]).long(), dim=0).to(input_ids.device)), dim=1
@@ -710,26 +919,26 @@ class RobHFRollout(BaseRollout):
                     attention_mask = torch.cat(
                         (attention_mask, torch.unsqueeze(torch.Tensor([True]).bool(), dim=0).to(attention_mask.device)), dim=1
                     )
-            
+
             batchdata["input_ids"].append(input_ids)
             batchdata["attention_mask"].append(attention_mask)
             batchdata["pixel_values"].append(pixel_values)
-            
+
             if self.config.use_proprio:
                 proprio = input_data["state"]
                 proprio_norm_stats = self.module.norm_stats[self.config.unnorm_key]["proprio"]
                 proprio = normalize_proprio(proprio, proprio_norm_stats)
                 batchdata["proprio"].append(torch.from_numpy(proprio))
-        
+
         device = torch.device('cuda')
-        
+
         # Padding and device placement
         if self.config.vla in ["openvla-oft"]:
             batchdata["input_ids"] = [x.transpose(0, 1) for x in batchdata["input_ids"]]
             batchdata["attention_mask"] = [x.transpose(0, 1) for x in batchdata["attention_mask"]]
             batchdata["input_ids"] = pad_sequence(batchdata["input_ids"], batch_first=True, padding_value=self.processor.tokenizer.pad_token_id).squeeze(-1).to(device)
             batchdata["attention_mask"] = pad_sequence(batchdata["attention_mask"], batch_first=True, padding_value=0).squeeze(-1).to(device)
-            
+
             padding_mask = batchdata["input_ids"].ne(self.processor.tokenizer.pad_token_id)
             assert torch.all(padding_mask == batchdata["attention_mask"].ne(0))
             padding_mask = ~padding_mask
@@ -737,26 +946,26 @@ class RobHFRollout(BaseRollout):
             sorted_indices = torch.argsort(padding_mask, dim=1, descending=True, stable=True)
             batchdata["input_ids"] = torch.gather(batchdata["input_ids"], 1, sorted_indices)
             batchdata["attention_mask"] = torch.gather(batchdata["attention_mask"], 1, sorted_indices)
-            
+
             batchdata["pixel_values"] = torch.cat(batchdata["pixel_values"], dim=0).to(device)
-            
+
             if self.config.use_proprio:
                 batchdata["proprio"] = torch.stack(batchdata["proprio"], dim=0).to(device)
-                
+
             assert torch.all(batchdata["attention_mask"].ne(0) == batchdata["input_ids"].ne(self.processor.tokenizer.pad_token_id))
         else:
             for key in ["input_ids", "attention_mask", "pixel_values"]:
                 batchdata[key] = torch.cat(batchdata[key], dim=0).to(device)
 
         return batchdata
-    
+
     def _generate_minibatch(self, prompts):
         """Generate minibatch - routes to appropriate implementation based on task suite"""
         if "robotwin" in self.config.task_suite_name:
             return self._generate_minibatch_robotwin(prompts)
         else:
             return self._generate_minibatch_libero(prompts)
-    
+
     def _generate_minibatch_robotwin(self, prompts):
         """Generate minibatch for Robotwin using threading"""
         self.module.eval()
@@ -774,6 +983,7 @@ class RobHFRollout(BaseRollout):
         video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
         minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
+        subgoal_logging_enabled = _subgoal_enabled(self.config)
 
         selected_video_indices = set()
         if collect_video:
@@ -784,7 +994,7 @@ class RobHFRollout(BaseRollout):
                 n_samples,
                 video_max_episodes,
             )
-        
+
         # Create environment wrappers
         env_wrappers = []
         for idx in range(batch_size):
@@ -792,16 +1002,16 @@ class RobHFRollout(BaseRollout):
             t_id = task_id[idx][0].item()
             tr_id = trial_id[idx][0].item()
             tr_seed = trial_seed[idx][0].item()
-            
+
             wrapper = RobotwinEnvWrapper(task_name, tr_id, tr_seed, self.config, version=self.robotwin_version)
             env_wrappers.append(wrapper)
-        
+
         # Initialize environments in parallel
         init_futures = []
         for wrapper in env_wrappers:
             future = self.env_thread_pool.submit(wrapper.initialize)
             init_futures.append(future)
-        
+
         for future in as_completed(init_futures, timeout=360):
             try:
                 future.result()
@@ -809,22 +1019,22 @@ class RobHFRollout(BaseRollout):
                 print(f"Environment initialization failed: {e}", flush=True)
                 traceback.print_exc()
                 raise
-        
+
         # Collect initial observations
         inputs = []
         task_descriptions = []
         task_records = []
         valid_video = defaultdict(list)
-        
+
         for idx, wrapper in enumerate(env_wrappers):
             try:
                 obs = wrapper.get_obs()
                 obs = encode_obs(obs)
-                    
+
                 task_description = wrapper.get_instruction()
                 task_descriptions.append(task_description)
                 inputs.append(self._obs_to_input(obs, is_robotwin=True, robotwin_version=wrapper.version))
-                
+
                 task_file_name = f"{wrapper.task_name}_trial_{wrapper.trial_id}_seed_{wrapper.trial_seed}"
                 task_records.append({
                     "active": wrapper.active,
@@ -832,37 +1042,37 @@ class RobHFRollout(BaseRollout):
                     "finish_step": wrapper.finish_step,
                     "task_file_name": task_file_name
                 })
-                
+
                 if collect_video and idx in selected_video_indices:
                     img = obs['observation']['head_camera']['rgb']
                     valid_video[task_file_name].append(img)
-                    
+
             except Exception as e:
                 print(f"Failed to get initial observation: {e}", flush=True)
                 traceback.print_exc()
                 raise
-        
+
         # Main rollout loop
         step = 0
         rollout_step_idx = 0
         vla_history = []
-        
+
         while step < max_steps:
             active_indices = [i for i, r in enumerate(task_records) if r['active']]
             # Keep identical forward-step counts across ranks to avoid FSDP/NCCL desync.
             # Even if all envs are inactive on this rank, we continue stepping the model
             # until max_steps so all ranks issue collectives in the same order/count.
-                
+
             current_inputs = inputs
             current_task_descriptions = task_descriptions
-            
+
             # Get VLA actions
             vla_input = self.process_input(current_inputs, current_task_descriptions)
             vla_input.update(meta_info)
-            
+
             vla_output = self._generate_one_step(vla_input)
             actions = vla_output["action"]
-            
+
             if not minimal_validation_output:
                 step_data = {
                     "responses": vla_output["responses"],
@@ -875,7 +1085,7 @@ class RobHFRollout(BaseRollout):
                 if vla_output.get("proprio") is not None:
                     step_data["proprio"] = vla_output["proprio"]
                 vla_history.append(step_data)
-            
+
             # Execute actions in parallel
             step_futures = []
             for idx in active_indices:
@@ -884,49 +1094,58 @@ class RobHFRollout(BaseRollout):
                     actions[idx]
                 )
                 step_futures.append((idx, future))
-            
+
             # Collect results
             new_inputs = inputs.copy()
+            subgoal_step_metrics = [_empty_subgoal_metrics() for _ in range(batch_size)] if subgoal_logging_enabled else None
             for idx, future in step_futures:
                 try:
-                    obs, done = future.result(timeout=120)
+                    obs, done, subgoal_metrics = future.result(timeout=120)
                     if obs is not None:
                         obs = encode_obs(obs)
                         new_inputs[idx] = self._obs_to_input(obs, is_robotwin=True, robotwin_version=env_wrappers[idx].version)
-                        
+
                     task_records[idx]['active'] = env_wrappers[idx].active
                     task_records[idx]['complete'] = env_wrappers[idx].complete
                     task_records[idx]['finish_step'] = env_wrappers[idx].finish_step
-                    
+                    if subgoal_step_metrics is not None and subgoal_metrics is not None:
+                        subgoal_step_metrics[idx] = subgoal_metrics
+
                     if collect_video and idx in selected_video_indices and obs is not None and (rollout_step_idx % video_frame_stride == 0):
                         img = obs['observation']['head_camera']['rgb']
                         valid_video[task_records[idx]['task_file_name']].append(img)
-                        
+
                 except Exception as e:
                     print(f"Step execution failed: {e}", flush=True)
                     task_records[idx]['active'] = False
                     task_records[idx]['complete'] = False
                     task_records[idx]['finish_step'] = step + self.config.action_chunks_len
-            
+
+            if subgoal_step_metrics is not None and not minimal_validation_output:
+                device = vla_output["responses"].device
+                for key in SUBGOAL_NUMERIC_KEYS:
+                    values = [metrics.get(key, 0.0) for metrics in subgoal_step_metrics]
+                    step_data[key] = torch.tensor(values, dtype=torch.float32, device=device)
+
             inputs = new_inputs
             step += self.config.action_chunks_len
             rollout_step_idx += 1
-        
+
         # Clean up environments
         cleanup_futures = []
         for wrapper in env_wrappers:
             future = self.env_thread_pool.submit(wrapper.close)
             cleanup_futures.append(future)
-            
+
         for future in as_completed(cleanup_futures):
             try:
                 future.result(timeout=20)
             except Exception as e:
                 print(f"Environment cleanup failed: {e}", flush=True)
-        
+
         torch.cuda.empty_cache()
         gc.collect()
-        
+
         # Save validation videos
         if collect_video:
             for task_file, images in valid_video.items():
@@ -939,14 +1158,14 @@ class RobHFRollout(BaseRollout):
                     complete,
                     rollout_root=getattr(self.config, "rollout_dir", None),
                 )
-        
+
         self.module.train()
-        
+
         # Prepare output batch
         if minimal_validation_output:
             return self._prepare_validation_output_batch(task_records, batch_size, device=task_id.device)
         return self._prepare_output_batch(vla_history, task_records, batch_size)
-    
+
     def _generate_minibatch_libero(self, prompts):
         """Generate minibatch for Libero using multiprocessing"""
         self.module.eval()
@@ -1030,16 +1249,20 @@ class RobHFRollout(BaseRollout):
         global_steps,
     ):
         batch_size = task_id.size(0)
-        
+
         processes = []
         input_queues = []
         output_queues = []
-        
+        task_labels = []
+
         try:
+            init_timeout = float(getattr(self.config, "libero_env_init_timeout", 180) or 180)
+            step_timeout = float(getattr(self.config, "libero_env_step_timeout", 60) or 60)
             for idx in range(batch_size):
                 task_name = task_suite_name[idx]
                 t_id = task_id[idx][0].item()
                 tr_id = trial_id[idx][0].item()
+                task_label = f"{task_name}[task_id={t_id}, trial_id={tr_id}]"
                 input_q = self.mp_ctx.Queue()
                 output_q = self.mp_ctx.Queue()
                 process_collect_video = collect_video and idx in selected_video_indices
@@ -1051,6 +1274,7 @@ class RobHFRollout(BaseRollout):
                 processes.append(p)
                 input_queues.append(input_q)
                 output_queues.append(output_q)
+                task_labels.append(task_label)
 
             inputs = []
             task_descriptions = []
@@ -1058,8 +1282,13 @@ class RobHFRollout(BaseRollout):
             valid_video = defaultdict(list)
 
             for idx in range(batch_size):
-                init_data = output_queues[idx].get(timeout=120)
-                assert init_data['type'] == 'init'
+                init_data = self._get_libero_worker_message(
+                    output_queues[idx],
+                    processes[idx],
+                    "init",
+                    init_timeout,
+                    task_labels[idx],
+                )
                 task_descriptions.append(init_data["task_description"])
                 inputs.append(self._obs_to_input(init_data['obs'], is_robotwin=False))
                 task_records.append({
@@ -1079,7 +1308,7 @@ class RobHFRollout(BaseRollout):
                 # Keep identical forward-step counts across ranks to avoid FSDP/NCCL desync.
                 # Even if all envs are inactive on this rank, we continue stepping the model
                 # until max_steps so all ranks issue collectives in the same order/count.
-             
+
                 current_inputs = inputs
                 current_task_descriptions = task_descriptions
 
@@ -1107,8 +1336,13 @@ class RobHFRollout(BaseRollout):
                 new_inputs = inputs.copy()
                 subgoal_step_metrics = [_empty_subgoal_metrics() for _ in range(batch_size)] if subgoal_logging_enabled else None
                 for idx in active_indices:
-                    result = output_queues[idx].get(timeout=30)
-                    assert result['type'] == 'step'
+                    result = self._get_libero_worker_message(
+                        output_queues[idx],
+                        processes[idx],
+                        "step",
+                        step_timeout,
+                        task_labels[idx],
+                    )
                     new_inputs[idx] = self._obs_to_input(result['obs'], is_robotwin=False)
                     task_records[idx]['active'] = result['active']
                     task_records[idx]['complete'] = result['complete']
@@ -1177,7 +1411,7 @@ class RobHFRollout(BaseRollout):
                     pass
 
             gc.collect()
-    
+
     def _prepare_output_batch(self, vla_history, task_records, batch_size):
         """Prepare the output batch from VLA history"""
         batch = {
@@ -1186,7 +1420,7 @@ class RobHFRollout(BaseRollout):
             'attention_mask': [],
             'pixel_values': []
         }
-        
+
         key_names = ["responses", "input_ids", "attention_mask", "pixel_values"]
         if self.config.use_proprio:
             batch["proprio"] = []
@@ -1196,17 +1430,17 @@ class RobHFRollout(BaseRollout):
             if vla_history and key in vla_history[0]:
                 batch[key] = []
                 key_names.append(key)
-        
+
         for k in key_names:
             for h in vla_history:
                 batch[k].append(h[k])
-        
+
         for k, v in batch.items():
             batch[k] = torch.stack(v, dim=1)
-        
+
         batch["complete"] = torch.tensor([bool(k["complete"]) for k in task_records], dtype=torch.bool, device=batch['responses'].device)
         batch["finish_step"] = torch.tensor([k["finish_step"] for k in task_records], dtype=torch.int64, device=batch['responses'].device)
-        
+
         output_batch = TensorDict(batch, batch_size=batch_size)
         return DataProto(batch=output_batch)
 
@@ -1226,7 +1460,7 @@ class RobHFRollout(BaseRollout):
         }
         output_batch = TensorDict(batch, batch_size=batch_size)
         return DataProto(batch=output_batch)
-    
+
     @torch.no_grad()
     def _generate_one_step(self, prompts: dict):
         """Generate one step of actions"""
@@ -1236,17 +1470,17 @@ class RobHFRollout(BaseRollout):
             return self._generate_one_step_openvla(prompts)
         else:
             raise ValueError(f"Unknown VLA type: {self.config.vla}")
-    
+
     def _generate_one_step_oft(self, prompts: dict):
         """Generate one step for OpenVLA-OFT"""
         idx = prompts['input_ids']
         attention_mask = prompts['attention_mask']
         pixel_values = prompts["pixel_values"]
         proprio = prompts.get("proprio", None)
-        
+
         do_sample = prompts.get('do_sample', self.config.do_sample)
         temperature = prompts.get('temperature', self.config.temperature)
-        
+
         with self._fsdp_summon_context():
             with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
                 actions, response = self.module.generate_action_verl(
@@ -1259,23 +1493,23 @@ class RobHFRollout(BaseRollout):
                     unnorm_key=self.config.unnorm_key,
                     temperature=temperature,
                 )
-        
+
         assert self.processor.tokenizer.pad_token_id is not None
-        
+
         idx = verl_F.pad_sequence_to_length(
             idx,
             max_seq_len=self.config.max_prompt_length,
             pad_token_id=self.processor.tokenizer.pad_token_id,
             left_pad=True
         )
-        
+
         attention_mask = verl_F.pad_sequence_to_length(
             attention_mask,
             max_seq_len=self.config.max_prompt_length,
             pad_token_id=0,
             left_pad=True
         )
-        
+
         batch = {
             'responses': response,
             'input_ids': idx,
@@ -1285,21 +1519,21 @@ class RobHFRollout(BaseRollout):
         }
         if proprio is not None:
             batch["proprio"] = proprio
-        
+
         return batch
-    
+
     def _generate_one_step_openvla(self, prompts: dict):
         """Generate one step for OpenVLA"""
         idx = prompts['input_ids']
         attention_mask = prompts['attention_mask']
         pixel_values = prompts["pixel_values"]
-        
+
         eos_token_id = prompts['eos_token_id']
         pad_token_id = prompts['pad_token_id']
-        
+
         batch_size = idx.size(0)
         prompt_length = idx.size(1)
-        
+
         do_sample = prompts.get('do_sample', self.config.do_sample)
         response_length = self.module.get_action_dim(self.config.unnorm_key)
         top_p = prompts.get('top_p', self.config.get('top_p', 1.0))
@@ -1307,10 +1541,10 @@ class RobHFRollout(BaseRollout):
         if top_k is None:
             top_k = 0
         top_k = max(0, top_k)
-        
+
         temperature = prompts.get('temperature', self.config.temperature)
         generation_config = GenerationConfig(temperature=temperature, top_p=top_p, top_k=top_k)
-        
+
         with self._fsdp_summon_context():
             with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
                 output = self.module.generate(
@@ -1326,18 +1560,18 @@ class RobHFRollout(BaseRollout):
                     return_dict_in_generate=True,
                     use_cache=True
                 )
-        
+
         seq = output.sequences
         prompt = seq[:, :prompt_length]
         response = seq[:, prompt_length:]
-        
+
         response_attention_mask = get_eos_mask(
             response_id=response,
             eos_token=eos_token_id,
             dtype=attention_mask.dtype
         )
         attention_mask = torch.cat((attention_mask, response_attention_mask), dim=-1)
-        
+
         # Extract and unnormalize actions
         predicted_action_token_ids = response.detach().cpu().numpy()
         discretized_actions = self.module.vocab_size - predicted_action_token_ids
@@ -1347,7 +1581,7 @@ class RobHFRollout(BaseRollout):
             a_max=self.module.bin_centers.shape[0] - 1
         )
         normalized_actions = self.module.bin_centers[discretized_actions]
-        
+
         action_norm_stats = self.module.get_action_stats(self.config.unnorm_key)
         mask = action_norm_stats.get("mask", np.ones_like(action_norm_stats["q01"], dtype=bool))
         action_high, action_low = np.array(action_norm_stats["q99"]), np.array(action_norm_stats["q01"])
@@ -1356,9 +1590,9 @@ class RobHFRollout(BaseRollout):
             0.5 * (normalized_actions + 1) * (action_high - action_low) + action_low,
             normalized_actions,
         )
-        
+
         actions = np.expand_dims(actions, axis=1)
-        
+
         prompt = verl_F.pad_sequence_to_length(
             prompt,
             max_seq_len=self.config.max_prompt_length,
@@ -1377,7 +1611,7 @@ class RobHFRollout(BaseRollout):
             pad_token_id=0,
             left_pad=True
         )
-        
+
         batch = {
             'prompts': prompt,
             'responses': response,
@@ -1386,9 +1620,9 @@ class RobHFRollout(BaseRollout):
             "pixel_values": pixel_values,
             "action": actions,
         }
-        
+
         return batch
-    
+
     def _obs_to_input(self, obs, is_robotwin=False, robotwin_version="1.0"):
         """Convert observation to model input format"""
         if not is_robotwin:
@@ -1398,7 +1632,7 @@ class RobHFRollout(BaseRollout):
                 quat2axisangle(obs["robot0_eef_quat"]),
                 obs["robot0_gripper_qpos"]
             ])
-            
+
             if self.config.num_images_in_input > 1:
                 return {
                     "full_image": get_libero_image(obs, 224),
@@ -1418,7 +1652,7 @@ class RobHFRollout(BaseRollout):
                 state[13] /= 0.045
             else:  # 2.0
                 state = obs['joint_action']['vector']
-            
+
             if self.config.num_images_in_input == 3:
                 return {
                     "full_image": obs['observation']['head_camera']['rgb'],
@@ -1431,7 +1665,7 @@ class RobHFRollout(BaseRollout):
                     "full_image": obs['observation']['head_camera']['rgb'],
                     "state": state
                 }
-    
+
     def __del__(self):
         """Cleanup resources on deletion"""
         if hasattr(self, 'env_thread_pool'):

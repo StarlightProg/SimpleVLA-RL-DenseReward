@@ -167,13 +167,27 @@ import hydra
 @hydra.main(config_path='config', config_name='ppo_trainer', version_base=None)
 def main(config):
     if not ray.is_initialized():
+        ray_init_kwargs = {}
+        ray_tmpdir = os.environ.get("RAY_TMPDIR") or os.environ.get("TMPDIR")
+        if ray_tmpdir:
+            os.makedirs(ray_tmpdir, exist_ok=True)
+            ray_init_kwargs["_temp_dir"] = ray_tmpdir
+
         # this is for local ray cluster
         if os.path.isfile(str(config.trainer.runtime_env)):
             with open(str(config.trainer.runtime_env), 'r') as f:
                 runtime_env = json.load(f)
-            ray.init(runtime_env=runtime_env)
+            ray.init(runtime_env=runtime_env, **ray_init_kwargs)
         else:
-            ray.init(runtime_env={'env_vars': {'TOKENIZERS_PARALLELISM': 'true', 'NCCL_DEBUG': 'WARN'}})
+            ray.init(
+                runtime_env={
+                    'env_vars': {
+                        'TOKENIZERS_PARALLELISM': 'true',
+                        'NCCL_DEBUG': 'WARN',
+                    }
+                },
+                **ray_init_kwargs,
+            )
 
     ray.get(main_task.remote(config))
 

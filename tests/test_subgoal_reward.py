@@ -315,6 +315,80 @@ class SubgoalRewardTest(unittest.TestCase):
         self.assertEqual(reward_parts["reward_total"], 0.75)
         self.assertEqual(reward_parts["reward_subgoal"], 0.0)
 
+    def test_excluded_task_id_disables_dense_shaping(self):
+        engine = LiberoSubgoalRewardEngine(
+            {
+                "enabled": True,
+                "excluded_task_ids": [1],
+                "clip_dense_reward": 1.0,
+                "weights": {
+                    "subgoal_progress": 1.0,
+                    "phase_transition": 1.0,
+                    "terminal_success": 1.0,
+                    "smoothness": 0.0,
+                },
+            }
+        )
+        obs = {
+            "robot0_eef_pos": np.array([0.0, 0.0, 0.0]),
+            "robot0_gripper_qpos": np.array([0.04, 0.04]),
+            "cube_pos": np.array([0.04, 0.0, 0.0]),
+            "target_pos": np.array([0.0, 0.0, 0.0]),
+        }
+
+        subgoal_info, reward_parts = engine.step(
+            env_index=0,
+            env=None,
+            obs=None,
+            next_obs=obs,
+            action=np.zeros(7),
+            env_reward=1.0,
+            done=True,
+            info={"success": True},
+            task_metadata={"task_id": 1, "instruction": "put the cube on the target"},
+        )
+
+        self.assertEqual(subgoal_info["subgoal_supported"], 0.0)
+        self.assertEqual(subgoal_info["phase_name"], "excluded")
+        self.assertEqual(reward_parts["reward_total"], 0.0)
+
+    def test_non_excluded_task_keeps_dense_shaping(self):
+        engine = LiberoSubgoalRewardEngine(
+            {
+                "enabled": True,
+                "excluded_task_ids": [1],
+                "clip_dense_reward": 1.0,
+                "weights": {
+                    "subgoal_progress": 0.0,
+                    "phase_transition": 1.0,
+                    "terminal_success": 0.0,
+                    "smoothness": 0.0,
+                },
+            }
+        )
+        obs = {
+            "robot0_eef_pos": np.array([0.0, 0.0, 0.0]),
+            "robot0_gripper_qpos": np.array([0.04, 0.04]),
+            "cube_pos": np.array([0.04, 0.0, 0.0]),
+            "target_pos": np.array([0.0, 0.2, 0.0]),
+        }
+
+        subgoal_info, reward_parts = engine.step(
+            env_index=0,
+            env=None,
+            obs=None,
+            next_obs=obs,
+            action=np.zeros(7),
+            env_reward=0.0,
+            done=False,
+            info={},
+            task_metadata={"task_id": 2, "instruction": "put the cube on the target"},
+        )
+
+        self.assertEqual(subgoal_info["subgoal_supported"], 1.0)
+        self.assertEqual(subgoal_info["subgoal_phase_completed"], 1.0)
+        self.assertEqual(reward_parts["reward_total"], 1.0)
+
     def test_reward_manager_subgoal_modes(self):
         if TensorDict is None or DataProto is None or RobRewardManager is None:
             self.skipTest("reward manager test requires full RL dependencies")

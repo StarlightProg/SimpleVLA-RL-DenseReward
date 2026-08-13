@@ -96,7 +96,14 @@ actor_rollout_ref:
     model_family: openvla
     task_suite_name: libero_10
     libero_env_batch_size: 1
-    libero_mp_start_method: fork
+    libero_mp_start_method: spawn
+    libero_env_init_timeout: 180
+    libero_env_step_timeout: 60
+    libero_env_init_max_retries: 3
+    libero_env_init_retry_sleep: 2.0
+    libero_egl_init_lock: True
+    libero_egl_init_lock_path: null
+    libero_egl_init_stagger_seconds: 2.0
     num_steps_wait: 10
     use_proprio: False
     pretrained_checkpoint: None
@@ -183,6 +190,8 @@ reward:
     mode: log_only  # log_only | replace | add
     log: True
     unsupported_task_behavior: terminal_only  # terminal_only | error
+    excluded_task_ids: []
+    excluded_task_names: []
     use_best_progress: True
     clip_dense_reward: 0.05
     weights:
@@ -264,6 +273,7 @@ algorithm:
 
 trainer:
   total_epochs: 30
+  max_steps: null
   total_training_steps: null
   project_name: verl_examples
   experiment_name: gsm8k

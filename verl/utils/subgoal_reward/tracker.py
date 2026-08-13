@@ -35,9 +35,15 @@ class SubgoalStepInfo:
 
 
 class OnlineSubgoalTracker:
-    def __init__(self, task_spec: TaskSpec | None = None, use_best_progress: bool = True):
+    def __init__(
+        self,
+        task_spec: TaskSpec | None = None,
+        use_best_progress: bool = True,
+        auto_complete_on_success: bool = True,
+    ):
         self.task_spec = task_spec
         self.use_best_progress = use_best_progress
+        self.auto_complete_on_success = auto_complete_on_success
         self.reset(task_spec=task_spec)
 
     def reset(self, task_spec: TaskSpec | None = None):
@@ -84,7 +90,7 @@ class OnlineSubgoalTracker:
             self.last_progress = 0.0
             phase = self.task_spec.phases[self.phase_id]
 
-        if state.success and self.phase_id < len(self.task_spec.phases) - 1:
+        if self.auto_complete_on_success and state.success and self.phase_id < len(self.task_spec.phases) - 1:
             completed_count += float(len(self.task_spec.phases) - self.phase_id - 1)
             self.phase_id = len(self.task_spec.phases) - 1
 
