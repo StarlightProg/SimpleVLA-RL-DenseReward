@@ -20,6 +20,17 @@ data:
   filter_format: True
   zero: False
   sample_num: -1
+  task_sampling:
+    enabled: False
+    mode: balanced_hard  # balanced_hard | clip_hard
+    uniform_fraction: 0.7
+    min_task_probability: 0.05
+    ema_momentum: 0.8
+    default_success: 0.5
+    seed: 0
+    log_train_tasks: False
+    clip_target_accuracy: 0.1
+    clip_max_attempts_per_step: 50
 
 actor_rollout_ref:
   hybrid_engine: True

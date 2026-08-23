@@ -300,6 +300,8 @@ class RayTrainer(object):
 
         self.validation_call_idx = 0
         self.prev_val_task_success_state = {}
+        self.task_success_ema = {}
+        self.train_task_sampler = None
         self.accuracy_distribution_cumulative_counts = Counter()
         self.accuracy_distribution_step_counts = Counter()
         self._create_dataloader()
@@ -338,7 +340,12 @@ class RayTrainer(object):
     def _create_dataloader(self):   # next fix
         from torch.utils.data import DataLoader, Subset
         # TODO: we have to make sure the batch size is divisible by the dp size
-        from verl.utils.dataset.rob_dataset import LIBERO_Dataset, Robotwin_Dataset, collate_fn
+        from verl.utils.dataset.rob_dataset import (
+            LIBERO_Dataset,
+            Robotwin_Dataset,
+            TaskBalancedHardBatchSampler,
+            collate_fn,
+        )
         if "libero" in self.config.data.task_suite_name:
             self.train_dataset = LIBERO_Dataset(self.config.data.task_suite_name,
                                                 num_trials_per_task=self.config.data.num_trials_per_task,
@@ -368,11 +375,41 @@ class RayTrainer(object):
             self.val_dataset = Subset(self.val_dataset, range(val_start_index, len(self.val_dataset)))
             print(f"Validation dataset starts at global index {val_start_index}; sliced len: {len(self.val_dataset)}")
 
-        self.train_dataloader = BufferedDataLoader(DataLoader(dataset=self.train_dataset,
-                                           batch_size=int(self.config.data.train_batch_size*self.config.data.oversample_factor),
-                                           shuffle=True,
-                                           drop_last=True,
-                                           collate_fn=collate_fn))
+        train_batch_size = int(self.config.data.train_batch_size * self.config.data.oversample_factor)
+        task_sampling_cfg = self.config.data.get('task_sampling', {})
+        if (
+            "libero" in self.config.data.task_suite_name
+            and bool(task_sampling_cfg.get('enabled', False))
+            and str(task_sampling_cfg.get('mode', 'balanced_hard')) == 'balanced_hard'
+        ):
+            self.train_task_sampler = TaskBalancedHardBatchSampler(
+                dataset=self.train_dataset,
+                batch_size=train_batch_size,
+                uniform_fraction=float(task_sampling_cfg.get('uniform_fraction', 0.7)),
+                min_task_probability=float(task_sampling_cfg.get('min_task_probability', 0.05)),
+                ema_momentum=float(task_sampling_cfg.get('ema_momentum', 0.8)),
+                default_success=float(task_sampling_cfg.get('default_success', 0.5)),
+                seed=int(task_sampling_cfg.get('seed', 0)),
+                drop_last=True,
+            )
+            print(
+                "Task-balanced hard sampler enabled:",
+                f"batch_size={train_batch_size}",
+                f"uniform_fraction={self.train_task_sampler.uniform_fraction}",
+                f"min_task_probability={self.train_task_sampler.min_task_probability}",
+                f"initial_probs={self.train_task_sampler.task_probabilities()}",
+            )
+            self.train_dataloader = BufferedDataLoader(DataLoader(
+                dataset=self.train_dataset,
+                batch_sampler=self.train_task_sampler,
+                collate_fn=collate_fn,
+            ))
+        else:
+            self.train_dataloader = BufferedDataLoader(DataLoader(dataset=self.train_dataset,
+                                               batch_size=train_batch_size,
+                                               shuffle=True,
+                                               drop_last=True,
+                                               collate_fn=collate_fn))
         self.val_dataloader = DataLoader(dataset=self.val_dataset,
                                          batch_size=self.config.data.val_batch_size,
                                          shuffle=False,
@@ -405,6 +442,34 @@ class RayTrainer(object):
         with open_dict(self.config):
             self.config.actor_rollout_ref.actor.optim.total_training_steps = total_training_steps
             self.config.critic.optim.total_training_steps = total_training_steps
+
+    @staticmethod
+    def _task_id_from_task_key(task_key: str) -> int | None:
+        match = re.search(r'/task_(\d+)$', str(task_key))
+        if match is None:
+            return None
+        return int(match.group(1))
+
+    def _update_train_sampler_from_validation(self, task_stats):
+        if self.train_task_sampler is None:
+            return
+        success_by_task = {}
+        for task_key, (count, score_sum) in task_stats.items():
+            if count <= 0:
+                continue
+            task_id = self._task_id_from_task_key(task_key)
+            if task_id is not None:
+                success_by_task[task_id] = float(score_sum) / float(count)
+        if not success_by_task:
+            return
+        self.train_task_sampler.set_task_success(success_by_task)
+        self.task_success_ema = dict(self.train_task_sampler.task_success_ema)
+        print(
+            "Updated task-balanced sampler from validation:",
+            f"success={success_by_task}",
+            f"ema={self.task_success_ema}",
+            f"probs={self.train_task_sampler.task_probabilities()}",
+        )
 
     def _validate(self, global_steps=0):
         from tqdm import tqdm
@@ -544,6 +609,8 @@ class RayTrainer(object):
                 elif previous_success and (not current_success):
                     tasks_started_failing.append(task_key)
             self.prev_val_task_success_state[task_key] = current_success
+
+        self._update_train_sampler_from_validation(task_stats)
 
         metric_dict['test_score/all'] = mean
         metric_dict['test_score/all_std'] = std
