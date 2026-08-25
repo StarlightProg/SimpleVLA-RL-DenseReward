@@ -471,6 +471,61 @@ class RayTrainer(object):
             f"probs={self.train_task_sampler.task_probabilities()}",
         )
 
+    def _log_train_task_batch(
+        self,
+        roll_batch: DataProto,
+        filtered_roll_batch: DataProto,
+        n_samples: int,
+        global_steps: int,
+        metrics: dict,
+    ):
+        task_sampling_cfg = self.config.data.get('task_sampling', {})
+        if not bool(task_sampling_cfg.get('log_train_tasks', False)):
+            return
+        if 'task_id' not in roll_batch.batch.keys() or 'acc' not in roll_batch.batch.keys():
+            return
+
+        task_ids = roll_batch.batch['task_id'].detach().cpu().reshape(len(roll_batch), -1)[:, 0].tolist()
+        acc_values = roll_batch.batch['acc'].detach().cpu().reshape(-1).tolist()
+        group_ids = roll_batch.non_tensor_batch.get('group_id')
+        num_groups = len(roll_batch) // int(n_samples)
+
+        accepted_group_ids = set()
+        if len(filtered_roll_batch) > 0:
+            accepted = filtered_roll_batch.non_tensor_batch.get('group_id')
+            if accepted is not None:
+                accepted_group_ids = {str(group_id) for group_id in accepted.tolist()}
+
+        task_stats = {}
+        for group_idx in range(num_groups):
+            start = group_idx * int(n_samples)
+            end = start + int(n_samples)
+            task_id = int(task_ids[start])
+            group_acc = float(np.mean(acc_values[start:end]))
+            group_id = str(group_ids[start]) if group_ids is not None else f"group_{group_idx}"
+            stats = task_stats.setdefault(task_id, {"groups": 0, "accepted": 0, "acc": []})
+            stats["groups"] += 1
+            stats["acc"].append(group_acc)
+            if group_id in accepted_group_ids:
+                stats["accepted"] += 1
+
+        if not task_stats:
+            return
+
+        parts = []
+        for task_id in sorted(task_stats):
+            stats = task_stats[task_id]
+            mean_acc = float(np.mean(stats["acc"])) if stats["acc"] else 0.0
+            parts.append(
+                f"task_{task_id}:prompts={stats['groups']},accepted={stats['accepted']},acc={mean_acc:.3f}"
+            )
+            prefix = f"train_task/task_{task_id}"
+            metrics[f"{prefix}/prompts"] = float(stats["groups"])
+            metrics[f"{prefix}/accepted_prompts"] = float(stats["accepted"])
+            metrics[f"{prefix}/accuracy"] = mean_acc
+
+        print(f"[train task sampling step {global_steps}] " + " | ".join(parts))
+
     def _validate(self, global_steps=0):
         from tqdm import tqdm
 
@@ -841,6 +896,13 @@ class RayTrainer(object):
                         else:
                             filtered_roll_batch = roll_batch
                     metrics['timing/acc&trunc_filter'] += timer.last
+                    self._log_train_task_batch(
+                        roll_batch=roll_batch,
+                        filtered_roll_batch=filtered_roll_batch,
+                        n_samples=n_samples,
+                        global_steps=global_steps,
+                        metrics=metrics,
+                    )
 
                     
                     if self.config.data.filter_warmup:
