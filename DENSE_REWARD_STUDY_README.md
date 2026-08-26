@@ -6,6 +6,17 @@ The current LIBERO-Spatial study starts from a weaker checkpoint with **58.0% va
 
 ![Terminal-only versus dense reward](reports/figures/paper/fig1_primary_reward_comparison.png)
 
+## Version scope
+
+This document separates the evaluated results from the code revision used to interpret them:
+
+- the numerical results come from the current `validation_results.zip` archive, audited on 2026-08-26;
+- the checked-out repository revision is `a4bf9b1`;
+- the implementation review also inspected the newer `origin/main` revision `1b5fc6c` so that upstream additions are not confused with code present in the checkout;
+- features available only in the newer upstream revision are labelled explicitly and are not attributed to the reported runs.
+
+The archive contains validation logs and checkpoint paths, but not a complete training configuration for every run. Consequently, reward names such as `Dense 0.05/0.05 + terminal 5` are treated as archive labels unless the corresponding setting is independently recoverable from code or configuration.
+
 ## Project goal
 
 Terminal success is well aligned with the manipulation objective, but it is sparse. A failed rollout receives the same outcome reward whether the robot never approaches the object or completes nearly the entire task. This makes credit assignment difficult when successful samples are uncommon, especially with small batches and limited rollout throughput.
@@ -108,15 +119,15 @@ Bounds that exclude 0 and 1 retain only groups containing both successful and fa
 
 This operation is different from clipping the numeric dense reward. The archive label `dense clipped` refers to trajectory selection according to the run-owner description; `clip_dense_reward` refers to bounding the shaping value.
 
-## Optional task-aware sampling
+## Newer upstream extension: task-aware sampling
 
-The latest implementation also contains a task-balanced hard sampler. A configurable part of the batch provides rotating uniform task coverage; remaining samples are biased toward tasks with low exponentially smoothed validation success:
+The newer `origin/main` revision `1b5fc6c` contains a task-balanced hard sampler. A configurable part of the batch provides rotating uniform task coverage; remaining samples are biased toward tasks with low exponentially smoothed validation success:
 
 \[
 q_k \propto 1-\operatorname{EMA}(s_k).
 \]
 
-This sampler is relevant because tasks 1 and 5 remain weak in the current results. It was introduced after the main ablations and is not claimed as part of the reported 65.3% result.
+This sampler is relevant because tasks 1 and 5 remain weak in the current results. It is not present in the checked-out `a4bf9b1` implementation, was introduced after the main ablations, and is not claimed as part of the reported 65.3% result.
 
 ## Experimental setup
 
@@ -134,6 +145,10 @@ The main archive contains 16 evaluated checkpoints across five reward configurat
 | Reported training compute | 2 NVIDIA L40 GPUs |
 
 The two-GPU setting appears in the checkpoint-evaluation commands; the L40 hardware model comes from the run-owner documentation. The supplied archive does not include complete training-time hardware telemetry or Hydra configurations.
+
+### Configuration alignment with the checked-out code
+
+In revision `a4bf9b1`, the base configuration defaults to progress weight 0.2, phase-transition weight 0.05, internal terminal-success weight 1.0, and shaping clip 0.05. The dense launcher enables `add` mode and inherits those values unless Hydra overrides are supplied. These repository defaults explain the implemented mechanism, but they do not prove the exact settings of the archived checkpoints. In particular, the archive label `0.05/0.05` and checkpoint directory fragments such as `dense_02_03` or `dense_03_02` cannot be reconciled without the original run configurations.
 
 ## Main results
 
@@ -229,13 +244,17 @@ Training integration:
 
 - `verl/workers/rollout/rob_rollout.py` — reward computation during environment interaction;
 - `verl/trainer/main_ppo.py` — verifier and dense-reward combination;
-- `verl/trainer/ppo/ray_trainer.py` — filtering, validation, and sampler updates;
-- `verl/utils/dataset/rob_dataset.py` — task-balanced hard sampler;
+- `verl/trainer/ppo/ray_trainer.py` — filtering and validation in the checked-out revision;
 - `verl/trainer/config/ppo_trainer.yaml` — default configuration;
 - `examples/run_openvla_oft_rl_libero_lora_dense.sh` — dense LoRA launcher.
 
+Newer `origin/main` only:
+
+- `verl/utils/dataset/rob_dataset.py` and associated trainer changes — task-balanced hard sampling; not part of revision `a4bf9b1` or the reported result.
+
 Analysis and paper artifacts:
 
+- [`results.md`](results.md) — current audited results, complete tables, uncertainty, and defensible claims;
 - [`reports/dense_reward_small_batch_study_prism.md`](reports/dense_reward_small_batch_study_prism.md) — full technical and statistical report;
 - [`reports/validation_audit.json`](reports/validation_audit.json) — machine-readable audited results;
 - [`reports/analyze_validation_results.py`](reports/analyze_validation_results.py) — reproducible log parser;
