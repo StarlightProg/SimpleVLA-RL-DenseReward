@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+<title id="title">Auxiliary dynamic-filtering checkpoint evaluations</title>
+<desc id="desc">Seven non-matched checkpoint evaluations with logged confidence intervals and rollout counts.</desc>
+<rect width="1600" height="940" fill="#FFFFFF"/>
+<text x="70.00" y="60.00" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#172033" text-anchor="start" font-weight="700" font-style="normal">Auxiliary dynamic-filtering checkpoint evaluations</text>
+<text x="70.00" y="98.00" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Diagnostic only · checkpoint steps and validation denominators differ</text>
+<line x1="540.00" y1="180.00" x2="540.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="540.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">50%</text>
+<line x1="728.00" y1="180.00" x2="728.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="728.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">54%</text>
+<line x1="916.00" y1="180.00" x2="916.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="916.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">58%</text>
+<line x1="1104.00" y1="180.00" x2="1104.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1104.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">62%</text>
+<line x1="1292.00" y1="180.00" x2="1292.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1292.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">66%</text>
+<line x1="1480.00" y1="180.00" x2="1480.00" y2="760.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1480.00" y="794.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">70%</text>
+<line x1="540.00" y1="760.00" x2="1480.00" y2="760.00" stroke="#172033" stroke-width="2" opacity="1.0"/>
+<rect x="65.00" y="185.80" width="1415.00" height="71.26" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="512.00" y="228.43" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Terminal · step 19</text>
+<line x1="798.50" y1="221.43" x2="1202.70" y2="221.43" stroke="#2F6BBD" stroke-width="3" opacity="0.65"/>
+<line x1="798.50" y1="213.43" x2="798.50" y2="229.43" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<line x1="1202.70" y1="213.43" x2="1202.70" y2="229.43" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<circle cx="1000.60" cy="221.43" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="1218.70" y="228.43" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#2F6BBD" text-anchor="start" font-weight="700" font-style="normal">59.8% · n=500</text>
+<text x="512.00" y="311.29" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Terminal · step 59</text>
+<line x1="826.70" y1="304.29" x2="1230.90" y2="304.29" stroke="#2F6BBD" stroke-width="3" opacity="0.65"/>
+<line x1="826.70" y1="296.29" x2="826.70" y2="312.29" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<line x1="1230.90" y1="296.29" x2="1230.90" y2="312.29" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<circle cx="1028.80" cy="304.29" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="1246.90" y="311.29" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#2F6BBD" text-anchor="start" font-weight="700" font-style="normal">60.4% · n=500</text>
+<rect x="65.00" y="351.51" width="1415.00" height="71.26" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="512.00" y="394.14" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense 0.1/0.1 · step 19</text>
+<line x1="817.30" y1="387.14" x2="1221.50" y2="387.14" stroke="#D97706" stroke-width="3" opacity="0.65"/>
+<line x1="817.30" y1="379.14" x2="817.30" y2="395.14" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<line x1="1221.50" y1="379.14" x2="1221.50" y2="395.14" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<rect x="1010.40" y="378.14" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="1237.50" y="394.14" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#D97706" text-anchor="start" font-weight="700" font-style="normal">60.2% · n=500</text>
+<text x="512.00" y="477.00" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense 0.1 · step 79</text>
+<line x1="953.60" y1="470.00" x2="1348.40" y2="470.00" stroke="#D97706" stroke-width="3" opacity="0.65"/>
+<line x1="953.60" y1="462.00" x2="953.60" y2="478.00" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<line x1="1348.40" y1="462.00" x2="1348.40" y2="478.00" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<rect x="1142.00" y="461.00" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="1364.40" y="477.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#D97706" text-anchor="start" font-weight="700" font-style="normal">63.0% · n=500</text>
+<rect x="65.00" y="517.23" width="1415.00" height="71.26" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="512.00" y="559.86" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Phase 0.2 · step 19</text>
+<line x1="779.70" y1="552.86" x2="1183.90" y2="552.86" stroke="#B58B00" stroke-width="3" opacity="0.65"/>
+<line x1="779.70" y1="544.86" x2="779.70" y2="560.86" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="1183.90" y1="544.86" x2="1183.90" y2="560.86" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="972.80" y1="543.86" x2="990.80" y2="561.86" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<line x1="972.80" y1="561.86" x2="990.80" y2="543.86" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<text x="1199.90" y="559.86" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#B58B00" text-anchor="start" font-weight="700" font-style="normal">59.4% · n=500</text>
+<text x="512.00" y="642.71" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Phase 0.2 · step 79</text>
+<line x1="807.90" y1="635.71" x2="1212.10" y2="635.71" stroke="#B58B00" stroke-width="3" opacity="0.65"/>
+<line x1="807.90" y1="627.71" x2="807.90" y2="643.71" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="1212.10" y1="627.71" x2="1212.10" y2="643.71" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="1001.00" y1="626.71" x2="1019.00" y2="644.71" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<line x1="1001.00" y1="644.71" x2="1019.00" y2="626.71" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<text x="1228.10" y="642.71" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#B58B00" text-anchor="start" font-weight="700" font-style="normal">60.0% · n=500</text>
+<rect x="65.00" y="682.94" width="1415.00" height="71.26" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="512.00" y="725.57" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense clip 0.3/0.5 · step 79</text>
+<line x1="930.10" y1="718.57" x2="1437.70" y2="718.57" stroke="#7C5CC4" stroke-width="3" opacity="0.65"/>
+<line x1="930.10" y1="710.57" x2="930.10" y2="726.57" stroke="#7C5CC4" stroke-width="2" opacity="0.65"/>
+<line x1="1437.70" y1="710.57" x2="1437.70" y2="726.57" stroke="#7C5CC4" stroke-width="2" opacity="0.65"/>
+<polygon points="1183.90,708.57 1174.90,727.57 1192.90,727.57" fill="#7C5CC4" stroke="#7C5CC4" stroke-width="3"/>
+<text x="1453.70" y="725.57" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#7C5CC4" text-anchor="start" font-weight="700" font-style="normal">63.7% · n=300</text>
+<text x="1010.00" y="842.00" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#172033" text-anchor="middle" font-weight="400" font-style="normal">Validation success</text>
+<text x="70.00" y="868.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Do not use this figure as a matched reward comparison; it documents auxiliary checkpoint behavior only.</text>
+</svg>

@@ -315,14 +315,17 @@ and two-sided \(p\approx0.36\). Comparing the best dense result with the 0.580 i
 
 ### 9.3 Plot audit
 
-Use the following files from the archive for the current 0.580 study:
+The audited publication-ready figure set is in `reports/figures/paper/`:
 
-- `validation_results/plots/overall_selected_terminal_dense_denseclipped.svg`;
-- `validation_results/plots/overall_all_ablations.svg`;
-- `validation_results/plots/best_checkpoint_by_ablation.svg`;
-- `validation_results/plots/per_task_all_ablations_grid.svg`.
+- `fig1_primary_reward_comparison.svg` — primary terminal-versus-dense comparison with logged 95% confidence intervals;
+- `fig2_all_reward_ablations.svg` — all five main reward configurations;
+- `fig3_best_checkpoint_intervals.svg` — compact best-observed checkpoint summary;
+- `fig4_per_task_comparison.svg` — task-level initial/terminal/dense comparison;
+- `figS1_auxiliary_dynamic_runs.svg` — supplementary diagnostic only.
 
-Prefer SVG for paper preparation. The alternative `plots/starting_585/` figures should not be used: their caption says the axis starts at 58.5%, while the plotted initial observation is 58.0%, and no 0.585 baseline record is present in the supplied CSVs. New publication figures should add confidence intervals and distinguish measured points from connecting lines.
+Each figure is also exported as vector PDF and 2400-pixel PNG. Paper-ready captions and intended use are provided in `reports/figures/README.md`.
+
+Prefer SVG or PDF for paper preparation. The alternative archive files under `plots/starting_585/` should not be used: their caption says the axis starts at 58.5%, while the plotted initial observation is 58.0%, and no 0.585 baseline record is present in the supplied CSVs. The new figures use the verified 0.580 baseline, add logged aggregate confidence intervals, and explicitly distinguish measured points from connecting lines.
 
 ## 10. Defensible conclusions
 

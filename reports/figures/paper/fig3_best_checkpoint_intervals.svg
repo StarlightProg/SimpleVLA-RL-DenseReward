@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="940" viewBox="0 0 1650 940" role="img" aria-labelledby="title desc">
+<title id="title">Best observed validation checkpoint by reward configuration</title>
+<desc id="desc">Best checkpoint success and logged 95 percent confidence intervals for five configurations.</desc>
+<rect width="1650" height="940" fill="#FFFFFF"/>
+<text x="70.00" y="60.00" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#172033" text-anchor="start" font-weight="700" font-style="normal">Best observed validation checkpoint by reward configuration</text>
+<text x="70.00" y="98.00" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Descriptive best-of-run comparison · 300 rollouts/checkpoint · logged 95% confidence intervals</text>
+<line x1="600.00" y1="190.00" x2="600.00" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="600.00" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">50%</text>
+<line x1="765.45" y1="190.00" x2="765.45" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="765.45" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">54%</text>
+<line x1="930.91" y1="190.00" x2="930.91" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="930.91" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">58%</text>
+<line x1="1096.36" y1="190.00" x2="1096.36" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1096.36" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">62%</text>
+<line x1="1261.82" y1="190.00" x2="1261.82" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1261.82" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">66%</text>
+<line x1="1427.27" y1="190.00" x2="1427.27" y2="735.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1427.27" y="769.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">70%</text>
+<line x1="600.00" y1="735.00" x2="1510.00" y2="735.00" stroke="#172033" stroke-width="2" opacity="1.0"/>
+<line x1="930.91" y1="190.00" x2="930.91" y2="735.00" stroke="#6B7280" stroke-width="2" opacity="1.0" stroke-dasharray="9 8"/>
+<text x="930.91" y="172.00" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#6B7280" text-anchor="middle" font-weight="600" font-style="normal">Initial 58.0%</text>
+<rect x="45.00" y="197.63" width="1465.00" height="93.74" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="570.00" y="251.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense 0.05/0.05 + terminal 5</text>
+<line x1="1009.50" y1="244.50" x2="1456.23" y2="244.50" stroke="#D97706" stroke-width="3" opacity="0.65"/>
+<line x1="1009.50" y1="236.50" x2="1009.50" y2="252.50" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<line x1="1456.23" y1="236.50" x2="1456.23" y2="252.50" stroke="#D97706" stroke-width="2" opacity="0.65"/>
+<rect x="1222.86" y="234.50" width="20.00" height="20.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="1474.23" y="251.50" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#D97706" text-anchor="start" font-weight="700" font-style="normal">65.3%  ·  step 160</text>
+<text x="570.00" y="360.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense clipped + terminal 5</text>
+<line x1="984.68" y1="353.50" x2="1431.41" y2="353.50" stroke="#7C5CC4" stroke-width="3" opacity="0.65"/>
+<line x1="984.68" y1="345.50" x2="984.68" y2="361.50" stroke="#7C5CC4" stroke-width="2" opacity="0.65"/>
+<line x1="1431.41" y1="345.50" x2="1431.41" y2="361.50" stroke="#7C5CC4" stroke-width="2" opacity="0.65"/>
+<polygon points="1208.05,342.50 1198.05,363.50 1218.05,363.50" fill="#7C5CC4" stroke="#7C5CC4" stroke-width="3"/>
+<text x="1449.41" y="360.50" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#7C5CC4" text-anchor="start" font-weight="700" font-style="normal">64.7%  ·  step 50</text>
+<rect x="45.00" y="415.63" width="1465.00" height="93.74" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="570.00" y="469.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Phase 0.2 + terminal 1</text>
+<line x1="943.32" y1="462.50" x2="1390.05" y2="462.50" stroke="#B58B00" stroke-width="3" opacity="0.65"/>
+<line x1="943.32" y1="454.50" x2="943.32" y2="470.50" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="1390.05" y1="454.50" x2="1390.05" y2="470.50" stroke="#B58B00" stroke-width="2" opacity="0.65"/>
+<line x1="1156.68" y1="452.50" x2="1176.68" y2="472.50" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<line x1="1156.68" y1="472.50" x2="1176.68" y2="452.50" stroke="#B58B00" stroke-width="4" opacity="1.0"/>
+<text x="1408.05" y="469.50" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#B58B00" text-anchor="start" font-weight="700" font-style="normal">63.7%  ·  step 90</text>
+<text x="570.00" y="578.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Terminal only, coefficient 5</text>
+<line x1="856.45" y1="571.50" x2="1311.45" y2="571.50" stroke="#2F6BBD" stroke-width="3" opacity="0.65"/>
+<line x1="856.45" y1="563.50" x2="856.45" y2="579.50" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<line x1="1311.45" y1="563.50" x2="1311.45" y2="579.50" stroke="#2F6BBD" stroke-width="2" opacity="0.65"/>
+<circle cx="1083.95" cy="571.50" r="10" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="1329.45" y="578.50" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#2F6BBD" text-anchor="start" font-weight="700" font-style="normal">61.7%  ·  step 170</text>
+<rect x="45.00" y="633.63" width="1465.00" height="93.74" fill="#F8FAFC" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="570.00" y="687.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Dense 0.05/0.05 + terminal 1</text>
+<line x1="827.50" y1="680.50" x2="1282.50" y2="680.50" stroke="#238B8E" stroke-width="3" opacity="0.65"/>
+<line x1="827.50" y1="672.50" x2="827.50" y2="688.50" stroke="#238B8E" stroke-width="2" opacity="0.65"/>
+<line x1="1282.50" y1="672.50" x2="1282.50" y2="688.50" stroke="#238B8E" stroke-width="2" opacity="0.65"/>
+<polygon points="1055.00,669.50 1045.00,680.50 1055.00,691.50 1065.00,680.50" fill="#238B8E" stroke="#238B8E" stroke-width="3"/>
+<text x="1300.50" y="687.50" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#238B8E" text-anchor="start" font-weight="700" font-style="normal">61.0%  ·  step 110</text>
+<text x="1055.00" y="817.00" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#172033" text-anchor="middle" font-weight="400" font-style="normal">Validation success</text>
+<text x="70.00" y="868.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Best checkpoint selection is post hoc; intervals describe evaluation uncertainty only, not training-run variability.</text>
+</svg>
