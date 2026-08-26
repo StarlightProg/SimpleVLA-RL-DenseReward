@@ -1,0 +1,543 @@
+{
+  "ablations": {
+    "Dense 0.05/0.05 + terminal 1": {
+      "best": {
+        "ci95_halfwidth": 0.055,
+        "file": "dense_005_005_terminaL_1_step_109_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.61,
+        "step": 110,
+        "tasks": [
+          0.5,
+          0.067,
+          0.9,
+          0.867,
+          0.8,
+          0.0,
+          0.867,
+          0.633,
+          0.767,
+          0.7
+        ]
+      },
+      "best_gain_over_initial": 0.030000000000000027,
+      "best_task_change_from_initial": [
+        0.13333333333333336,
+        -0.033,
+        0.033333333333333326,
+        0.06699999999999995,
+        0.033333333333333326,
+        -0.03333333333333333,
+        0.10033333333333327,
+        -0.0003333333333332966,
+        0.0003333333333332966,
+        0.0
+      ],
+      "first": {
+        "ci95_halfwidth": 0.056,
+        "file": "dense_005_005_terminaL_1_step_59_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.597,
+        "step": 60,
+        "tasks": [
+          0.4,
+          0.1,
+          0.933,
+          0.867,
+          0.833,
+          0.0,
+          0.8,
+          0.567,
+          0.767,
+          0.7
+        ]
+      },
+      "last": {
+        "ci95_halfwidth": 0.055,
+        "file": "dense_005_005_terminaL_1_step_109_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.61,
+        "step": 110,
+        "tasks": [
+          0.5,
+          0.067,
+          0.9,
+          0.867,
+          0.8,
+          0.0,
+          0.867,
+          0.633,
+          0.767,
+          0.7
+        ]
+      }
+    },
+    "Dense 0.05/0.05 + terminal 5": {
+      "best": {
+        "ci95_halfwidth": 0.054,
+        "file": "dense_005_005_terminaL_5_step_159_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.653,
+        "step": 160,
+        "tasks": [
+          0.6,
+          0.1,
+          0.933,
+          0.9,
+          0.9,
+          0.067,
+          0.833,
+          0.767,
+          0.8,
+          0.633
+        ]
+      },
+      "best_gain_over_initial": 0.07300000000000006,
+      "best_task_change_from_initial": [
+        0.23333333333333334,
+        0.0,
+        0.06633333333333336,
+        0.09999999999999998,
+        0.1333333333333333,
+        0.03366666666666667,
+        0.06633333333333324,
+        0.1336666666666667,
+        0.033333333333333326,
+        -0.06699999999999995
+      ],
+      "first": {
+        "ci95_halfwidth": 0.055,
+        "file": "dense_005_005_terminaL_5_step_39_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.623,
+        "step": 40,
+        "tasks": [
+          0.433,
+          0.1,
+          0.933,
+          0.833,
+          0.9,
+          0.033,
+          0.867,
+          0.7,
+          0.8,
+          0.633
+        ]
+      },
+      "last": {
+        "ci95_halfwidth": 0.054,
+        "file": "dense_005_005_terminaL_5_step_159_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.653,
+        "step": 160,
+        "tasks": [
+          0.6,
+          0.1,
+          0.933,
+          0.9,
+          0.9,
+          0.067,
+          0.833,
+          0.767,
+          0.8,
+          0.633
+        ]
+      }
+    },
+    "Dense clipped + terminal 5": {
+      "best": {
+        "ci95_halfwidth": 0.054,
+        "file": "dense_clip_terminaL_5_step_49_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.647,
+        "step": 50,
+        "tasks": [
+          0.633,
+          0.133,
+          0.967,
+          0.867,
+          0.8,
+          0.067,
+          0.9,
+          0.6,
+          0.867,
+          0.633
+        ]
+      },
+      "best_gain_over_initial": 0.06700000000000006,
+      "best_task_change_from_initial": [
+        0.26633333333333337,
+        0.033,
+        0.10033333333333327,
+        0.06699999999999995,
+        0.033333333333333326,
+        0.03366666666666667,
+        0.1333333333333333,
+        -0.033333333333333326,
+        0.10033333333333327,
+        -0.06699999999999995
+      ],
+      "first": {
+        "ci95_halfwidth": 0.055,
+        "file": "dense_clipped_terminaL_5_step_29_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.627,
+        "step": 30,
+        "tasks": [
+          0.533,
+          0.067,
+          0.9,
+          0.833,
+          0.9,
+          0.133,
+          0.8,
+          0.567,
+          0.767,
+          0.767
+        ]
+      },
+      "last": {
+        "ci95_halfwidth": 0.054,
+        "file": "dense_clip_terminaL_5_step_49_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.647,
+        "step": 50,
+        "tasks": [
+          0.633,
+          0.133,
+          0.967,
+          0.867,
+          0.8,
+          0.067,
+          0.9,
+          0.6,
+          0.867,
+          0.633
+        ]
+      }
+    },
+    "Phase 0.2 + terminal 1": {
+      "best": {
+        "ci95_halfwidth": 0.054,
+        "file": "phase_02_terminaL_1_step_89_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.637,
+        "step": 90,
+        "tasks": [
+          0.567,
+          0.067,
+          0.967,
+          0.833,
+          0.833,
+          0.1,
+          0.833,
+          0.667,
+          0.8,
+          0.7
+        ]
+      },
+      "best_gain_over_initial": 0.05700000000000005,
+      "best_task_change_from_initial": [
+        0.2003333333333333,
+        -0.033,
+        0.10033333333333327,
+        0.03299999999999992,
+        0.06633333333333324,
+        0.06666666666666668,
+        0.06633333333333324,
+        0.033666666666666734,
+        0.033333333333333326,
+        0.0
+      ],
+      "first": {
+        "ci95_halfwidth": 0.056,
+        "file": "phase_02_terminaL_1_step_29_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.58,
+        "step": 30,
+        "tasks": [
+          0.367,
+          0.067,
+          0.9,
+          0.867,
+          0.8,
+          0.033,
+          0.8,
+          0.6,
+          0.767,
+          0.6
+        ]
+      },
+      "last": {
+        "ci95_halfwidth": 0.055,
+        "file": "phase_02_terminaL_1_step_109_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.623,
+        "step": 110,
+        "tasks": [
+          0.667,
+          0.067,
+          0.967,
+          0.9,
+          0.867,
+          0.067,
+          0.767,
+          0.533,
+          0.833,
+          0.567
+        ]
+      }
+    },
+    "Terminal only (coef=5)": {
+      "best": {
+        "ci95_halfwidth": 0.055,
+        "file": "terminal_terminaL_5_step_169_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.617,
+        "step": 170,
+        "tasks": [
+          0.533,
+          0.067,
+          0.9,
+          0.867,
+          0.733,
+          0.033,
+          0.867,
+          0.667,
+          0.8,
+          0.7
+        ]
+      },
+      "best_gain_over_initial": 0.03700000000000003,
+      "best_task_change_from_initial": [
+        0.1663333333333334,
+        -0.033,
+        0.033333333333333326,
+        0.06699999999999995,
+        -0.033666666666666734,
+        -0.0003333333333333313,
+        0.10033333333333327,
+        0.033666666666666734,
+        0.033333333333333326,
+        0.0
+      ],
+      "first": {
+        "ci95_halfwidth": 0.055,
+        "file": "terminal_terminaL_5_step_39_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.61,
+        "step": 40,
+        "tasks": [
+          0.4,
+          0.067,
+          0.967,
+          0.867,
+          0.833,
+          0.067,
+          0.833,
+          0.6,
+          0.867,
+          0.7
+        ]
+      },
+      "last": {
+        "ci95_halfwidth": 0.055,
+        "file": "terminal_terminaL_5_step_169_lora_adapter.log",
+        "num_rollouts": 300,
+        "overall": 0.617,
+        "step": 170,
+        "tasks": [
+          0.533,
+          0.067,
+          0.9,
+          0.867,
+          0.733,
+          0.033,
+          0.867,
+          0.667,
+          0.8,
+          0.7
+        ]
+      }
+    }
+  },
+  "aligned_dense_minus_terminal_mean": 0.020000000000000018,
+  "aligned_dense_vs_terminal": [
+    {
+      "dense_minus_terminal": 0.013000000000000012,
+      "step": 40
+    },
+    {
+      "dense_minus_terminal": 0.02300000000000002,
+      "step": 80
+    },
+    {
+      "dense_minus_terminal": 0.02400000000000002,
+      "step": 110
+    }
+  ],
+  "best_dense_vs_best_terminal_unpaired_normal": {
+    "ci95_high": 0.11299100214094289,
+    "ci95_low": -0.040991002140942825,
+    "difference": 0.03600000000000003,
+    "standard_error": 0.039281123541297376,
+    "two_sided_p_approx": 0.35942005215856654,
+    "z": 0.9164707308372225
+  },
+  "best_dense_vs_initial_unpaired_normal": {
+    "ci95_high": 0.15059479676713733,
+    "ci95_low": -0.004594796767137185,
+    "difference": 0.07300000000000006,
+    "standard_error": 0.03958918202404962,
+    "two_sided_p_approx": 0.06519216572861138,
+    "z": 1.8439380726698031
+  },
+  "dynamic": [
+    {
+      "ci95_halfwidth": 0.043,
+      "file": "1_dense_01_01_global_step_19_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.602,
+      "tasks": [
+        0.42,
+        0.08,
+        0.98,
+        0.88,
+        0.78,
+        0.02,
+        0.88,
+        0.6,
+        0.72,
+        0.66
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.054,
+      "file": "1_dense_clip_03_05_step_79_lora_adapter.log",
+      "num_rollouts": 300,
+      "overall": 0.637,
+      "tasks": [
+        0.7,
+        0.133,
+        0.867,
+        0.867,
+        0.8,
+        0.133,
+        0.733,
+        0.633,
+        0.833,
+        0.667
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.043,
+      "file": "1_termianal_global_step_19_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.598,
+      "tasks": [
+        0.42,
+        0.12,
+        0.84,
+        0.84,
+        0.86,
+        0.04,
+        0.86,
+        0.5,
+        0.78,
+        0.72
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.043,
+      "file": "2_phase_02_79_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.6,
+      "tasks": [
+        0.46,
+        0.08,
+        0.92,
+        0.84,
+        0.78,
+        0.02,
+        0.84,
+        0.56,
+        0.76,
+        0.74
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.043,
+      "file": "2_phase_02_global_step_19_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.594,
+      "tasks": [
+        0.4,
+        0.08,
+        0.86,
+        0.84,
+        0.8,
+        0.04,
+        0.86,
+        0.58,
+        0.76,
+        0.72
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.043,
+      "file": "2_terminal_global_step_59_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.604,
+      "tasks": [
+        0.42,
+        0.12,
+        0.9,
+        0.84,
+        0.86,
+        0.04,
+        0.88,
+        0.64,
+        0.72,
+        0.62
+      ]
+    },
+    {
+      "ci95_halfwidth": 0.042,
+      "file": "3_dense_01_global_step_79_lora_adapter.log",
+      "num_rollouts": 500,
+      "overall": 0.63,
+      "tasks": [
+        0.42,
+        0.12,
+        0.94,
+        0.88,
+        0.78,
+        0.08,
+        0.9,
+        0.58,
+        0.78,
+        0.82
+      ]
+    }
+  ],
+  "dynamic_summary_tsv_malformed": true,
+  "initial": {
+    "overall": 0.58,
+    "provenance": "standalone CSV",
+    "tasks": [
+      0.36666666666666664,
+      0.1,
+      0.8666666666666667,
+      0.8,
+      0.7666666666666667,
+      0.03333333333333333,
+      0.7666666666666667,
+      0.6333333333333333,
+      0.7666666666666667,
+      0.7
+    ]
+  },
+  "main_log_count": 16,
+  "summary_row_count": 16,
+  "summary_vs_raw_mismatches": []
+}
