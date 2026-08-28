@@ -38,6 +38,13 @@ from verl import DataProto
 from verl.trainer.ppo import core_algos
 from verl.utils.accuracy_distribution import accuracy_distribution_counts, accuracy_distribution_metric_values
 from verl.utils.dataset.rob_dataset import BufferedDataLoader
+from verl.utils.task_sampling import (
+    clip_hard_retry_prompt_mask,
+    is_clip_hard_mode,
+    make_prompt_group_ids,
+    normalize_task_sampling_mode,
+    uses_hard_task_sampler,
+)
 
 WorkerType = Type[Worker]
 
@@ -377,10 +384,11 @@ class RayTrainer(object):
 
         train_batch_size = int(self.config.data.train_batch_size * self.config.data.oversample_factor)
         task_sampling_cfg = self.config.data.get('task_sampling', {})
+        task_sampling_mode = normalize_task_sampling_mode(task_sampling_cfg.get('mode', 'balanced_hard'))
         if (
             "libero" in self.config.data.task_suite_name
             and bool(task_sampling_cfg.get('enabled', False))
-            and str(task_sampling_cfg.get('mode', 'balanced_hard')) == 'balanced_hard'
+            and uses_hard_task_sampler(task_sampling_mode)
         ):
             self.train_task_sampler = TaskBalancedHardBatchSampler(
                 dataset=self.train_dataset,
@@ -394,6 +402,7 @@ class RayTrainer(object):
             )
             print(
                 "Task-balanced hard sampler enabled:",
+                f"mode={task_sampling_mode}",
                 f"batch_size={train_batch_size}",
                 f"uniform_fraction={self.train_task_sampler.uniform_fraction}",
                 f"min_task_probability={self.train_task_sampler.min_task_probability}",
@@ -520,11 +529,79 @@ class RayTrainer(object):
                 f"task_{task_id}:prompts={stats['groups']},accepted={stats['accepted']},acc={mean_acc:.3f}"
             )
             prefix = f"train_task/task_{task_id}"
-            metrics[f"{prefix}/prompts"] = float(stats["groups"])
-            metrics[f"{prefix}/accepted_prompts"] = float(stats["accepted"])
-            metrics[f"{prefix}/accuracy"] = mean_acc
+            prompts_key = f"{prefix}/prompts"
+            accepted_key = f"{prefix}/accepted_prompts"
+            accuracy_key = f"{prefix}/accuracy"
+            old_prompts = float(metrics[prompts_key]) if prompts_key in metrics else 0.0
+            new_prompts = float(stats["groups"])
+            metrics[prompts_key] = old_prompts + new_prompts
+            metrics[accepted_key] = (
+                float(metrics[accepted_key]) if accepted_key in metrics else 0.0
+            ) + float(stats["accepted"])
+            old_accuracy = float(metrics[accuracy_key]) if accuracy_key in metrics else 0.0
+            metrics[accuracy_key] = (
+                (old_accuracy * old_prompts + mean_acc * new_prompts) / (old_prompts + new_prompts)
+                if old_prompts + new_prompts > 0
+                else 0.0
+            )
 
         print(f"[train task sampling step {global_steps}] " + " | ".join(parts))
+
+    def _clip_hard_enabled(self) -> bool:
+        task_sampling_cfg = self.config.data.get('task_sampling', {})
+        return bool(task_sampling_cfg.get('enabled', False)) and is_clip_hard_mode(
+            task_sampling_cfg.get('mode', 'balanced_hard')
+        )
+
+    def _effective_accuracy_lower_bound(self) -> float:
+        lower_bound = float(self.config.data.accuracy_lower_bound)
+        if self._clip_hard_enabled():
+            task_sampling_cfg = self.config.data.get('task_sampling', {})
+            lower_bound = max(lower_bound, float(task_sampling_cfg.get('clip_target_accuracy', lower_bound)))
+        return lower_bound
+
+    def _slice_data_proto(self, batch: DataProto, start: int, end: int):
+        start = max(0, int(start))
+        end = min(len(batch), int(end))
+        if end <= start:
+            return []
+        return batch.slice(range(start, end))
+
+    def _concat_data_proto(self, batches):
+        batches = [batch for batch in batches if len(batch) > 0]
+        if not batches:
+            return []
+        if len(batches) == 1:
+            return batches[0]
+        return DataProto.concat(batches)
+
+    def _take_clip_retry_batch(self, retry_batch, max_prompts: int):
+        if len(retry_batch) == 0:
+            return [], []
+        take_count = min(int(max_prompts), len(retry_batch))
+        current = self._slice_data_proto(retry_batch, 0, take_count)
+        remaining = self._slice_data_proto(retry_batch, take_count, len(retry_batch))
+        return current, remaining
+
+    def _clip_hard_retry_prompts(
+        self,
+        prompt_batch: DataProto,
+        roll_batch: DataProto,
+        n_samples: int,
+    ):
+        task_sampling_cfg = self.config.data.get('task_sampling', {})
+        target_accuracy = float(
+            task_sampling_cfg.get('clip_target_accuracy', self._effective_accuracy_lower_bound())
+        )
+        retry_mask = clip_hard_retry_prompt_mask(
+            roll_batch.batch['acc'].detach().cpu().reshape(-1).tolist(),
+            n_samples=n_samples,
+            target_accuracy=target_accuracy,
+        )
+        retry_indices = np.flatnonzero(retry_mask).tolist()
+        if not retry_indices:
+            return []
+        return prompt_batch.slice(retry_indices)
 
     def _validate(self, global_steps=0):
         from tqdm import tqdm
@@ -808,6 +885,7 @@ class RayTrainer(object):
             while True:
                 valid_batch = []
                 buffer_batch = []
+                clip_retry_batch = []
 
                 if self.train_dataloader.buffer_size() > 0:
                     buffer_batch = self.train_dataloader.get_from_buffer(batch_size, self.actor_rollout_wg.world_size)
@@ -818,17 +896,50 @@ class RayTrainer(object):
                 metrics['timing/filter_format_error'] = 0
                 metrics['timing/compute_all_entropy'] = 0
                 self._reset_accuracy_distribution_step_counts()
+                clip_hard_enabled = self._clip_hard_enabled()
+                task_sampling_cfg = self.config.data.get('task_sampling', {})
+                clip_max_attempts = int(task_sampling_cfg.get('clip_max_attempts_per_step', 50))
+                clip_attempts = 0
 
                 while len(valid_batch) < batch_size * n_samples:
-                    try:
-                        batch_dict = self.train_dataloader.get_next_batch()
-                    except StopIteration:
-                        break
+                    retry_current = []
+                    if clip_hard_enabled and len(clip_retry_batch) > 0:
+                        retry_current, clip_retry_batch = self._take_clip_retry_batch(
+                            clip_retry_batch, batch_size
+                        )
+                        if len(retry_current) > 0:
+                            print(
+                                f"clip_hard retry prompts: {len(retry_current)} "
+                                f"(queued_remaining={len(clip_retry_batch)})"
+                            )
 
                     # generate a batch
                     with Timer(name='gen', text="{name}: {seconds:.1f} seconds") as timer:
 
-                        newbatch: DataProto = DataProto.from_single_dict(batch_dict)
+                        fresh_batch = []
+                        if len(retry_current) < batch_size:
+                            try:
+                                batch_dict = self.train_dataloader.get_next_batch()
+                            except StopIteration:
+                                if len(retry_current) == 0:
+                                    break
+                                batch_dict = None
+                            if batch_dict is not None:
+                                fresh_batch = DataProto.from_single_dict(batch_dict)
+
+                        prompt_batches = []
+                        if len(retry_current) > 0:
+                            prompt_batches.append(retry_current)
+                        if len(fresh_batch) > 0:
+                            needed_fresh = batch_size - sum(len(batch) for batch in prompt_batches)
+                            if needed_fresh < len(fresh_batch):
+                                prompt_batches.append(self._slice_data_proto(fresh_batch, 0, needed_fresh))
+                                self.train_dataloader.add_to_buffer(
+                                    self._slice_data_proto(fresh_batch, needed_fresh, len(fresh_batch))
+                                )
+                            elif needed_fresh > 0:
+                                prompt_batches.append(fresh_batch)
+                        newbatch: DataProto = self._concat_data_proto(prompt_batches)
 
                         if len(buffer_batch) > 0:
                             newbatch = DataProto.concat([buffer_batch, newbatch])
@@ -846,13 +957,16 @@ class RayTrainer(object):
                         newbatch.non_tensor_batch['uid'] = np.array([str(uuid.uuid4()) for _ in range(len(newbatch.batch))],
                                                              dtype=object)
                         task_ids = newbatch.batch['task_id'].detach().cpu().reshape(len(newbatch), -1)[:, 0].tolist()
+                        trial_ids = newbatch.batch['trial_id'].detach().cpu().reshape(len(newbatch), -1)[:, 0].tolist()
                         task_suites = newbatch.non_tensor_batch.get(
                             'task_suite_name',
                             np.array([self.config.data.task_suite_name for _ in range(len(newbatch))], dtype=object)
                         )
-                        newbatch.non_tensor_batch['group_id'] = np.array(
-                            [f"{task_suites[i]}:{int(task_ids[i])}" for i in range(len(newbatch))],
-                            dtype=object
+                        newbatch.non_tensor_batch['group_id'] = make_prompt_group_ids(
+                            task_suites=task_suites,
+                            task_ids=task_ids,
+                            trial_ids=trial_ids,
+                            uids=newbatch.non_tensor_batch['uid'],
                         )
 
                         batch_lst = sum([[newbatch[i:i + 1] for _ in range(n_samples)] for i in range(len(newbatch))],
@@ -903,6 +1017,22 @@ class RayTrainer(object):
                         global_steps=global_steps,
                         metrics=metrics,
                     )
+                    if clip_hard_enabled:
+                        clip_attempts += 1
+                        retry_prompts = self._clip_hard_retry_prompts(newbatch, roll_batch, n_samples)
+                        if len(retry_prompts) > 0:
+                            if clip_attempts < clip_max_attempts:
+                                clip_retry_batch = self._concat_data_proto([clip_retry_batch, retry_prompts])
+                                print(
+                                    f"clip_hard queued {len(retry_prompts)} prompt(s) below "
+                                    f"target_accuracy={self._effective_accuracy_lower_bound():.3f}; "
+                                    f"attempts={clip_attempts}/{clip_max_attempts}"
+                                )
+                            else:
+                                print(
+                                    f"clip_hard dropped {len(retry_prompts)} prompt(s) after "
+                                    f"attempts={clip_attempts}/{clip_max_attempts}"
+                                )
 
                     
                     if self.config.data.filter_warmup:
@@ -1117,7 +1247,7 @@ class RayTrainer(object):
             counts = self._record_accuracy_distribution(acc_tensor, n_samples)
             print("Accuracy distribution:", " ".join(f"{k:.2f}:{v}" for k, v in sorted(counts.items())))
 
-            acc_mask = (acc_tensor >= self.config.data.accuracy_lower_bound) & (
+            acc_mask = (acc_tensor >= self._effective_accuracy_lower_bound()) & (
                         acc_tensor <= self.config.data.accuracy_upper_bound)
         else:
             # If accuracy filtering disabled, keep all samples
