@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">LIBERO-Spatial validation success: primary reward comparison</title>
+<desc id="desc">Terminal-only and dense-labelled checkpoint success with logged 95 percent confidence intervals.</desc>
+<rect width="1600" height="1000" fill="#FFFFFF"/>
+<text x="70.00" y="60.00" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#172033" text-anchor="start" font-weight="700" font-style="normal">LIBERO-Spatial validation success</text>
+<text x="70.00" y="98.00" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Primary reward comparison · 300 rollouts/checkpoint · logged 95% confidence intervals</text>
+<line x1="155.00" y1="815.00" x2="1490.00" y2="815.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="821.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">50%</text>
+<line x1="155.00" y1="697.73" x2="1490.00" y2="697.73" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="703.73" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">54%</text>
+<line x1="155.00" y1="580.45" x2="1490.00" y2="580.45" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="586.45" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">58%</text>
+<line x1="155.00" y1="463.18" x2="1490.00" y2="463.18" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="469.18" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">62%</text>
+<line x1="155.00" y1="345.91" x2="1490.00" y2="345.91" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="351.91" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">66%</text>
+<line x1="155.00" y1="228.64" x2="1490.00" y2="228.64" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="139.00" y="234.64" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="end" font-weight="400" font-style="normal">70%</text>
+<line x1="155.00" y1="815.00" x2="155.00" y2="822.00" stroke="#172033" stroke-width="1.5" opacity="1.0"/>
+<text x="155.00" y="846.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">0</text>
+<line x1="451.67" y1="815.00" x2="451.67" y2="822.00" stroke="#172033" stroke-width="1.5" opacity="1.0"/>
+<text x="451.67" y="846.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">40</text>
+<line x1="748.33" y1="815.00" x2="748.33" y2="822.00" stroke="#172033" stroke-width="1.5" opacity="1.0"/>
+<text x="748.33" y="846.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">80</text>
+<line x1="1045.00" y1="815.00" x2="1045.00" y2="822.00" stroke="#172033" stroke-width="1.5" opacity="1.0"/>
+<text x="1045.00" y="846.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">120</text>
+<line x1="1341.67" y1="815.00" x2="1341.67" y2="822.00" stroke="#172033" stroke-width="1.5" opacity="1.0"/>
+<text x="1341.67" y="846.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">160</text>
+<line x1="155.00" y1="170.00" x2="155.00" y2="815.00" stroke="#172033" stroke-width="2" opacity="1.0"/>
+<line x1="155.00" y1="815.00" x2="1490.00" y2="815.00" stroke="#172033" stroke-width="2" opacity="1.0"/>
+<text x="822.50" y="887.00" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#172033" text-anchor="middle" font-weight="400" font-style="normal">Training checkpoint step</text>
+<text x="63.00" y="492.50" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#172033" text-anchor="middle" font-weight="400" font-style="normal" transform="rotate(-90 63.00 492.50)">Validation success</text>
+<line x1="155.00" y1="580.45" x2="1490.00" y2="580.45" stroke="#6B7280" stroke-width="2" opacity="1.0" stroke-dasharray="9 8"/>
+<rect x="1326.00" y="549.45" width="154.00" height="25.00" fill="#FFFFFF" stroke="none" stroke-width="1" rx="0" opacity="0.92"/>
+<text x="1478.00" y="568.45" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#6B7280" text-anchor="end" font-weight="600" font-style="normal">Initial 58.0%</text>
+<polyline points="451.67,492.50 748.33,501.30 970.83,483.70 1415.83,471.98" fill="none" stroke="#2F6BBD" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="1.0"/>
+<line x1="451.67" y1="653.75" x2="451.67" y2="331.25" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="444.67" y1="653.75" x2="458.67" y2="653.75" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="444.67" y1="331.25" x2="458.67" y2="331.25" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<circle cx="451.67" cy="492.50" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="451.67" y="473.50" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#2F6BBD" text-anchor="middle" font-weight="700" font-style="normal">61.0%</text>
+<line x1="748.33" y1="662.55" x2="748.33" y2="340.05" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="741.33" y1="662.55" x2="755.33" y2="662.55" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="741.33" y1="340.05" x2="755.33" y2="340.05" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<circle cx="748.33" cy="501.30" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="748.33" y="482.30" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#2F6BBD" text-anchor="middle" font-weight="700" font-style="normal">60.7%</text>
+<line x1="970.83" y1="644.95" x2="970.83" y2="322.45" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="963.83" y1="644.95" x2="977.83" y2="644.95" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="963.83" y1="322.45" x2="977.83" y2="322.45" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<circle cx="970.83" cy="483.70" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="970.83" y="464.70" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#2F6BBD" text-anchor="middle" font-weight="700" font-style="normal">61.3%</text>
+<line x1="1415.83" y1="633.23" x2="1415.83" y2="310.73" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="1408.83" y1="633.23" x2="1422.83" y2="633.23" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<line x1="1408.83" y1="310.73" x2="1422.83" y2="310.73" stroke="#2F6BBD" stroke-width="2" opacity="0.62"/>
+<circle cx="1415.83" cy="471.98" r="9" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="1415.83" y="452.98" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#2F6BBD" text-anchor="middle" font-weight="700" font-style="normal">61.7%</text>
+<polyline points="451.67,454.39 748.33,433.86 970.83,413.34 1341.67,366.43" fill="none" stroke="#D97706" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="1.0"/>
+<line x1="451.67" y1="615.64" x2="451.67" y2="293.14" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="444.67" y1="615.64" x2="458.67" y2="615.64" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="444.67" y1="293.14" x2="458.67" y2="293.14" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<rect x="442.67" y="445.39" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="451.67" y="435.39" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#D97706" text-anchor="middle" font-weight="700" font-style="normal">62.3%</text>
+<line x1="748.33" y1="595.11" x2="748.33" y2="272.61" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="741.33" y1="595.11" x2="755.33" y2="595.11" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="741.33" y1="272.61" x2="755.33" y2="272.61" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<rect x="739.33" y="424.86" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="748.33" y="414.86" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#D97706" text-anchor="middle" font-weight="700" font-style="normal">63.0%</text>
+<line x1="970.83" y1="571.66" x2="970.83" y2="255.02" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="963.83" y1="571.66" x2="977.83" y2="571.66" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="963.83" y1="255.02" x2="977.83" y2="255.02" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<rect x="961.83" y="404.34" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="970.83" y="394.34" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#D97706" text-anchor="middle" font-weight="700" font-style="normal">63.7%</text>
+<line x1="1341.67" y1="524.75" x2="1341.67" y2="208.11" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="1334.67" y1="524.75" x2="1348.67" y2="524.75" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<line x1="1334.67" y1="208.11" x2="1348.67" y2="208.11" stroke="#D97706" stroke-width="2" opacity="0.62"/>
+<rect x="1332.67" y="357.43" width="18.00" height="18.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="1341.67" y="347.43" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#D97706" text-anchor="middle" font-weight="700" font-style="normal">65.3%</text>
+<line x1="610.00" y1="132.00" x2="655.00" y2="132.00" stroke="#2F6BBD" stroke-width="4" opacity="1.0"/>
+<circle cx="632.00" cy="132.00" r="7" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="668.00" y="138.00" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Terminal only (coef=5)</text>
+<line x1="1020.00" y1="132.00" x2="1065.00" y2="132.00" stroke="#D97706" stroke-width="4" opacity="1.0"/>
+<rect x="1035.00" y="125.00" width="14.00" height="14.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="1078.00" y="138.00" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Dense 0.05/0.05 + terminal 5</text>
+<text x="155.00" y="932.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Focused y-axis. Error bars describe checkpoint-evaluation uncertainty, not training-seed variability.</text>
+</svg>

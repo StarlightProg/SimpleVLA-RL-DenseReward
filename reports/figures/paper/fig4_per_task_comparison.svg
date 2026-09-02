@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="1080" viewBox="0 0 1650 1080" role="img" aria-labelledby="title desc">
+<title id="title">Per-task validation success at selected checkpoints</title>
+<desc id="desc">Initial, best terminal-only, and best dense-labelled success for ten LIBERO-Spatial tasks.</desc>
+<rect width="1650" height="1080" fill="#FFFFFF"/>
+<text x="70.00" y="60.00" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#172033" text-anchor="start" font-weight="700" font-style="normal">Per-task validation success at selected checkpoints</text>
+<text x="70.00" y="98.00" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Initial vs best terminal-only (step 170) vs best dense-labelled (step 160) · 30 trials/task</text>
+<rect x="110.00" y="265.26" width="1420.00" height="62.48" fill="#FFF8DD" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<rect x="110.00" y="549.26" width="1420.00" height="62.48" fill="#FFF8DD" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<line x1="230.00" y1="190.00" x2="230.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="230.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">0%</text>
+<line x1="490.00" y1="190.00" x2="490.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="490.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">20%</text>
+<line x1="750.00" y1="190.00" x2="750.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="750.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">40%</text>
+<line x1="1010.00" y1="190.00" x2="1010.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1010.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">60%</text>
+<line x1="1270.00" y1="190.00" x2="1270.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1270.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">80%</text>
+<line x1="1530.00" y1="190.00" x2="1530.00" y2="900.00" stroke="#DDE3EA" stroke-width="1.5" opacity="1.0"/>
+<text x="1530.00" y="934.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="middle" font-weight="400" font-style="normal">100%</text>
+<line x1="230.00" y1="900.00" x2="1530.00" y2="900.00" stroke="#172033" stroke-width="2" opacity="1.0"/>
+<text x="202.00" y="232.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 0</text>
+<line x1="922.90" y1="225.50" x2="1010.00" y2="225.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="707.10" cy="225.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="922.90" cy="225.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1002.00" y="217.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="303.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 1</text>
+<line x1="317.10" y1="296.50" x2="360.00" y2="296.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="360.00" cy="296.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="317.10" cy="296.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="352.00" y="288.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="374.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 2</text>
+<line x1="1400.00" y1="367.50" x2="1442.90" y2="367.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1357.10" cy="367.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1400.00" cy="367.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1434.90" y="359.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="445.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 3</text>
+<line x1="1357.10" y1="438.50" x2="1400.00" y2="438.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1270.00" cy="438.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1357.10" cy="438.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1392.00" y="430.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="516.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 4</text>
+<line x1="1182.90" y1="509.50" x2="1400.00" y2="509.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1227.10" cy="509.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1182.90" cy="509.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1392.00" y="501.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="587.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 5</text>
+<line x1="272.90" y1="580.50" x2="317.10" y2="580.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="272.90" cy="580.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="272.90" cy="580.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="309.10" y="572.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="658.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 6</text>
+<line x1="1357.10" y1="651.50" x2="1312.90" y2="651.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1227.10" cy="651.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1357.10" cy="651.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1304.90" y="643.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="729.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 7</text>
+<line x1="1097.10" y1="722.50" x2="1227.10" y2="722.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1052.90" cy="722.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1097.10" cy="722.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1219.10" y="714.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="800.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 8</text>
+<line x1="1270.00" y1="793.50" x2="1270.00" y2="793.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1227.10" cy="793.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1270.00" cy="793.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1262.00" y="785.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="202.00" y="871.50" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#172033" text-anchor="end" font-weight="600" font-style="normal">Task 9</text>
+<line x1="1140.00" y1="864.50" x2="1052.90" y2="864.50" stroke="#AEB8C4" stroke-width="4" opacity="1.0"/>
+<circle cx="1140.00" cy="864.50" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<circle cx="1140.00" cy="864.50" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<rect x="1044.90" y="856.50" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="880.00" y="982.00" font-family="Arial, Helvetica, sans-serif" font-size="19" fill="#172033" text-anchor="middle" font-weight="400" font-style="normal">Task success</text>
+<circle cx="470.00" cy="137.00" r="7" fill="#FFFFFF" stroke="#6B7280" stroke-width="3" opacity="1.0"/>
+<text x="488.00" y="143.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Initial</text>
+<circle cx="660.00" cy="137.00" r="8" fill="#2F6BBD" stroke="#2F6BBD" stroke-width="3" opacity="1.0"/>
+<text x="680.00" y="143.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Terminal only best</text>
+<rect x="937.00" y="129.00" width="16.00" height="16.00" fill="#D97706" stroke="#D97706" stroke-width="3" rx="1" opacity="1.0"/>
+<text x="966.00" y="143.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Dense-labelled best</text>
+<rect x="1230.00" y="125.00" width="28.00" height="20.00" fill="#FFF8DD" stroke="none" stroke-width="1" rx="0" opacity="1.0"/>
+<text x="1270.00" y="143.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#172033" text-anchor="start" font-weight="400" font-style="normal">Persistent low-success tasks</text>
+<text x="70.00" y="1015.00" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#5F6B7A" text-anchor="start" font-weight="400" font-style="normal">Per-task estimates have 3.33-point resolution (n=30). No task-level uncertainty bars are shown to avoid clutter.</text>
+</svg>
