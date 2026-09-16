@@ -370,6 +370,8 @@ class RobDataParallelPPOActor(BasePPOActor):
         
         self.actor_module.eval()
 
+        # This value is already per-rank: the FSDP worker divides the global
+        # log-prob micro batch by the number of GPU ranks during initialization.
         micro_batch_size = data.meta_info['micro_batch_size'] #256
         temperature = data.meta_info['temperature']  # temperature must be in the data.meta_info to avoid slient error # 1
         use_dynamic_bsz = data.meta_info['use_dynamic_bsz'] #trues
@@ -415,18 +417,19 @@ class RobDataParallelPPOActor(BasePPOActor):
         batch = data.select(batch_keys=select_keys).batch
         assert self.config.ppo_micro_batch_size == 1
 
-        # Split to make minibatch iterator for updating the actor
-        # See PPO paper for details. https://arxiv.org/abs/1707.06347
+        # Split the collected rollout batch into PPO mini-batches. Each
+        # mini-batch is processed through smaller micro-batches and then gets
+        # one optimizer step.
         dataloader = batch.split(self.config.ppo_mini_batch_size)
         metrics = {}
         for batch_idx, data in enumerate(dataloader):
-            # split batch into micro_batches
             mini_batch = data
             if self.config.use_dynamic_bsz:
                 max_token_len = self.config.ppo_max_token_len_per_gpu * self.ulysses_sequence_parallel_size
                 micro_batches, _ = rearrange_micro_batches(batch=mini_batch, max_token_len=max_token_len)
             else:
-                # split batch into micro_batches
+                # Fixed micro-batches are safer for robotics trajectories. In
+                # the 2xL40 setup this is normally one trajectory per rank.
                 micro_batches = mini_batch.split(self.config.ppo_micro_batch_size)
 
             self.actor_optimizer.zero_grad()
@@ -487,6 +490,8 @@ class RobDataParallelPPOActor(BasePPOActor):
 
                 for i in range(0, traj_len, int(traj_len/traj_split_num)):
                    
+                    # Recompute current-policy log-probs for the generated
+                    # action tokens; PPO compares them with old_log_probs.
                     entropy, log_prob = self._forward_micro_batch_update(input_ids=input_ids[i:i+int(traj_len/traj_split_num)], 
                                                                          attention_mask=attention_mask[i:i+int(traj_len/traj_split_num)], 
                                                                          pixel_values=pixel_values[i:i+int(traj_len/traj_split_num)], 

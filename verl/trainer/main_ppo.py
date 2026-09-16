@@ -45,6 +45,9 @@ class RobRewardManager():
         if "reward_total" not in data.batch.keys():
             return None
 
+        # Rollout returns dense reward per environment step. PPO trains on
+        # action tokens, so each step reward is placed on the last token of the
+        # corresponding generated action chunk.
         dense_values = data.batch["reward_total"]
         dense_tokens = torch.zeros_like(data.batch['responses'], dtype=torch.float32).reshape((data.batch['responses'].shape[0], -1))
         response_tokens_per_step = data.batch['responses'].size(-1)
@@ -58,6 +61,8 @@ class RobRewardManager():
         return dense_tokens
 
     def verify(self, data):
+        # LIBERO rollout reports whether the task was completed. This becomes
+        # the binary verifier accuracy/reward used for filtering and GRPO.
         completes = data.batch['complete'].tolist()
         # Validation may run in minimal-output mode without `responses`.
         if 'responses' in data.batch.keys():
@@ -114,6 +119,8 @@ class RobRewardManager():
         reward_tensor = reward_tensor.reshape((reward_tensor.shape[0],-1))
         verifier_reward = verifier_reward.reshape((verifier_reward.shape[0],-1))
         
+        # Terminal verifier reward is not spread over the whole trajectory: it
+        # is placed on the final valid action token for each rollout.
         valid_response_length = data.batch['finish_step'] * self.config.actor_rollout_ref.model.action_token_len 
        
         if 'acc' in data.batch:
@@ -148,6 +155,8 @@ class RobRewardManager():
                 reward_tensor_dict['subgoal_scores'] = dense_reward
                 reward_metrics['subgoal_dense'] = dense_reward.sum(dim=1).mean().item()
                 mode = str(subgoal_cfg.get("mode", "log_only"))
+                # log_only records dense metrics only; add combines dense
+                # shaping with verifier reward; replace ignores verifier reward.
                 if mode == "replace":
                     reward_tensor = dense_reward.clone()
                 elif mode == "add":

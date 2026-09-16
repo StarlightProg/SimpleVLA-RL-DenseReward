@@ -356,10 +356,12 @@ class RayTrainer(object):
         if "libero" in self.config.data.task_suite_name:
             self.train_dataset = LIBERO_Dataset(self.config.data.task_suite_name,
                                                 num_trials_per_task=self.config.data.num_trials_per_task,
-                                                train_val ="train")
+                                                train_val ="train",
+                                                task_ids=self.config.data.get('train_task_ids', None))
             self.val_dataset = LIBERO_Dataset(self.config.data.task_suite_name,
                                             num_trials_per_task=self.config.data.num_trials_per_task,
-                                            train_val ="valid")
+                                            train_val ="valid",
+                                            task_ids=self.config.data.get('val_task_ids', None))
         elif "robotwin" in self.config.data.task_suite_name:
             # (cjh) We assume here that data set names are "robotwin_{task_name}" or "robotwin_all"
             self.train_dataset = Robotwin_Dataset(self.config.data.task_suite_name,
@@ -575,6 +577,13 @@ class RayTrainer(object):
             return batches[0]
         return DataProto.concat(batches)
 
+    def _drop_prompt_runtime_ids(self, batch):
+        if len(batch) == 0:
+            return batch
+        for key in ("uid", "group_id"):
+            batch.non_tensor_batch.pop(key, None)
+        return batch
+
     def _take_clip_retry_batch(self, retry_batch, max_prompts: int):
         if len(retry_batch) == 0:
             return [], []
@@ -582,6 +591,48 @@ class RayTrainer(object):
         current = self._slice_data_proto(retry_batch, 0, take_count)
         remaining = self._slice_data_proto(retry_batch, take_count, len(retry_batch))
         return current, remaining
+
+    def _should_fetch_fresh_prompts(self, clip_hard_enabled: bool, retry_current) -> bool:
+        return not (clip_hard_enabled and len(retry_current) > 0)
+
+    def _pad_clip_retry_prompts_for_workers(self, retry_current, worker_count: int):
+        worker_count = max(1, int(worker_count))
+        if len(retry_current) == 0:
+            return retry_current
+        retry_current.non_tensor_batch['clip_hard_padding'] = np.array([False] * len(retry_current), dtype=object)
+        if len(retry_current) % worker_count == 0:
+            retry_current.non_tensor_batch.pop('clip_hard_padding', None)
+            return retry_current
+        target_count = int(math.ceil(len(retry_current) / worker_count) * worker_count)
+        repeat_count = target_count - len(retry_current)
+        repeat_indices = [idx % len(retry_current) for idx in range(repeat_count)]
+        padding_batch = retry_current.slice(repeat_indices)
+        padding_batch.non_tensor_batch['clip_hard_padding'] = np.array([True] * len(padding_batch), dtype=object)
+        return self._concat_data_proto([retry_current, padding_batch])
+
+    def _drop_clip_hard_padding(self, batch):
+        if len(batch) == 0:
+            return batch
+        padding = batch.non_tensor_batch.get('clip_hard_padding')
+        if padding is None:
+            return batch
+        keep_indices = np.flatnonzero(~np.asarray(padding, dtype=np.bool_).reshape(-1)).tolist()
+        if len(keep_indices) == len(batch):
+            batch.non_tensor_batch.pop('clip_hard_padding', None)
+            return batch
+        kept = batch.slice(keep_indices)
+        kept.non_tensor_batch.pop('clip_hard_padding', None)
+        return kept
+
+    @staticmethod
+    def _validate_prompt_batching_for_workers(batch_size: int, worker_count: int):
+        batch_size = int(batch_size)
+        worker_count = max(1, int(worker_count))
+        if batch_size < worker_count or batch_size % worker_count != 0:
+            raise ValueError(
+                f"data.train_batch_size={batch_size} must be >= and divisible by "
+                f"rollout worker count={worker_count}. Uneven prompt shards can hang FSDP/NCCL."
+            )
 
     def _clip_hard_retry_prompts(
         self,
@@ -601,7 +652,7 @@ class RayTrainer(object):
         retry_indices = np.flatnonzero(retry_mask).tolist()
         if not retry_indices:
             return []
-        return prompt_batch.slice(retry_indices)
+        return self._drop_prompt_runtime_ids(prompt_batch.slice(retry_indices))
 
     def _validate(self, global_steps=0):
         from tqdm import tqdm
@@ -868,6 +919,10 @@ class RayTrainer(object):
         dp_size = self.actor_rollout_wg.world_size // self.config.actor_rollout_ref.rollout.tensor_model_parallel_size
         batch_size = self.config.data.train_batch_size
         n_samples = self.config.data.n_samples
+        # Here batch_size is number of prompts. The rollout count per train
+        # step is batch_size * n_samples because GRPO samples several
+        # trajectories for every prompt.
+        self._validate_prompt_batching_for_workers(batch_size, self.actor_rollout_wg.world_size)
 
         # perform validation before training
         # currently, we only support validation using the reward_function.
@@ -904,20 +959,31 @@ class RayTrainer(object):
                 while len(valid_batch) < batch_size * n_samples:
                     retry_current = []
                     if clip_hard_enabled and len(clip_retry_batch) > 0:
+                        # clip_hard retries the same failed prompts instead of
+                        # replacing them with fresh tasks from the sampler.
                         retry_current, clip_retry_batch = self._take_clip_retry_batch(
                             clip_retry_batch, batch_size
+                        )
+                        original_retry_count = len(retry_current)
+                        retry_current = self._pad_clip_retry_prompts_for_workers(
+                            retry_current,
+                            worker_count=self.actor_rollout_wg.world_size,
                         )
                         if len(retry_current) > 0:
                             print(
                                 f"clip_hard retry prompts: {len(retry_current)} "
-                                f"(queued_remaining={len(clip_retry_batch)})"
+                                f"(failed={original_retry_count}, "
+                                f"queued_remaining={len(clip_retry_batch)})"
                             )
 
                     # generate a batch
                     with Timer(name='gen', text="{name}: {seconds:.1f} seconds") as timer:
 
                         fresh_batch = []
-                        if len(retry_current) < batch_size:
+                        if (
+                            self._should_fetch_fresh_prompts(clip_hard_enabled, retry_current)
+                            and len(retry_current) < batch_size
+                        ):
                             try:
                                 batch_dict = self.train_dataloader.get_next_batch()
                             except StopIteration:
@@ -945,6 +1011,8 @@ class RayTrainer(object):
                             newbatch = DataProto.concat([buffer_batch, newbatch])
                             buffer_batch = []
 
+                        # gen_batch contains one row per prompt. The rollout
+                        # worker will generate n_samples trajectories per row.
                         if "robotwin" in self.config.data.task_suite_name:
                             gen_batch = newbatch.select(batch_keys=['task_id', 'trial_id',"trial_seed"],
                                                         non_tensor_batch_keys={"task_suite_name"},
@@ -969,6 +1037,9 @@ class RayTrainer(object):
                             uids=newbatch.non_tensor_batch['uid'],
                         )
 
+                        # roll_batch must contain one row per generated
+                        # trajectory, so we repeat each prompt n_samples times
+                        # before unioning it with generated trajectory tensors.
                         batch_lst = sum([[newbatch[i:i + 1] for _ in range(n_samples)] for i in range(len(newbatch))],
                                         [])
 
@@ -983,6 +1054,10 @@ class RayTrainer(object):
                         roll_batch = DataProto.concat(batch_lst)
                         #roll_batch.pop(batch_keys=['input_ids', 'attention_mask', 'position_ids'])
                         roll_batch = roll_batch.union(gen_batch_output)
+                        # Retry padding exists only to keep distributed GPU
+                        # shards even; it must not affect reward/filter/update.
+                        score_prompt_batch = self._drop_clip_hard_padding(newbatch)
+                        roll_batch = self._drop_clip_hard_padding(roll_batch)
 
                     metrics['timing/gen'] += timer.last
                     
@@ -1005,6 +1080,8 @@ class RayTrainer(object):
                     with Timer(name='acc&trunc_filter', text="{name}: {seconds:.1f} seconds") as timer:
                         if self.config.data.filter_accuracy or self.config.data.filter_truncated:
                             print(f"before filtering: {len(roll_batch)}")
+                            # Filtering is group-wise: either all n_samples for
+                            # a prompt are kept, or the whole prompt group is dropped.
                             filtered_roll_batch = self.filter(roll_batch.batch['acc'].unsqueeze(1), roll_batch, n_samples)
                             print(f"after filtering: {len(filtered_roll_batch)}")
                         else:
@@ -1019,7 +1096,9 @@ class RayTrainer(object):
                     )
                     if clip_hard_enabled:
                         clip_attempts += 1
-                        retry_prompts = self._clip_hard_retry_prompts(newbatch, roll_batch, n_samples)
+                        # Below-target prompt groups are put back into the
+                        # retry queue until they pass or max attempts is reached.
+                        retry_prompts = self._clip_hard_retry_prompts(score_prompt_batch, roll_batch, n_samples)
                         if len(retry_prompts) > 0:
                             if clip_attempts < clip_max_attempts:
                                 clip_retry_batch = self._concat_data_proto([clip_retry_batch, retry_prompts])
@@ -1103,7 +1182,8 @@ class RayTrainer(object):
                                                          action_chunks_len=self.config.actor_rollout_ref.model.action_chunks_len,)
                     metrics.update(kl_metrics)
 
-                    # compute advantages, executed on the driver process
+                    # GRPO computes advantages by comparing the n_samples
+                    # trajectories generated from the same prompt.
                     batch = compute_advantage(batch,
                                               self.config.algorithm.gamma,
                                               self.config.algorithm.lam,

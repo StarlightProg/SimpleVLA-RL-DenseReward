@@ -79,6 +79,21 @@ class TaskBalancedHardBatchSamplerTest(unittest.TestCase):
         tasks = batch["task_id"].reshape(-1).tolist()
         self.assertGreaterEqual(len(set(tasks)), 7)
 
+    def test_single_task_dataset_only_samples_that_task(self):
+        dataset = FakeTaskDataset(num_tasks=1, trials_per_task=20)
+        sampler = TaskBalancedHardBatchSampler(
+            dataset,
+            batch_size=10,
+            uniform_fraction=0.7,
+            min_task_probability=0.05,
+            seed=3,
+        )
+
+        for indices in iter(sampler):
+            tasks = [int(dataset[index]["task_id"].item()) for index in indices]
+            self.assertEqual(set(tasks), {0})
+            break
+
 
 if __name__ == "__main__":
     unittest.main()

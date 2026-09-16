@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
+
 from omegaconf import ListConfig
 import os
 from typing import List, Union
@@ -62,26 +64,92 @@ def collate_fn(data_list: list[dict]) -> dict:
     return output
 
 
+def normalize_libero_task_ids(task_ids, num_tasks_in_suite: int | None = None) -> list[int] | None:
+    """Normalize user-provided LIBERO task filters.
+
+    ``None``/``null``/``all`` means the full benchmark suite. Explicit lists
+    select only those task ids, which is useful for single-task training runs.
+    """
+
+    if task_ids is None:
+        return None
+
+    raw_task_ids = task_ids
+    if isinstance(task_ids, str):
+        stripped = task_ids.strip()
+        if stripped.lower() in {"", "none", "null", "all"}:
+            return None
+        if stripped.startswith("["):
+            try:
+                raw_task_ids = ast.literal_eval(stripped)
+            except (SyntaxError, ValueError) as exc:
+                raise ValueError(f"Invalid LIBERO task id list: {task_ids!r}") from exc
+        else:
+            raw_task_ids = [part.strip() for part in stripped.split(",")]
+    elif isinstance(task_ids, (int, np.integer)) and not isinstance(task_ids, bool):
+        raw_task_ids = [task_ids]
+    elif isinstance(task_ids, ListConfig):
+        raw_task_ids = list(task_ids)
+    elif isinstance(task_ids, (list, tuple, set)):
+        raw_task_ids = list(task_ids)
+    else:
+        raise TypeError(
+            "LIBERO task ids must be null/all, an int, a comma-separated string, "
+            f"or a list of ints; got {type(task_ids).__name__}"
+        )
+
+    normalized: list[int] = []
+    seen: set[int] = set()
+    for raw_id in raw_task_ids:
+        if isinstance(raw_id, bool):
+            raise ValueError(f"Invalid LIBERO task id: {raw_id!r}")
+        try:
+            task_id = int(raw_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Invalid LIBERO task id: {raw_id!r}") from exc
+        if task_id in seen:
+            continue
+        normalized.append(task_id)
+        seen.add(task_id)
+
+    if not normalized:
+        raise ValueError("LIBERO task id list is empty; use null/all to select the full suite")
+
+    if num_tasks_in_suite is not None:
+        invalid = [task_id for task_id in normalized if task_id < 0 or task_id >= int(num_tasks_in_suite)]
+        if invalid:
+            raise ValueError(
+                f"LIBERO task ids {invalid} are outside task suite range [0, {int(num_tasks_in_suite) - 1}]"
+            )
+
+    return normalized
+
+
 class LIBERO_Dataset(Dataset):
     def __init__(self,
                  task_suite_name,
                  num_trials_per_task=50,
                  train_val ="train",
+                 task_ids=None,
                  ):
         
         self.task_suite_name = task_suite_name  
         self.num_trials_per_task = num_trials_per_task  
         self.train_val = train_val
+        self.task_ids = task_ids
         self._read_files_and_tokenize()
 
     def _read_files_and_tokenize(self):
         benchmark_dict = benchmark.get_benchmark_dict()
         task_suite = benchmark_dict[self.task_suite_name]()
         num_tasks_in_suite = task_suite.n_tasks
+        selected_task_ids = normalize_libero_task_ids(self.task_ids, num_tasks_in_suite)
+        if selected_task_ids is None:
+            selected_task_ids = list(range(num_tasks_in_suite))
         dataframes = []
         
         if self.task_suite_name in benchmark_dict:
-            for task_id in range(num_tasks_in_suite):
+            for task_id in selected_task_ids:
                 if self.train_val == "train":
                     trials_range = list(range(0, int(self.num_trials_per_task)))
                 elif self.train_val == "valid":
@@ -97,7 +165,11 @@ class LIBERO_Dataset(Dataset):
                     }
                     dataframes.append(data)
             self.dataframe = dataframes
-            print(f'dataset len: {len(self.dataframe)}')
+            print(
+                f"LIBERO dataset {self.train_val}: suite={self.task_suite_name}, "
+                f"task_ids={selected_task_ids}, trials_per_task={self.num_trials_per_task}, "
+                f"len={len(self.dataframe)}"
+            )
         else:
             raise ValueError
      

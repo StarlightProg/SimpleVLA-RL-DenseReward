@@ -59,6 +59,10 @@ except ImportError as exc:
 logger = logging.getLogger(__file__)
 logger.setLevel(os.getenv('VERL_PPO_LOGGING_LEVEL', 'WARN'))
 
+# Historical name in the launch scripts is "llm-projector", but the preset is
+# broader than only the visual projector: it adapts common LLM attention/MLP
+# linear layers plus the VLA projector. It does not target a separate
+# diffusion/regression action head.
 DEFAULT_VLA_LORA_TARGET_MODULES = (
     "q_proj",
     "k_proj",
@@ -118,6 +122,8 @@ def resolve_vla_lora_target_modules(model, target_modules, use_proprio=False):
         if preset == "all-linear":
             return "all-linear"
         if preset in {"llm-projector", "llm_projector", "default"}:
+            # Resolve only names that really exist in the loaded checkpoint, so
+            # one preset can work across OpenVLA/OFT variants with/without proprio.
             resolved = list(DEFAULT_VLA_LORA_TARGET_MODULES)
             if not use_proprio:
                 resolved = [name for name in resolved if not name.startswith("proprio_projector.")]

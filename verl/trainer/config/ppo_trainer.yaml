@@ -2,6 +2,8 @@ data:
   tokenizer: null
   task_suite_name: libero_10
   num_trials_per_task: 50
+  train_task_ids: null
+  val_task_ids: null
   filter_warmup: False
   prompt_key: prompt
   system_prompt: null
