@@ -140,6 +140,7 @@ class LiberoSubgoalRewardEngine:
         subgoal_info["subgoal_has_target"] = float(state.target_position is not None)
         subgoal_info["subgoal_has_gripper"] = float(state.gripper_position is not None)
         subgoal_info["phase_name"] = step_info.phase_name
+        subgoal_info["completed_phase_names"] = step_info.completed_phase_names
         if done:
             self.reset(env_index)
         return subgoal_info, reward_parts.as_dict()

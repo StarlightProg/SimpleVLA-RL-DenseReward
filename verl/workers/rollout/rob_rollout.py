@@ -63,6 +63,7 @@ from transformers import GenerationConfig, AutoProcessor
 
 from verl.utils.libero_utils import save_rollout_video
 from verl.utils.validation_video import select_validation_video_indices
+from verl.utils.subgoal_reward.task_specs import LIBERO_PICK_PLACE_PHASE_NAMES
 try:
     from verl.utils.libero_utils import (
         get_libero_env, get_libero_dummy_action, get_libero_image,
@@ -351,13 +352,42 @@ def _subgoal_enabled(config):
     return bool(subgoal_config.get("enabled", False))
 
 
+def _subgoal_engine_config(config, force_enabled=False):
+    """Return the subgoal config, optionally enabling validation-only metrics."""
+    subgoal_config = _get_subgoal_config(config)
+    if not force_enabled:
+        return subgoal_config
+    try:
+        forced_config = dict(subgoal_config) if subgoal_config is not None else {}
+    except (TypeError, ValueError):
+        forced_config = {}
+    forced_config["enabled"] = True
+    return forced_config
+
+
 def _empty_subgoal_metrics():
     return {key: 0.0 for key in SUBGOAL_NUMERIC_KEYS}
 
 
+def _empty_episode_subgoal_metrics():
+    metrics = {"subgoal_supported": False}
+    metrics.update({f"subgoal_phase_success_{name}": False for name in LIBERO_PICK_PLACE_PHASE_NAMES})
+    return metrics
+
+
+def _record_episode_subgoal_metrics(total, subgoal_info):
+    if not bool(subgoal_info.get("subgoal_supported", False)):
+        return
+    total["subgoal_supported"] = True
+    for phase_name in subgoal_info.get("completed_phase_names", ()):
+        key = f"subgoal_phase_success_{phase_name}"
+        if key in total:
+            total[key] = True
+
+
 def _accumulate_subgoal_metrics(total, subgoal_info, reward_parts):
     for key, value in subgoal_info.items():
-        if key == "phase_name":
+        if key in ("phase_name", "completed_phase_names"):
             continue
         if key in (
             "subgoal_phase_id",
@@ -511,7 +541,19 @@ class RobotwinEnvWrapper:
 
 # ================ Libero-specific functions ================
 
-def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, collect_video, frame_stride, global_steps, max_steps):
+def env_worker(
+    task_name,
+    task_id,
+    trial_id,
+    config,
+    input_queue,
+    output_queue,
+    collect_video,
+    frame_stride,
+    global_steps,
+    max_steps,
+    collect_subgoal_phase_metrics=False,
+):
     """Worker process for Libero environments"""
     def send_error(stage, exc, extra=None):
         error_data = {
@@ -636,14 +678,17 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         "task_description": task_description,
         "bddl_file_path": os.path.join(get_libero_path("bddl_files"), task.problem_folder, task.bddl_file),
     }
-    if _subgoal_enabled(config):
+    if _subgoal_enabled(config) or collect_subgoal_phase_metrics:
         from verl.utils.subgoal_reward import LiberoSubgoalRewardEngine
 
-        subgoal_engine = LiberoSubgoalRewardEngine(_get_subgoal_config(config))
+        subgoal_engine = LiberoSubgoalRewardEngine(
+            _subgoal_engine_config(config, force_enabled=collect_subgoal_phase_metrics)
+        )
 
     active = True
     complete = False
     finish_step = 0
+    episode_subgoal_metrics = _empty_episode_subgoal_metrics() if collect_subgoal_phase_metrics else None
 
     while True:
         action = input_queue.get()
@@ -675,6 +720,8 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
                         task_metadata=task_metadata,
                     )
                     _accumulate_subgoal_metrics(subgoal_metrics, subgoal_info, reward_parts)
+                    if episode_subgoal_metrics is not None:
+                        _record_episode_subgoal_metrics(episode_subgoal_metrics, subgoal_info)
 
                 if collect_video and (i % frame_stride == 0):
                     img = obs["agentview_image"][::-1, ::-1]
@@ -703,6 +750,8 @@ def env_worker(task_name, task_id, trial_id, config, input_queue, output_queue, 
         }
         if subgoal_metrics is not None:
             output_data["subgoal_metrics"] = subgoal_metrics
+        if episode_subgoal_metrics is not None:
+            output_data["subgoal_episode_metrics"] = episode_subgoal_metrics.copy()
         output_queue.put(output_data)
 
 # ================ Main Rollout Class ================
@@ -1182,7 +1231,8 @@ class RobHFRollout(BaseRollout):
         video_frame_stride = max(1, int(meta_info.get('validation_video_frame_stride', 8)))
         minimal_validation_output = bool(meta_info.get('validate', False) and meta_info.get('minimal_validation_output', False))
         global_steps = meta_info.get('global_steps', 0) if is_valid else 0
-        subgoal_logging_enabled = _subgoal_enabled(self.config)
+        collect_subgoal_phase_metrics = is_valid and bool(meta_info.get('collect_subgoal_phase_metrics', False))
+        subgoal_logging_enabled = _subgoal_enabled(self.config) or collect_subgoal_phase_metrics
 
         selected_video_indices = set()
         if collect_video:
@@ -1213,6 +1263,7 @@ class RobHFRollout(BaseRollout):
                         video_frame_stride,
                         minimal_validation_output,
                         subgoal_logging_enabled,
+                        collect_subgoal_phase_metrics,
                         global_steps,
                     )
                 )
@@ -1231,6 +1282,7 @@ class RobHFRollout(BaseRollout):
             video_frame_stride,
             minimal_validation_output,
             subgoal_logging_enabled,
+            collect_subgoal_phase_metrics,
             global_steps,
         )
 
@@ -1246,6 +1298,7 @@ class RobHFRollout(BaseRollout):
         video_frame_stride,
         minimal_validation_output,
         subgoal_logging_enabled,
+        collect_subgoal_phase_metrics,
         global_steps,
     ):
         batch_size = task_id.size(0)
@@ -1268,7 +1321,19 @@ class RobHFRollout(BaseRollout):
                 process_collect_video = collect_video and idx in selected_video_indices
                 p = self.mp_ctx.Process(
                     target=env_worker,
-                    args=(task_name, t_id, tr_id, self.config, input_q, output_q, process_collect_video, video_frame_stride, global_steps, max_steps),
+                    args=(
+                        task_name,
+                        t_id,
+                        tr_id,
+                        self.config,
+                        input_q,
+                        output_q,
+                        process_collect_video,
+                        video_frame_stride,
+                        global_steps,
+                        max_steps,
+                        collect_subgoal_phase_metrics,
+                    ),
                 )
                 p.start()
                 processes.append(p)
@@ -1291,12 +1356,15 @@ class RobHFRollout(BaseRollout):
                 )
                 task_descriptions.append(init_data["task_description"])
                 inputs.append(self._obs_to_input(init_data['obs'], is_robotwin=False))
-                task_records.append({
+                task_record = {
                     "active": init_data['active'],
                     "complete": init_data['complete'],
                     "finish_step": init_data['finish_step'],
                     "task_file_name": init_data['task_file_name']
-                })
+                }
+                if collect_subgoal_phase_metrics:
+                    task_record.update(_empty_episode_subgoal_metrics())
+                task_records.append(task_record)
                 if collect_video and idx in selected_video_indices:
                     valid_video[init_data['task_file_name']].extend(init_data['valid_images'])
 
@@ -1349,6 +1417,8 @@ class RobHFRollout(BaseRollout):
                     task_records[idx]['finish_step'] = result['finish_step']
                     if subgoal_step_metrics is not None and "subgoal_metrics" in result:
                         subgoal_step_metrics[idx] = result["subgoal_metrics"]
+                    if collect_subgoal_phase_metrics and "subgoal_episode_metrics" in result:
+                        task_records[idx].update(result["subgoal_episode_metrics"])
                     if collect_video and idx in selected_video_indices:
                         valid_video[task_records[idx]['task_file_name']].extend(result['valid_images'])
 
@@ -1458,6 +1528,19 @@ class RobHFRollout(BaseRollout):
                 device=device,
             ),
         }
+        if any("subgoal_supported" in record for record in task_records):
+            batch["subgoal_supported"] = torch.tensor(
+                [bool(record.get("subgoal_supported", False)) for record in task_records],
+                dtype=torch.bool,
+                device=device,
+            )
+            for phase_name in LIBERO_PICK_PLACE_PHASE_NAMES:
+                key = f"subgoal_phase_success_{phase_name}"
+                batch[key] = torch.tensor(
+                    [bool(record.get(key, False)) for record in task_records],
+                    dtype=torch.bool,
+                    device=device,
+                )
         output_batch = TensorDict(batch, batch_size=batch_size)
         return DataProto(batch=output_batch)
 

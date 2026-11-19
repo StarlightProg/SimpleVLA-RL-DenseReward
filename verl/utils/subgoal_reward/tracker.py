@@ -20,6 +20,9 @@ class SubgoalStepInfo:
     phase_completed: float
     success: bool
     action_delta_l2: float
+    # Names, rather than only a count, let validation record whether every
+    # individual dense-reward phase was reached during an episode.
+    completed_phase_names: tuple[str, ...] = ()
 
     def as_numeric_dict(self) -> dict[str, float]:
         return {
@@ -67,6 +70,7 @@ class OnlineSubgoalTracker:
                 phase_completed=0.0,
                 success=bool(state.success),
                 action_delta_l2=action_delta_l2,
+                completed_phase_names=(),
             )
 
         self.phase_id = max(0, min(self.phase_id, len(self.task_spec.phases) - 1))
@@ -81,7 +85,9 @@ class OnlineSubgoalTracker:
         self.last_progress = progress
 
         completed_count = 0.0
+        completed_phase_names = []
         while phase.is_done(state):
+            completed_phase_names.append(phase.name)
             completed_count += 1.0
             if self.phase_id >= len(self.task_spec.phases) - 1:
                 break
@@ -92,6 +98,9 @@ class OnlineSubgoalTracker:
 
         if self.auto_complete_on_success and state.success and self.phase_id < len(self.task_spec.phases) - 1:
             completed_count += float(len(self.task_spec.phases) - self.phase_id - 1)
+            completed_phase_names.extend(
+                item.name for item in self.task_spec.phases[self.phase_id + 1:]
+            )
             self.phase_id = len(self.task_spec.phases) - 1
 
         return SubgoalStepInfo(
@@ -104,6 +113,7 @@ class OnlineSubgoalTracker:
             phase_completed=completed_count,
             success=bool(state.success),
             action_delta_l2=action_delta_l2,
+            completed_phase_names=tuple(completed_phase_names),
         )
 
     def _action_delta(self, action: Any) -> float:

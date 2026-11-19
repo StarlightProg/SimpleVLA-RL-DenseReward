@@ -45,6 +45,8 @@ from verl.utils.task_sampling import (
     normalize_task_sampling_mode,
     uses_hard_task_sampler,
 )
+from verl.utils.subgoal_reward.task_specs import LIBERO_PICK_PLACE_PHASE_NAMES
+from verl.utils.subgoal_reward.validation import phase_success_batch_key, tally_phase_success
 
 WorkerType = Type[Worker]
 
@@ -668,12 +670,18 @@ class RayTrainer(object):
         video_per_task_limit = max(1, int(validation_cfg.get('video_per_task_limit', 1)))
         video_frame_stride = max(1, int(validation_cfg.get('video_frame_stride', 8)))
         transition_success_threshold = float(validation_cfg.get('transition_success_threshold', 0.5))
+        stage_success_metrics = bool(validation_cfg.get('stage_success_metrics', True)) and "libero" in str(
+            self.config.data.task_suite_name
+        ).lower()
 
         total = 0
         total_sum = 0.0
         total_sumsq = 0.0
         data_source_stats = defaultdict(lambda: [0, 0.0])  # count, sum
         task_stats = defaultdict(lambda: [0, 0.0])  # count, sum
+        subgoal_supported_rollouts = 0
+        subgoal_phase_success_counts = {phase_name: 0 for phase_name in LIBERO_PICK_PLACE_PHASE_NAMES}
+        subgoal_phase_metrics_missing = False
         selected_video_count = 0
         video_task_counts = defaultdict(int)
 
@@ -713,6 +721,7 @@ class RayTrainer(object):
                         'do_sample': False,
                         'validate': True,
                         'minimal_validation_output': True,
+                        'collect_subgoal_phase_metrics': stage_success_metrics,
                         'save_validation_video': save_video_this_call,
                         'validation_video_mask': video_mask,
                         'validation_video_max_episodes': video_max_episodes,
@@ -738,6 +747,38 @@ class RayTrainer(object):
                     )
                     data_sources = data_sources[:take_n]
 
+                    if stage_success_metrics:
+                        output_batch = test_output_gen_batch.batch
+                        required_keys = ["subgoal_supported"] + [
+                            phase_success_batch_key(phase_name)
+                            for phase_name in LIBERO_PICK_PLACE_PHASE_NAMES
+                        ]
+                        if all(key in output_batch.keys() for key in required_keys):
+                            supported_values = output_batch["subgoal_supported"].detach().cpu().reshape(-1).tolist()
+                            phase_values = {
+                                phase_name: output_batch[phase_success_batch_key(phase_name)]
+                                .detach()
+                                .cpu()
+                                .reshape(-1)
+                                .tolist()
+                                for phase_name in LIBERO_PICK_PLACE_PHASE_NAMES
+                            }
+                            supported_count, phase_counts = tally_phase_success(
+                                supported_values,
+                                phase_values,
+                                take_n,
+                            )
+                            subgoal_supported_rollouts += supported_count
+                            for phase_name, phase_count in phase_counts.items():
+                                subgoal_phase_success_counts[phase_name] += phase_count
+                        elif not subgoal_phase_metrics_missing:
+                            print(
+                                "Validation stage-success metrics were requested but rollout output "
+                                "did not contain subgoal phase fields.",
+                                flush=True,
+                            )
+                            subgoal_phase_metrics_missing = True
+
                     for i in range(take_n):
                         s = float(scores[i])
                         total += 1
@@ -762,6 +803,30 @@ class RayTrainer(object):
             if count > 0:
                 safe_key = self._sanitize_metric_key(task_key)
                 metric_dict[f'test_score_task/{safe_key}'] = score_sum / count
+
+        if stage_success_metrics:
+            metric_dict['test_subgoal/supported_rollouts'] = float(subgoal_supported_rollouts)
+            metric_dict['test_subgoal/unsupported_rollouts'] = float(total - subgoal_supported_rollouts)
+            if subgoal_supported_rollouts > 0:
+                for phase_name, phase_count in subgoal_phase_success_counts.items():
+                    metric_dict[f'test_subgoal_phase_success/{phase_name}'] = (
+                        phase_count / subgoal_supported_rollouts
+                    )
+                stage_rates = ", ".join(
+                    f"{phase_name}={subgoal_phase_success_counts[phase_name] / subgoal_supported_rollouts:.4f}"
+                    for phase_name in LIBERO_PICK_PLACE_PHASE_NAMES
+                )
+                print(
+                    "Validation stage success rates "
+                    f"(supported_rollouts={subgoal_supported_rollouts}): {stage_rates}",
+                    flush=True,
+                )
+            else:
+                print(
+                    "Validation stage-success metrics: no supported LIBERO episodes were observed; "
+                    "per-phase success rates are omitted.",
+                    flush=True,
+                )
 
         if total == 0:
             metric_dict['test_score/all'] = 0.0

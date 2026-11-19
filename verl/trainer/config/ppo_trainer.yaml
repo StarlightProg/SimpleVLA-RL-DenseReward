@@ -307,6 +307,9 @@ trainer:
     video_frame_stride: 8
     video_every_n_calls: 1
     transition_success_threshold: 0.5
+    # Collect dense-reward stage success during LIBERO validation without
+    # changing the rollout reward or training objective.
+    stage_success_metrics: True
   default_hdfs_dir: ~/experiments/gsm8k/ppo/${trainer.experiment_name}
   default_local_dir: checkpoints/${trainer.project_name}/${trainer.experiment_name}
   runtime_env: none

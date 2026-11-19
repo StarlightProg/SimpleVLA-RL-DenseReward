@@ -14,6 +14,18 @@ from .phases import (
 )
 
 
+# The current LIBERO dense-reward task spec is deliberately explicit.  Keep
+# this ordered tuple close to the spec so validation can publish stable metric
+# names without inferring them from an individual trajectory.
+LIBERO_PICK_PLACE_PHASE_NAMES = (
+    "reach_object",
+    "grasp_object",
+    "lift_object",
+    "move_to_target",
+    "place_or_success",
+)
+
+
 @dataclass
 class TaskSpec:
     name: str
